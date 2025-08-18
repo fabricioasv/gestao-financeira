@@ -1,0 +1,220 @@
+from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
+import os
+import pandas as pd
+from werkzeug.utils import secure_filename
+import json
+from datetime import datetime
+
+app = Flask(__name__)
+app.secret_key = 'financas_pessoais_2024'
+
+# Configurações
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def get_current_month():
+    """Retorna o mês atual no formato '25-XX'"""
+    now = datetime.now()
+    return f"25-{now.month:02d}"
+
+def is_future_month(month_str):
+    """Verifica se o mês é futuro (mês atual ou maior)"""
+    current_month = get_current_month()
+    return month_str >= current_month
+
+def process_excel_data(file_path):
+    """Processa o arquivo Excel e retorna os dados estruturados"""
+    try:
+        df = pd.read_excel(file_path)
+        
+        # Extrair meses das colunas
+        months = [col for col in df.columns if col.startswith('25-')]
+        months.sort()
+        
+        # Preparar dados para a tabela
+        table_data = []
+        for _, row in df.iterrows():
+            if pd.notna(row['Alias']):
+                row_data = {
+                    'alias': str(row['Alias']),
+                    'id': str(row['Id']) if pd.notna(row['Id']) else '',
+                    'months': {}
+                }
+                
+                for month in months:
+                    value = row[month] if pd.notna(row[month]) else 0
+                    row_data['months'][month] = float(value)
+                
+                table_data.append(row_data)
+        
+        # Preparar dados para gráficos
+        chart_data = {
+            'months': months,
+            'consolidated': {
+                'credito_realizado': [],
+                'debitos_realizado': [],
+                'debitos_previsto': [],
+                'consolidado': []
+            },
+            'cartao': {
+                'cartao_dti': [],
+                'sicredi': [],
+                'porto_bank': [],
+                'btg': [],
+                'cartao_consolidado': []
+            },
+            'investimento': {
+                'acoes': [],
+                'renda_fixa': [],
+                'previdencia_privada': []
+            }
+        }
+        
+        # Calcular dados consolidados
+        for month in months:
+            credito_realizado = 0
+            debitos_realizado = 0
+            debitos_previsto = 0
+            
+            for row in table_data:
+                value = row['months'][month]
+                # Créditos: categorias que contêm "Créditos" e "Realizado"
+                if 'Créditos' in row['alias'] and 'Realizado' in row['alias']:
+                    credito_realizado += value if value > 0 else 0
+                # Débitos Realizado: categorias que contêm "Débitos" e "Realizado"
+                elif 'Débitos' in row['alias'] and 'Realizado' in row['alias']:
+                    debitos_realizado += abs(value) if value < 0 else value
+                # Débitos Previsto: categorias que contêm "Débitos" e "Previsto"
+                elif 'Débitos' in row['alias'] and 'Previsto' in row['alias']:
+                    debitos_previsto += abs(value) if value < 0 else value
+                # Fallback para categoria específica "Débitos" (sem Previsto/Realizado)
+                elif row['alias'] == 'Débitos':
+                    if is_future_month(month):
+                        debitos_previsto += abs(value) if value < 0 else value
+                    else:
+                        debitos_realizado += abs(value) if value < 0 else value
+            
+            # Para meses futuros, usar previsto; para meses passados, usar realizado
+            if is_future_month(month):
+                debitos_final = debitos_previsto
+            else:
+                debitos_final = debitos_realizado
+            
+            consolidado = credito_realizado - debitos_final
+            
+            chart_data['consolidated']['credito_realizado'].append(credito_realizado)
+            chart_data['consolidated']['debitos_realizado'].append(debitos_realizado)
+            chart_data['consolidated']['debitos_previsto'].append(debitos_previsto)
+            chart_data['consolidated']['consolidado'].append(consolidado)
+        
+        # Calcular dados do cartão
+        for month in months:
+            cartao_dti = 0
+            sicredi = 0
+            porto_bank = 0
+            btg = 0
+            cartao_consolidado = 0
+            
+            for row in table_data:
+                value = row['months'][month]
+                if 'Cartão dti' in row['alias'] and 'Realizado' in row['alias']:
+                    cartao_dti = abs(value) if value < 0 else value
+                elif 'Sicredi' in row['alias'] and 'Realizado' in row['alias']:
+                    sicredi = abs(value) if value < 0 else value
+                elif 'Porto Bank' in row['alias'] and 'Realizado' in row['alias']:
+                    porto_bank = abs(value) if value < 0 else value
+                elif 'BTG' in row['alias'] and 'Realizado' in row['alias']:
+                    btg = abs(value) if value < 0 else value
+                elif '[C] Cartão' in row['alias']:
+                    cartao_consolidado = abs(value) if value < 0 else value
+            
+            chart_data['cartao']['cartao_dti'].append(cartao_dti)
+            chart_data['cartao']['sicredi'].append(sicredi)
+            chart_data['cartao']['porto_bank'].append(porto_bank)
+            chart_data['cartao']['btg'].append(btg)
+            chart_data['cartao']['cartao_consolidado'].append(cartao_consolidado)
+        
+        # Calcular dados de investimento
+        for month in months:
+            acoes = 0
+            renda_fixa = 0
+            previdencia_privada = 0
+            
+            for row in table_data:
+                value = row['months'][month]
+                if 'Investimento' in row['alias'] and 'Ações' in row['alias']:
+                    acoes = abs(value) if value < 0 else value
+                elif 'Investimento' in row['alias'] and 'Renda Fixa' in row['alias']:
+                    renda_fixa = abs(value) if value < 0 else value
+                elif 'Previdência Privada' in row['alias']:
+                    previdencia_privada = abs(value) if value < 0 else value
+            
+            chart_data['investimento']['acoes'].append(acoes)
+            chart_data['investimento']['renda_fixa'].append(renda_fixa)
+            chart_data['investimento']['previdencia_privada'].append(previdencia_privada)
+        
+        return {
+            'success': True,
+            'table_data': table_data,
+            'chart_data': chart_data
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'error': str(e)
+        }
+
+@app.route('/')
+def index():
+    """Página principal com upload e visualização"""
+    return render_template('index.html')
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    """Endpoint para upload de arquivos Excel"""
+    if 'file' not in request.files:
+        flash('Nenhum arquivo selecionado')
+        return redirect(request.url)
+    
+    file = request.files['file']
+    if file.filename == '':
+        flash('Nenhum arquivo selecionado')
+        return redirect(request.url)
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        
+        # Processar dados
+        result = process_excel_data(file_path)
+        
+        if result['success']:
+            # Salvar dados na sessão (em produção, usar banco de dados)
+            return jsonify(result)
+        else:
+            return jsonify({'success': False, 'error': result['error']})
+    
+    flash('Tipo de arquivo não permitido')
+    return redirect(request.url)
+
+@app.route('/load_default')
+def load_default():
+    """Carrega os dados padrão do arquivo dados.xlsx"""
+    try:
+        result = process_excel_data('dados.xlsx')
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)

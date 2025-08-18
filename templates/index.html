@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão Financeira Pessoal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #0056b3;
+            background-color: #e9ecef;
+        }
+        
+        .upload-area.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        
+        .financial-table {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+        
+        .category-badge {
+            font-size: 0.8em;
+            padding: 4px 8px;
+        }
+        
+        .value-positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .value-negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .value-neutral {
+            color: #6c757d;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #495057;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .month-future {
+            color: #6c757d !important;
+            font-style: italic;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .table th, .table td {
+            white-space: nowrap;
+            min-width: 120px;
+        }
+        
+        .table th:first-child, .table td:first-child {
+            min-width: 200px;
+            position: sticky;
+            left: 0;
+            background-color: white;
+            z-index: 1;
+        }
+        
+        .table th:nth-child(2), .table td:nth-child(2) {
+            min-width: 150px;
+            position: sticky;
+            left: 200px;
+            background-color: white;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row bg-primary text-white py-3 mb-3">
+            <div class="col-12">
+                <h1 class="text-center mb-0">
+                    <i class="fas fa-chart-line me-3"></i>
+                    Sistema de Gestão Financeira Pessoal
+                </h1>
+            </div>
+        </div>
+
+        <!-- Upload Section (Reduzida) -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-2">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="upload-area" id="uploadArea">
+                                    <i class="fas fa-file-excel fa-2x text-primary me-2"></i>
+                                    <span class="me-3">Arraste e solte sua planilha Excel aqui</span>
+                                    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
+                                    <button class="btn btn-primary btn-sm" onclick="document.getElementById('fileInput').click()">
+                                        <i class="fas fa-folder-open me-1"></i>
+                                        Selecionar Arquivo
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="loadDefaultData()">
+                                    <i class="fas fa-database me-1"></i>
+                                    Carregar Dados Padrão
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="row loading" id="loadingIndicator">
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-2">Processando dados financeiros...</p>
+            </div>
+        </div>
+
+        <!-- Data Display Section -->
+        <div class="row" id="dataSection" style="display: none;">
+            <!-- Navigation Tabs -->
+            <div class="col-12 mb-3">
+                <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                            <i class="fas fa-chart-pie me-2"></i>Dashboard
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="table-tab" data-bs-toggle="tab" data-bs-target="#table" type="button" role="tab">
+                            <i class="fas fa-table me-2"></i>Tabela de Dados
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="mainTabsContent">
+                <!-- Dashboard Tab -->
+                <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                    <div class="row mb-4">
+                        <!-- Consolidado Chart -->
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-bar me-2"></i>
+                                        Consolidado
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="consolidatedChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cartão Chart -->
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-credit-card me-2"></i>
+                                        Cartão
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="cartaoChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Segunda linha de gráficos -->
+                    <div class="row mb-4">
+                        <!-- Investimento Chart -->
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-pie me-2"></i>
+                                        Investimento
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="investimentoChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Tab -->
+                <div class="tab-pane fade" id="table" role="tabpanel">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-table me-2"></i>
+                                    Dados Financeiros Detalhados
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive financial-table">
+                                    <table class="table table-striped table-hover" id="financialTable">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Categoria</th>
+                                                <th>ID</th>
+                                                <th id="monthsHeader"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let currentData = null;
+        let consolidatedChart = null;
+        let cartaoChart = null;
+        let investimentoChart = null;
+
+        // Função para obter o mês atual
+        function getCurrentMonth() {
+            const now = new Date();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            return `25-${month}`;
+        }
+
+        // Função para verificar se o mês é futuro
+        function isFutureMonth(monthStr) {
+            const currentMonth = getCurrentMonth();
+            return monthStr > currentMonth; // Maior que o mês atual (não igual)
+        }
+
+        // Drag and Drop functionality
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.name.match(/\.(xlsx|xls)$/)) {
+                alert('Por favor, selecione um arquivo Excel válido (.xlsx ou .xls)');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showLoading(true);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                if (data.success) {
+                    displayData(data);
+                } else {
+                    alert('Erro ao processar arquivo: ' + data.error);
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                alert('Erro ao fazer upload: ' + error.message);
+            });
+        }
+
+        function loadDefaultData() {
+            showLoading(true);
+            
+            fetch('/load_default')
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                if (data.success) {
+                    displayData(data);
+                } else {
+                    alert('Erro ao carregar dados padrão: ' + data.error);
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                alert('Erro ao carregar dados: ' + error.message);
+            });
+        }
+
+        function displayData(data) {
+            currentData = data;
+            
+            // Display data section
+            document.getElementById('dataSection').style.display = 'block';
+            
+            // Create charts
+            createConsolidatedChart(data.chart_data);
+            createCartaoChart(data.chart_data);
+            createInvestimentoChart(data.chart_data);
+            
+            // Create table
+            createFinancialTable(data.table_data, data.chart_data.months);
+        }
+
+        function createConsolidatedChart(chartData) {
+            const ctx = document.getElementById('consolidatedChart').getContext('2d');
+            
+            if (consolidatedChart) {
+                consolidatedChart.destroy();
+            }
+
+            // Preparar dados com cores baseadas no mês
+            const months = chartData.months;
+            const currentMonth = getCurrentMonth();
+            
+            const datasets = [
+                {
+                    label: 'Crédito Realizado',
+                    data: chartData.consolidated.credito_realizado,
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                }
+            ];
+
+            // Adicionar Débitos Realizado (meses passados)
+            const debitosRealizadoData = months.map((month, index) => {
+                return isFutureMonth(month) ? 0 : chartData.consolidated.debitos_realizado[index];
+            });
+            
+            datasets.push({
+                label: 'Débitos Realizado',
+                data: debitosRealizadoData,
+                backgroundColor: 'rgba(220, 53, 69, 0.8)',
+                borderColor: 'rgba(220, 53, 69, 1)',
+                borderWidth: 1
+            });
+
+            // Adicionar Débitos Previsto (meses futuros) em cinza
+            const debitosPrevistoData = months.map((month, index) => {
+                return isFutureMonth(month) ? chartData.consolidated.debitos_previsto[index] : 0;
+            });
+            
+            datasets.push({
+                label: 'Débitos Previsto',
+                data: debitosPrevistoData,
+                backgroundColor: 'rgba(108, 117, 125, 0.8)',
+                borderColor: 'rgba(108, 117, 125, 1)',
+                borderWidth: 1
+            });
+
+            // Adicionar linha consolidada
+            datasets.push({
+                label: '[C] Consolidado',
+                data: chartData.consolidated.consolidado,
+                type: 'line',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.1
+            });
+
+            consolidatedChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Evolução Financeira Consolidada'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += 'R$ ' + context.parsed.y.toLocaleString('pt-BR');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCartaoChart(chartData) {
+            const ctx = document.getElementById('cartaoChart').getContext('2d');
+            
+            if (cartaoChart) {
+                cartaoChart.destroy();
+            }
+
+            // Preparar dados com lógica de meses futuros
+            const months = chartData.months;
+            const datasets = [];
+
+            // Para meses passados e atual: usar dados realizados
+            const cartaoDtiData = months.map((month, index) => {
+                return isFutureMonth(month) ? 0 : chartData.cartao.cartao_dti[index];
+            });
+            
+            datasets.push({
+                label: 'Cartão dti Realizado',
+                data: cartaoDtiData,
+                backgroundColor: 'rgba(255, 193, 7, 0.8)',
+                borderColor: 'rgba(255, 193, 7, 1)',
+                borderWidth: 1
+            });
+
+            const sicrediData = months.map((month, index) => {
+                return isFutureMonth(month) ? 0 : chartData.cartao.sicredi[index];
+            });
+            
+            datasets.push({
+                label: 'Sicredi Realizado',
+                data: sicrediData,
+                backgroundColor: 'rgba(220, 53, 69, 0.8)',
+                borderColor: 'rgba(220, 53, 69, 1)',
+                borderWidth: 1
+            });
+
+            const portoBankData = months.map((month, index) => {
+                return isFutureMonth(month) ? 0 : chartData.cartao.porto_bank[index];
+            });
+            
+            datasets.push({
+                label: 'Porto Bank Realizado',
+                data: portoBankData,
+                backgroundColor: 'rgba(23, 162, 184, 0.8)',
+                borderColor: 'rgba(23, 162, 184, 1)',
+                borderWidth: 1
+            });
+
+            const btgData = months.map((month, index) => {
+                return isFutureMonth(month) ? 0 : chartData.cartao.btg[index];
+            });
+            
+            datasets.push({
+                label: 'BTG Realizado',
+                data: btgData,
+                backgroundColor: 'rgba(102, 16, 242, 0.8)',
+                borderColor: 'rgba(102, 16, 242, 1)',
+                borderWidth: 1
+            });
+
+            // Para meses futuros: usar [C] Cartão em cinza
+            const cartaoConsolidadoData = months.map((month, index) => {
+                return isFutureMonth(month) ? chartData.cartao.cartao_consolidado[index] : 0;
+            });
+            
+            datasets.push({
+                label: '[C] Cartão (Futuro)',
+                data: cartaoConsolidadoData,
+                backgroundColor: 'rgba(108, 117, 125, 0.8)',
+                borderColor: 'rgba(108, 117, 125, 1)',
+                borderWidth: 1
+            });
+
+            cartaoChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Gastos com Cartão por Instituição'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += 'R$ ' + context.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createInvestimentoChart(chartData) {
+            const ctx = document.getElementById('investimentoChart').getContext('2d');
+            
+            if (investimentoChart) {
+                investimentoChart.destroy();
+            }
+
+            investimentoChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.months,
+                    datasets: [
+                        {
+                            label: 'Investimento Ações',
+                            data: chartData.investimento.acoes,
+                            backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Investimento Renda Fixa',
+                            data: chartData.investimento.renda_fixa,
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Previdência Privada',
+                            data: chartData.investimento.previdencia_privada,
+                            backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Evolução dos Investimentos'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += 'R$ ' + context.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createFinancialTable(tableData, months) {
+            const tableBody = document.getElementById('tableBody');
+            const monthsHeader = document.getElementById('monthsHeader');
+            
+            // Create months header
+            monthsHeader.innerHTML = months.map(month => {
+                const isFuture = isFutureMonth(month);
+                const monthClass = isFuture ? 'month-future' : '';
+                return `<th class="text-center ${monthClass}">${month}</th>`;
+            }).join('');
+            
+            // Create table rows
+            tableBody.innerHTML = tableData.map(row => {
+                const monthCells = months.map(month => {
+                    const value = row.months[month];
+                    let valueClass = 'value-neutral';
+                    if (value > 0) valueClass = 'value-positive';
+                    else if (value < 0) valueClass = 'value-negative';
+                    
+                    // Adicionar classe para meses futuros
+                    if (isFutureMonth(month)) {
+                        valueClass += ' month-future';
+                    }
+                    
+                    return `<td class="text-end ${valueClass}">R$ ${value.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>`;
+                }).join('');
+                
+                return `
+                    <tr>
+                        <td>
+                            <span class="badge bg-secondary category-badge">${row.alias}</span>
+                        </td>
+                        <td><small class="text-muted">${row.id}</small></td>
+                        ${monthCells}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function showLoading(show) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (show) {
+                loadingIndicator.classList.add('show');
+            } else {
+                loadingIndicator.classList.remove('show');
+            }
+        }
+
+        // Auto-load default data on page load
+        window.addEventListener('load', () => {
+            loadDefaultData();
+        });
+    </script>
+</body>
+</html>
