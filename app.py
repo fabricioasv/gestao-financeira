@@ -26,22 +26,26 @@ def get_current_month():
     return f"25-{now.month:02d}"
 
 def is_future_month(month_str):
-    """Verifica se o mês é futuro (mês atual ou maior)"""
+    """Verifica se o mês é futuro (maior que o mês atual)"""
     current_month = get_current_month()
-    return month_str >= current_month
+    return month_str > current_month
 
 def process_excel_data(file_path):
     """Processa o arquivo Excel e retorna os dados estruturados"""
     try:
-        df = pd.read_excel(file_path)
+        # Ler aba "Consolidado"
+        df_consolidado = pd.read_excel(file_path, sheet_name='Consolidado')
         
-        # Extrair meses das colunas
-        months = [col for col in df.columns if col.startswith('25-')]
+        # Ler aba "Ações"
+        df_acoes = pd.read_excel(file_path, sheet_name='Ações')
+        
+        # Extrair meses das colunas da aba Consolidado
+        months = [col for col in df_consolidado.columns if col.startswith('25-')]
         months.sort()
         
-        # Preparar dados para a tabela
+        # Preparar dados para a tabela (aba Consolidado)
         table_data = []
-        for _, row in df.iterrows():
+        for _, row in df_consolidado.iterrows():
             if pd.notna(row['Alias']):
                 row_data = {
                     'alias': str(row['Alias']),
@@ -54,6 +58,53 @@ def process_excel_data(file_path):
                     row_data['months'][month] = float(value)
                 
                 table_data.append(row_data)
+        
+        # Preparar dados da aba Ações
+        acoes_data = []
+        if df_acoes is not None and len(df_acoes) > 0:
+            for _, row in df_acoes.iterrows():
+                if pd.notna(row.get('Ticker', '')):
+                    # Processar quantidade
+                    qtd = 0
+                    if pd.notna(row.get('Qtd', 0)):
+                        try:
+                            qtd = float(row['Qtd'])
+                        except:
+                            qtd = 0
+                    
+                    # Processar renda esperada (remover R$ e converter vírgula)
+                    renda_esperada = 0
+                    if pd.notna(row.get('Renda Esperada', 0)):
+                        try:
+                            if isinstance(row['Renda Esperada'], str):
+                                clean_val = row['Renda Esperada'].replace('R$', '').replace(',', '.').strip()
+                                renda_esperada = float(clean_val)
+                            else:
+                                renda_esperada = float(row['Renda Esperada'])
+                        except:
+                            renda_esperada = 0
+                    
+                    # Processar dividend yield pago (remover R$ e converter vírgula)
+                    dividend_yield_pago = 0
+                    if pd.notna(row.get('Dividend Yield Pago', 0)):
+                        try:
+                            if isinstance(row['Dividend Yield Pago'], str):
+                                clean_val = row['Dividend Yield Pago'].replace('R$', '').replace(',', '.').strip()
+                                dividend_yield_pago = float(clean_val)
+                            else:
+                                dividend_yield_pago = float(row['Dividend Yield Pago'])
+                        except:
+                            dividend_yield_pago = 0
+                    
+                    acao_data = {
+                        'ticker': str(row.get('Ticker', '')),
+                        'qtd': qtd,
+                        'renda_esperada': renda_esperada,
+                        'dividend_yield_pago': dividend_yield_pago
+                    }
+                    # Calcular resultado
+                    acao_data['resultado'] = acao_data['renda_esperada'] - acao_data['dividend_yield_pago']
+                    acoes_data.append(acao_data)
         
         # Preparar dados para gráficos
         chart_data = {
@@ -164,7 +215,8 @@ def process_excel_data(file_path):
         return {
             'success': True,
             'table_data': table_data,
-            'chart_data': chart_data
+            'chart_data': chart_data,
+            'acoes_data': acoes_data
         }
         
     except Exception as e:

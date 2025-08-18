@@ -238,6 +238,57 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Painel de Ações -->
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Carteira de Ações
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped" id="acoesTable">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>Ticker</th>
+                                                    <th>Qtd</th>
+                                                    <th>Renda Esperada</th>
+                                                    <th>Dividend Yield Pago</th>
+                                                    <th>Resultado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="acoesTableBody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="row text-center">
+                                            <div class="col-4">
+                                                <div class="border rounded p-2">
+                                                    <small class="text-muted d-block">Total Ações</small>
+                                                    <strong id="totalAcoes">0</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="border rounded p-2">
+                                                    <small class="text-muted d-block">Renda Total</small>
+                                                    <strong id="rendaTotal">R$ 0,00</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="border rounded p-2">
+                                                    <small class="text-muted d-block">Resultado</small>
+                                                    <strong id="resultadoTotal">R$ 0,00</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -385,6 +436,11 @@
             
             // Create table
             createFinancialTable(data.table_data, data.chart_data.months);
+            
+            // Create ações table
+            if (data.acoes_data) {
+                createAcoesTable(data.acoes_data);
+            }
         }
 
         function createConsolidatedChart(chartData) {
@@ -719,6 +775,58 @@
                         </td>
                         <td><small class="text-muted">${row.id}</small></td>
                         ${monthCells}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function createAcoesTable(acoesData) {
+            const acoesTableBody = document.getElementById('acoesTableBody');
+            const totalAcoes = document.getElementById('totalAcoes');
+            const rendaTotal = document.getElementById('rendaTotal');
+            const resultadoTotal = document.getElementById('resultadoTotal');
+
+            if (!acoesData || acoesData.length === 0) {
+                // Não há dados de ações
+                acoesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Nenhuma ação encontrada. Adicione dados na aba "Ações" do Excel.
+                        </td>
+                    </tr>
+                `;
+                
+                totalAcoes.textContent = "0";
+                rendaTotal.textContent = "R$ 0,00";
+                resultadoTotal.textContent = "R$ 0,00";
+                return;
+            }
+
+            let totalQtd = 0;
+            let totalRendaEsperada = 0;
+            let totalDividendYieldPago = 0;
+            let totalResultado = 0;
+
+            acoesData.forEach(acao => {
+                totalQtd += acao.qtd;
+                totalRendaEsperada += acao.renda_esperada;
+                totalDividendYieldPago += acao.dividend_yield_pago;
+                totalResultado += acao.resultado;
+            });
+
+            totalAcoes.textContent = totalQtd;
+            rendaTotal.textContent = `R$ ${totalRendaEsperada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            resultadoTotal.textContent = `R$ ${totalResultado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            acoesTableBody.innerHTML = acoesData.map(acao => {
+                return `
+                    <tr>
+                        <td><strong>${acao.ticker}</strong></td>
+                        <td class="text-end">${acao.qtd.toLocaleString('pt-BR')}</td>
+                        <td class="text-end text-success">R$ ${acao.renda_esperada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td class="text-end text-info">R$ ${acao.dividend_yield_pago.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td class="text-end ${acao.resultado >= 0 ? 'text-success' : 'text-danger'}">R$ ${acao.resultado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                     </tr>
                 `;
             }).join('');
