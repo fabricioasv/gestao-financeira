@@ -87,27 +87,136 @@
         
         .table-responsive {
             overflow-x: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
         }
         
         .table th, .table td {
             white-space: nowrap;
             min-width: 120px;
+            vertical-align: middle;
         }
         
         .table th:first-child, .table td:first-child {
             min-width: 200px;
             position: sticky;
             left: 0;
-            background-color: white;
+            background-color: #f8f9fa !important;
             z-index: 1;
+            border-right: 2px solid #dee2e6;
         }
         
         .table th:nth-child(2), .table td:nth-child(2) {
-            min-width: 150px;
+            min-width: 100px;
             position: sticky;
             left: 200px;
-            background-color: white;
+            background-color: #f8f9fa !important;
             z-index: 1;
+            border-right: 2px solid #dee2e6;
+        }
+        
+        /* Melhorar a responsividade da tabela */
+        .table-responsive {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        /* Estilo para scrollbar personalizada */
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Estilo para meses futuros - melhorar visibilidade */
+        .month-future {
+            color: #495057 !important;
+            font-style: italic;
+            background-color: #e9ecef !important;
+        }
+        
+        /* Estilo para células de meses futuros */
+        .table td.month-future {
+            background-color: #e9ecef !important;
+            color: #495057 !important;
+        }
+        
+        /* Estilo para cabeçalhos de meses futuros */
+        .table th.month-future {
+            background-color: #6c757d !important;
+            color: #ffffff !important;
+        }
+        
+        /* CORREÇÃO ESPECÍFICA PARA COLUNAS FIXAS - Usar seletores mais específicos */
+        #financialTable thead tr th:first-child,
+        #financialTable thead tr th:nth-child(2) {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+        }
+        
+        #financialTable tbody tr td:first-child,
+        #financialTable tbody tr td:nth-child(2) {
+            background-color: #f8f9fa !important;
+            color: #212529 !important;
+        }
+        
+        /* Garantir que as colunas fixas tenham prioridade sobre outras classes */
+        #financialTable .table-dark th:first-child,
+        #financialTable .table-dark th:nth-child(2) {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+        }
+        
+        /* CORREÇÃO PARA TABELA DE AÇÕES - Replicar as mesmas correções */
+        #acoesTable thead tr th:first-child,
+        #acoesTable thead tr th:nth-child(2) {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+        }
+        
+        #acoesTable tbody tr td:first-child,
+        #acoesTable tbody tr td:nth-child(2) {
+            background-color: #f8f9fa !important;
+            color: #212529 !important;
+        }
+        
+        /* Garantir que as colunas fixas da tabela de ações tenham prioridade */
+        #acoesTable .table-dark th:first-child,
+        #acoesTable .table-dark th:nth-child(2) {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+        }
+        
+        /* Ajustar posicionamento das colunas fixas da tabela de ações */
+        #acoesTable th:first-child, #acoesTable td:first-child {
+            min-width: 40px;
+            position: sticky;
+            left: 0;
+            background-color: #f8f9fa !important;
+            z-index: 1;
+            border-right: 2px solid #dee2e6;
+        }
+        
+        #acoesTable th:nth-child(2), #acoesTable td:nth-child(2) {
+            min-width: 80px;
+            position: sticky;
+            left: 40px;
+            background-color: #f8f9fa !important;
+            z-index: 1;
+            border-right: 2px solid #dee2e6;
         }
     </style>
 </head>
@@ -250,14 +359,14 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
-                                        <table class="table table-sm table-striped" id="acoesTable">
+                                        <table class="table table-sm table-striped table-hover table-bordered" id="acoesTable">
                                             <thead class="table-dark">
                                                 <tr>
-                                                    <th>Ticker</th>
-                                                    <th>Qtd</th>
-                                                    <th>Renda Esperada</th>
-                                                    <th>Dividend Yield Pago</th>
-                                                    <th>Resultado</th>
+                                                    <th scope="col" style="min-width: 40px;">Ticker</th>
+                                                    <th scope="col" style="min-width: 80px;">Qtd</th>
+                                                    <th scope="col" style="min-width: 140px;">Renda Esperada</th>
+                                                    <th scope="col" style="min-width: 140px;">Dividend Yield Pago</th>
+                                                    <th scope="col" style="min-width: 120px;">Resultado</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="acoesTableBody">
@@ -303,13 +412,13 @@
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <div class="table-responsive financial-table">
-                                    <table class="table table-striped table-hover" id="financialTable">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover table-bordered" id="financialTable">
                                         <thead class="table-dark">
                                             <tr>
-                                                <th>Categoria</th>
-                                                <th>ID</th>
-                                                <th id="monthsHeader"></th>
+                                                <th scope="col" style="min-width: 200px;">Categoria</th>
+                                                <th scope="col" style="min-width: 100px;">ID</th>
+                                                <!-- Os cabeçalhos dos meses serão criados dinamicamente -->
                                             </tr>
                                         </thead>
                                         <tbody id="tableBody">
@@ -743,41 +852,71 @@
 
         function createFinancialTable(tableData, months) {
             const tableBody = document.getElementById('tableBody');
-            const monthsHeader = document.getElementById('monthsHeader');
+            const thead = document.querySelector('#financialTable thead tr');
             
-            // Create months header
-            monthsHeader.innerHTML = months.map(month => {
-                const isFuture = isFutureMonth(month);
-                const monthClass = isFuture ? 'month-future' : '';
-                return `<th class="text-center ${monthClass}">${month}</th>`;
-            }).join('');
+            // Limpar cabeçalhos existentes (exceto Categoria e ID)
+            const existingHeaders = thead.querySelectorAll('th');
+            for (let i = 2; i < existingHeaders.length; i++) {
+                existingHeaders[i].remove();
+            }
             
-            // Create table rows
-            tableBody.innerHTML = tableData.map(row => {
-                const monthCells = months.map(month => {
-                    const value = row.months[month];
-                    let valueClass = 'value-neutral';
-                    if (value > 0) valueClass = 'value-positive';
-                    else if (value < 0) valueClass = 'value-negative';
+            // Adicionar cabeçalhos dos meses
+            months.forEach(month => {
+                const th = document.createElement('th');
+                th.setAttribute('scope', 'col');
+                th.className = 'text-center';
+                th.style.minWidth = '100px';
+                
+                if (isFutureMonth(month)) {
+                    th.classList.add('month-future');
+                }
+                
+                th.textContent = month;
+                thead.appendChild(th);
+            });
+            
+            // Limpar o corpo da tabela
+            tableBody.innerHTML = '';
+            
+            // Criar linhas da tabela
+            tableData.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Célula da categoria
+                const tdCategory = document.createElement('td');
+                tdCategory.innerHTML = `<span class="badge bg-secondary">${row.alias}</span>`;
+                tr.appendChild(tdCategory);
+                
+                // Célula do ID
+                const tdId = document.createElement('td');
+                tdId.innerHTML = `<small class="text-muted">${row.id}</small>`;
+                tr.appendChild(tdId);
+                
+                // Células dos meses
+                months.forEach(month => {
+                    const td = document.createElement('td');
+                    td.className = 'text-end';
                     
-                    // Adicionar classe para meses futuros
+                    const value = row.months[month];
+                    let valueClass = '';
+                    if (value > 0) valueClass = 'text-success fw-bold';
+                    else if (value < 0) valueClass = 'text-danger fw-bold';
+                    else valueClass = 'text-muted';
+                    
                     if (isFutureMonth(month)) {
-                        valueClass += ' month-future';
+                        td.classList.add('month-future');
+                        // Remover classes de cor para meses futuros para manter consistência
+                        td.className = 'text-end month-future';
+                    } else {
+                        if (valueClass) td.className += ' ' + valueClass;
                     }
                     
-                    return `<td class="text-end ${valueClass}">R$ ${value.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>`;
-                }).join('');
+                    td.textContent = `R$ ${value.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                    tr.appendChild(td);
+                });
                 
-                return `
-                    <tr>
-                        <td>
-                            <span class="badge bg-secondary category-badge">${row.alias}</span>
-                        </td>
-                        <td><small class="text-muted">${row.id}</small></td>
-                        ${monthCells}
-                    </tr>
-                `;
-            }).join('');
+                tableBody.appendChild(tr);
+            });
         }
 
         function createAcoesTable(acoesData) {
