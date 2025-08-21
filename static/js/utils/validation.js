@@ -19,7 +19,6 @@ export function validateElement(elementId, context) {
     const element = document.getElementById(elementId);
     
     if (!element) {
-        console.error(`❌ Elemento com ID '${elementId}' não encontrado no contexto: ${context}`);
         return null;
     }
     
@@ -34,12 +33,10 @@ export function validateElement(elementId, context) {
  */
 export function validateArray(value, context) {
     if (!Array.isArray(value)) {
-        console.error(`❌ Valor não é um array no contexto: ${context}`, value);
         return false;
     }
     
     if (value.length === 0) {
-        console.warn(`⚠️ Array vazio no contexto: ${context}`);
         return false;
     }
     
@@ -54,7 +51,6 @@ export function validateArray(value, context) {
  */
 export function validateObject(value, context) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
-        console.error(`❌ Valor não é um objeto válido no contexto: ${context}`, value);
         return false;
     }
     
@@ -69,7 +65,6 @@ export function validateObject(value, context) {
  */
 export function validateString(value, context) {
     if (!value || typeof value !== 'string' || value.trim() === '') {
-        console.error(`❌ String inválida ou vazia no contexto: ${context}`, value);
         return false;
     }
     

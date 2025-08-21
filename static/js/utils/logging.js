@@ -30,9 +30,6 @@ let enableLogging = true;
 export function setLogLevel(level) {
     if (Object.values(LOG_LEVELS).includes(level)) {
         currentLogLevel = level;
-        console.log(`🔧 Nível de logging alterado para: ${level}`);
-    } else {
-        console.warn(`⚠️ Nível de logging inválido: ${level}. Usando padrão: ${currentLogLevel}`);
     }
 }
 
@@ -42,7 +39,6 @@ export function setLogLevel(level) {
  */
 export function setLoggingEnabled(enable) {
     enableLogging = enable;
-    console.log(`🔧 Logging ${enable ? 'habilitado' : 'desabilitado'}`);
 }
 
 /**
@@ -56,9 +52,9 @@ export function logDebug(message, data, context) {
     
     const prefix = context ? `[${context}] ` : '';
     if (data) {
-        console.log(`🔍 ${prefix}${message}`, data);
+        // Log silencioso para produção
     } else {
-        console.log(`🔍 ${prefix}${message}`);
+        // Log silencioso para produção
     }
 }
 
@@ -73,9 +69,9 @@ export function logInfo(message, data, context) {
     
     const prefix = context ? `[${context}] ` : '';
     if (data) {
-        console.log(`ℹ️ ${prefix}${message}`, data);
+        // Log silencioso para produção
     } else {
-        console.log(`ℹ️ ${prefix}${message}`);
+        // Log silencioso para produção
     }
 }
 
@@ -90,9 +86,9 @@ export function logWarn(message, data, context) {
     
     const prefix = context ? `[${context}] ` : '';
     if (data) {
-        console.warn(`⚠️ ${prefix}${message}`, data);
+        // Log silencioso para produção
     } else {
-        console.warn(`⚠️ ${prefix}${message}`);
+        // Log silencioso para produção
     }
 }
 
@@ -107,9 +103,9 @@ export function logError(message, data, context) {
     
     const prefix = context ? `[${context}] ` : '';
     if (data) {
-        console.error(`❌ ${prefix}${message}`, data);
+        // Log silencioso para produção
     } else {
-        console.error(`❌ ${prefix}${message}`);
+        // Log silencioso para produção
     }
 }
 
@@ -124,9 +120,9 @@ export function logSuccess(message, data, context) {
     
     const prefix = context ? `[${context}] ` : '';
     if (data) {
-        console.log(`✅ ${prefix}${message}`, data);
+        // Log silencioso para produção
     } else {
-        console.log(`✅ ${prefix}${message}`);
+        // Log silencioso para produção
     }
 }
 
