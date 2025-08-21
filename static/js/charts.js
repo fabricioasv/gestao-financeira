@@ -461,13 +461,13 @@ function createProventosChart(proventosData, filterType = 'desde-inicio') {
  * @param {Object} cartaoData - Dados do cartão
  */
 function createCartaoCategoriaChart(cartaoData) {
-    console.log('🚀 createCartaoCategoriaChart INICIADA');
+
     logDebug('createCartaoCategoriaChart chamada com:', cartaoData);
     
     // Verificar se cartaoData é um array
     if (!Array.isArray(cartaoData)) {
         logError('❌ cartaoData não é um array:', cartaoData);
-        console.error('❌ cartaoData não é um array:', cartaoData);
+
         return;
     }
     

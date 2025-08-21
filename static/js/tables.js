@@ -280,7 +280,7 @@ function displayFilteredCartaoDetalhe(filteredData) {
  * @param {Array} cartaoDetalheData - Dados detalhados do cartão
  */
 function populateCartaoFilters(cartaoData, cartaoDetalheData) {
-    console.log('🚀 populateCartaoFilters INICIADA');
+
     logDebug('populateCartaoFilters chamada com:', cartaoData, cartaoDetalheData);
     
     const filtroMes = document.getElementById('filtroMes');
@@ -374,8 +374,7 @@ function populateCartaoFilters(cartaoData, cartaoDetalheData) {
     logDebug('✅ Filtros de cartão populados com sucesso');
     
     // Log final para debug
-    console.log('🔍 Filtro de mês populado com opções:', filtroMes.options.length - 1, 'meses');
-    console.log('🔍 Filtro de grupo populado com opções:', filtroGrupo.options.length - 1, 'grupos');
+    
 }
 
 /**

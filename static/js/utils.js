@@ -18,7 +18,7 @@
 export function validateElement(elementId, context = '') {
     const element = document.getElementById(elementId);
     if (!element) {
-        console.error(`❌ Elemento ${elementId} não encontrado${context ? ` em ${context}` : ''}`);
+
         return null;
     }
     return element;
@@ -32,7 +32,7 @@ export function validateElement(elementId, context = '') {
  */
 export function validateData(data, context = '') {
     if (!data || (Array.isArray(data) && data.length === 0)) {
-        console.warn(`⚠️ Dados inválidos ou vazios${context ? ` em ${context}` : ''}`);
+
         return false;
     }
     return true;
@@ -104,9 +104,9 @@ export function formatNumber(value, decimals = 2) {
 export function logDebug(message, data = null, context = '') {
     const prefix = context ? `[${context}] ` : '';
     if (data) {
-        console.log(`🔍 ${prefix}${message}`, data);
+    
     } else {
-        console.log(`🔍 ${prefix}${message}`);
+
     }
 }
 
@@ -119,9 +119,9 @@ export function logDebug(message, data = null, context = '') {
 export function logError(message, error = null, context = '') {
     const prefix = context ? `[${context}] ` : '';
     if (error) {
-        console.error(`❌ ${prefix}${message}`, error);
+
     } else {
-        console.error(`❌ ${prefix}${message}`);
+
     }
 }
 
@@ -134,9 +134,9 @@ export function logError(message, error = null, context = '') {
 export function logWarning(message, data = null, context = '') {
     const prefix = context ? `[${context}] ` : '';
     if (data) {
-        console.warn(`⚠️ ${prefix}${message}`, data);
+
     } else {
-        console.warn(`⚠️ ${prefix}${message}`);
+
     }
 }
 

@@ -440,20 +440,19 @@
         // Função para atualizar dados globais
         window.updateGlobalData = function(data) {
             globalCurrentData = data;
-            console.log('✅ Dados globais atualizados:', data);
+    
         };
         
         // Funções globais para uso nos onclick
         window.filterProventos = function(filterType) {
-            console.log('🔍 filterProventos chamado com:', filterType);
-            console.log('🔍 Dados globais disponíveis:', globalCurrentData);
+            
             
             if (globalCurrentData && globalCurrentData.proventos_data) {
-                console.log('✅ Aplicando filtro de proventos:', filterType);
+
                 createProventosChart(globalCurrentData.proventos_data, filterType);
                 createProventosTable(globalCurrentData.proventos_data, filterType);
             } else {
-                console.log('❌ Dados de proventos não disponíveis para filtro:', filterType);
+
                 alert('Dados de proventos não disponíveis. Aguarde o carregamento ou recarregue a página.');
             }
         };

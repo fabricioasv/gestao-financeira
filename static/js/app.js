@@ -59,7 +59,7 @@ function isFutureMonth(monthStr) {
  * @param {Object} data - Dados recebidos do backend
  */
 function displayData(data) {
-    console.log('🔍 displayData chamada com:', data);
+    
     currentData = data;
     
     // Atualizar dados globais no HTML
@@ -80,27 +80,24 @@ function displayData(data) {
     
     // Create ações table
     if (data.acoes_data) {
-        console.log('🔍 Criando tabela de ações com:', data.acoes_data);
+
         createAcoesTableDashboard(data.acoes_data);
     } else {
-        console.log('❌ data.acoes_data não encontrado');
+
     }
     
          // Create proventos chart and table
      if (data.proventos_data) {
-         console.log('🔍 Criando tabela de proventos com:', data.proventos_data);
-         console.log('🔍 Quantidade de anos de proventos:', data.proventos_data.length);
+         
          createProventosChart(data.proventos_data);
          createProventosTable(data.proventos_data);
      } else {
-         console.log('❌ data.proventos_data não encontrado');
+ 
      }
     
          // Create cartão detalhado chart and table
      if (data.cartao_data && data.cartao_detalhe_data) {
-         console.log('🔍 Criando cartão detalhado com:', data.cartao_data, data.cartao_detalhe_data);
-         console.log('🔍 Quantidade de itens de cartão detalhado:', data.cartao_detalhe_data.length);
-         console.log('🔍 Exemplo de item de cartão detalhado:', data.cartao_detalhe_data[0]);
+         
          
          createCartaoCategoriaChart(data.cartao_data);
          createCartaoDetalheTable(data.cartao_detalhe_data);
@@ -112,7 +109,7 @@ function displayData(data) {
          // Expor dados originais do cartão para filtros
          window.originalCartaoData = data.cartao_data;
      } else {
-         console.log('❌ data.cartao_data ou data.cartao_detalhe_data não encontrado');
+ 
      }
 }
 
