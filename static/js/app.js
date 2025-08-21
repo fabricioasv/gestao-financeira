@@ -14,15 +14,19 @@ import {
     createInvestimentoChart, 
     createProventosChart, 
     createCartaoCategoriaChart
-} from './charts.js';
+} from './charts/index.js';
 
 import {
     createFinancialTable,
     createAcoesTableDashboard,
     createProventosTable,
-    createCartaoDetalheTable,
-    populateCartaoFilters
-} from './tables.js';
+    createCartaoDetalheTable
+} from './tables/index.js';
+
+import { populateCartaoFilters } from './filters/cartao.js';
+
+// Importar funções utilitárias
+import { logDebug, logError } from './utils/index.js';
 
 // ========================================
 // VARIÁVEIS GLOBAIS

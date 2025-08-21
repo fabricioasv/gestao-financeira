@@ -414,17 +414,15 @@
     
     <!-- JavaScript Customizado -->
     <script type="module" src="/static/js/app.js"></script>
-    <script type="module" src="/static/js/utils.js"></script>
     <script type="module" src="/static/js/upload.js"></script>
-    <script type="module" src="/static/js/charts.js"></script>
-    <script type="module" src="/static/js/tables.js"></script>
     
     <script type="module">
         // Importar módulos
         import { initUpload } from '/static/js/upload.js';
         import { displayData, showLoading, loadDefaultData, currentData } from '/static/js/app.js';
-        import { createProventosTable, filtrarCartaoDetalhe } from '/static/js/tables.js';
-        import { createProventosChart } from '/static/js/charts.js';
+        import { createProventosTable } from '/static/js/tables/index.js';
+        import { filtrarCartaoDetalhe } from '/static/js/filters/cartao.js';
+        import { createProventosChart } from '/static/js/charts/index.js';
         
         // Inicializar funcionalidades quando a página carregar
         document.addEventListener('DOMContentLoaded', () => {

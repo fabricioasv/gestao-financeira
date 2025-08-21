@@ -5,7 +5,7 @@
    Descrição: Funcionalidades de upload e drag & drop
    ======================================== */
 
-import { logDebug, logError } from './utils.js';
+import { logDebug, logError } from './utils/index.js';
 
 // ========================================
 // VARIÁVEIS GLOBAIS
