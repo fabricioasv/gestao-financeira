@@ -97,7 +97,8 @@
             vertical-align: middle;
         }
         
-        .table th:first-child, .table td:first-child {
+        /* Estilos para fixar as primeiras colunas apenas da tabela principal (financialTable) */
+        #financialTable th:first-child, #financialTable td:first-child {
             min-width: 200px;
             position: sticky;
             left: 0;
@@ -106,7 +107,7 @@
             border-right: 2px solid #dee2e6;
         }
         
-        .table th:nth-child(2), .table td:nth-child(2) {
+        #financialTable th:nth-child(2), #financialTable td:nth-child(2) {
             min-width: 100px;
             position: sticky;
             left: 200px;
@@ -218,6 +219,52 @@
             z-index: 1;
             border-right: 2px solid #dee2e6;
         }
+        
+        /* CORREÇÃO PARA TABELA DE PROVENTOS - Todas as colunas com fundo correto */
+        #proventosTable thead tr th {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+        }
+        
+        #proventosTable tbody tr td {
+            background-color: inherit !important;
+            color: inherit !important;
+        }
+        
+        /* Coluna Ano fixa com fundo específico */
+        #proventosTable thead tr th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            border-right: 2px solid #dee2e6;
+        }
+        
+        #proventosTable tbody tr td:first-child {
+            background-color: #f8f9fa !important;
+            color: #212529 !important;
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            border-right: 2px solid #dee2e6;
+        }
+        
+        /* Garantir que todas as colunas tenham fundo correto */
+        #proventosTable .table-dark th {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+        }
+        
+        #proventosTable .table-striped tbody tr:nth-of-type(odd) td {
+            background-color: rgba(0, 0, 0, 0.05) !important;
+        }
+        
+        #proventosTable .table-striped tbody tr:nth-of-type(even) td {
+            background-color: rgba(0, 0, 0, 0) !important;
+        }
+        
+        #proventosTable .table-hover tbody tr:hover td {
+            background-color: rgba(0, 0, 0, 0.075) !important;
+        }
     </style>
 </head>
 <body>
@@ -279,6 +326,11 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
                             <i class="fas fa-chart-pie me-2"></i>Dashboard
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="proventos-tab" data-bs-toggle="tab" data-bs-target="#proventos" type="button" role="tab">
+                            <i class="fas fa-money-bill-wave me-2"></i>Proventos
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -401,6 +453,100 @@
                     </div>
                 </div>
 
+                <!-- Proventos Tab -->
+                <div class="tab-pane fade" id="proventos" role="tabpanel">
+                    <div class="row mb-4">
+                        <!-- Filtros -->
+                        <div class="col-12 mb-3">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-filter me-2"></i>
+                                        Filtros de Período
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-success w-100" onclick="filterProventos('este-ano')">
+                                                <i class="fas fa-calendar-day me-2"></i>
+                                                Este Ano
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-info w-100" onclick="filterProventos('ultimos-12-meses')">
+                                                <i class="fas fa-calendar-week me-2"></i>
+                                                Últimos 12 Meses
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-primary w-100" onclick="filterProventos('desde-inicio')">
+                                                <i class="fas fa-calendar-alt me-2"></i>
+                                                Desde o Início
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gráfico de Proventos -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Evolução dos Proventos
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="proventosChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Proventos -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-table me-2"></i>
+                                        Tabela de Proventos por Ano
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover table-bordered" id="proventosTable">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th scope="col">Ano</th>
+                                                    <th scope="col">Janeiro</th>
+                                                    <th scope="col">Fevereiro</th>
+                                                    <th scope="col">Março</th>
+                                                    <th scope="col">Abril</th>
+                                                    <th scope="col">Maio</th>
+                                                    <th scope="col">Junho</th>
+                                                    <th scope="col">Julho</th>
+                                                    <th scope="col">Agosto</th>
+                                                    <th scope="col">Setembro</th>
+                                                    <th scope="col">Outubro</th>
+                                                    <th scope="col">Novembro</th>
+                                                    <th scope="col">Dezembro</th>
+                                                    <th scope="col">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="proventosTableBody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Table Tab -->
                 <div class="tab-pane fade" id="table" role="tabpanel">
                     <div class="col-12">
@@ -441,6 +587,8 @@
         let consolidatedChart = null;
         let cartaoChart = null;
         let investimentoChart = null;
+        let proventosChart = null;
+        let currentProventosFilter = 'desde-inicio';
 
         // Função para obter o mês atual
         function getCurrentMonth() {
@@ -549,6 +697,12 @@
             // Create ações table
             if (data.acoes_data) {
                 createAcoesTable(data.acoes_data);
+            }
+            
+            // Create proventos chart and table
+            if (data.proventos_data) {
+                createProventosChart(data.proventos_data);
+                createProventosTable(data.proventos_data);
             }
         }
 
@@ -969,6 +1123,206 @@
                     </tr>
                 `;
             }).join('');
+        }
+
+        function createProventosChart(proventosData) {
+            
+            const ctx = document.getElementById('proventosChart').getContext('2d');
+            
+            if (proventosChart) {
+                proventosChart.destroy();
+            }
+
+            // Aplicar filtro atual
+            const filteredData = filterProventosData(proventosData, currentProventosFilter);
+            
+            // Preparar dados para gráfico de barras com meses no eixo X
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                               'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            
+            // Criar datasets para cada ano
+            const datasets = [];
+            const colors = [
+                'rgba(40, 167, 69, 0.8)',   // Verde
+                'rgba(23, 162, 184, 0.8)',  // Azul
+                'rgba(255, 193, 7, 0.8)',   // Amarelo
+                'rgba(220, 53, 69, 0.8)',   // Vermelho
+                'rgba(102, 16, 242, 0.8)',  // Roxo
+                'rgba(253, 126, 20, 0.8)',  // Laranja
+                'rgba(32, 201, 151, 0.8)'   // Verde água
+            ];
+            
+            filteredData.forEach((yearData, index) => {
+                
+                const yearValues = monthNames.map(monthName => {
+                    const value = yearData.months[monthName] || 0;
+                    return value;
+                });
+                
+                datasets.push({
+                    label: `Ano ${yearData.year}`,
+                    data: yearValues,
+                    backgroundColor: colors[index % colors.length],
+                    borderColor: colors[index % colors.length].replace('0.8', '1'),
+                    borderWidth: 1
+                });
+            });
+            
+            const chartConfig = {
+                type: 'bar',
+                data: {
+                    labels: monthNames,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Evolução dos Proventos por Mês'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += 'R$ ' + context.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Meses'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Valor (R$)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            try {
+                proventosChart = new Chart(ctx, chartConfig);
+            } catch (error) {
+                console.error('❌ Erro ao criar gráfico:', error);
+            }
+        }
+
+        function createProventosTable(proventosData) {
+            
+            const tableBody = document.getElementById('proventosTableBody');
+            
+            // Aplicar filtro atual
+            const filteredData = filterProventosData(proventosData, currentProventosFilter);
+            
+            tableBody.innerHTML = '';
+            
+            filteredData.forEach(yearData => {
+                
+                const tr = document.createElement('tr');
+                
+                // Célula do ano
+                const tdYear = document.createElement('td');
+                tdYear.innerHTML = `<strong>${yearData.year}</strong>`;
+                tr.appendChild(tdYear);
+                
+                // Células dos meses
+                const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                
+                monthNames.forEach(monthName => {
+                    const td = document.createElement('td');
+                    td.className = 'text-end';
+                    
+                    // Encontrar o valor do mês correspondente
+                    let monthValue = yearData.months[monthName] || 0;
+                    
+                    if (monthValue > 0) {
+                        td.className += ' text-success fw-bold';
+                    } else if (monthValue < 0) {
+                        td.className += ' text-danger fw-bold';
+                    } else {
+                        td.className += ' text-muted';
+                    }
+                    
+                    td.textContent = `R$ ${monthValue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                    tr.appendChild(td);
+                });
+                
+                // Célula do total
+                const tdTotal = document.createElement('td');
+                tdTotal.className = 'text-end fw-bold';
+                if (yearData.total > 0) {
+                    tdTotal.className += ' text-success';
+                } else if (yearData.total < 0) {
+                    tdTotal.className += ' text-danger';
+                }
+                tdTotal.textContent = `R$ ${yearData.total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                tr.appendChild(tdTotal);
+                
+                tableBody.appendChild(tr);
+            });
+            
+        }
+
+        function filterProventos(filterType) {
+            currentProventosFilter = filterType;
+            
+            if (currentData && currentData.proventos_data) {
+                createProventosChart(currentData.proventos_data);
+                createProventosTable(currentData.proventos_data);
+            }
+        }
+
+        function filterProventosData(proventosData, filterType) {
+            
+            if (!proventosData || proventosData.length === 0) {
+                return [];
+            }
+            
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth() + 1;
+            
+            let filteredData = [];
+            
+            switch (filterType) {
+                case 'este-ano':
+                    filteredData = proventosData.filter(item => item.year === currentYear);
+                    break;
+                
+                case 'ultimos-12-meses':
+                    // Para os últimos 12 meses, vamos mostrar os últimos 2 anos
+                    filteredData = proventosData.filter(item => 
+                        item.year >= currentYear - 1
+                    );
+                    break;
+                
+                case 'desde-inicio':
+                default:
+                    filteredData = proventosData;
+                    break;
+            }
+            
+            return filteredData;
         }
 
         function showLoading(show) {

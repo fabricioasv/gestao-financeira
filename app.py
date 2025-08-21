@@ -39,6 +39,9 @@ def process_excel_data(file_path):
         # Ler aba "Ações"
         df_acoes = pd.read_excel(file_path, sheet_name='Ações')
         
+        # Ler aba "Proventos"
+        df_proventos = pd.read_excel(file_path, sheet_name='Proventos')
+        
         # Extrair meses das colunas da aba Consolidado
         months = [col for col in df_consolidado.columns if col.startswith('25-')]
         months.sort()
@@ -105,6 +108,62 @@ def process_excel_data(file_path):
                     # Calcular resultado
                     acao_data['resultado'] = acao_data['renda_esperada'] - acao_data['dividend_yield_pago']
                     acoes_data.append(acao_data)
+        
+        # Preparar dados da aba Proventos
+        proventos_data = []
+        if df_proventos is not None and len(df_proventos) > 0:
+            # Extrair meses da primeira linha (cabeçalhos)
+            month_headers = []
+            month_names = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+            
+            for col in df_proventos.columns[1:]:  # Pular a primeira coluna (Ano)
+                if pd.notna(col):
+                    col_str = str(col)
+                    # Verificar se é um timestamp de data
+                    if isinstance(col, (pd.Timestamp, datetime)):
+                        month_index = col.month - 1  # month é 1-12, precisamos 0-11
+                        month_name = month_names[month_index]
+                        month_headers.append(month_name)
+                    # Verificar se contém apenas números (ignorar colunas como Total, Média, etc.)
+                    elif col_str.replace('-', '').replace(':', '').replace(' ', '').replace('.', '').isdigit():
+                        # Se for apenas números, é provavelmente um mês
+                        month_index = col.month - 1 if hasattr(col, 'month') else 0
+                        month_name = month_names[month_index]
+                        month_headers.append(month_name)
+                    # Verificar se é um nome de mês
+                    elif any(month_name in col_str for month_name in month_names):
+                        for month_name in month_names:
+                            if month_name in col_str:
+                                month_headers.append(month_name)
+                                break
+            
+            # Processar dados de proventos linha por linha
+            for _, row in df_proventos.iterrows():
+                # Verificar se a primeira coluna contém um ano válido
+                year_cell = row.iloc[0]
+                if pd.notna(year_cell) and str(year_cell).isdigit():
+                    year = int(year_cell)
+                    year_data = {
+                        'year': year,
+                        'months': {},
+                        'total': 0
+                    }
+                    
+                    total_year = 0
+                    # Processar cada coluna de mês (começando da segunda coluna)
+                    for i, month_header in enumerate(month_headers):
+                        if i + 1 < len(row):  # +1 porque a primeira coluna é o ano
+                            value = row.iloc[i + 1] if pd.notna(row.iloc[i + 1]) else 0
+                            try:
+                                value = float(value)
+                            except:
+                                value = 0
+                            year_data['months'][month_header] = value
+                            total_year += value
+                    
+                    year_data['total'] = total_year
+                    proventos_data.append(year_data)
         
         # Preparar dados para gráficos
         chart_data = {
@@ -216,7 +275,8 @@ def process_excel_data(file_path):
             'success': True,
             'table_data': table_data,
             'chart_data': chart_data,
-            'acoes_data': acoes_data
+            'acoes_data': acoes_data,
+            'proventos_data': proventos_data
         }
         
     except Exception as e:
