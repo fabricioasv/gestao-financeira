@@ -475,22 +475,10 @@
                                     </div>
                                     <div class="mt-3">
                                         <div class="row text-center">
-                                            <div class="col-md-4">
-                                                <div class="bg-light p-3 rounded">
-                                                    <h6 class="text-muted mb-1">Total Ações</h6>
-                                                    <h5 class="text-primary mb-0" id="totalAcoesDashboard">R$ 0,00</h5>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-12">
                                                 <div class="bg-light p-3 rounded">
                                                     <h6 class="text-muted mb-1">Renda Total</h6>
                                                     <h5 class="text-success mb-0" id="rendaTotalDashboard">R$ 0,00</h5>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="bg-light p-3 rounded">
-                                                    <h6 class="text-muted mb-1">Resultado Total</h6>
-                                                    <h5 class="mb-0" id="resultadoTotalDashboard">R$ 0,00</h5>
                                                 </div>
                                             </div>
                                         </div>
@@ -1187,22 +1175,18 @@
             console.log('🔍 createAcoesTableDashboard chamada com:', acoesData);
             
             const acoesTableBody = document.getElementById('acoesTableDashboardBody');
-            const totalAcoes = document.getElementById('totalAcoesDashboard');
             const rendaTotal = document.getElementById('rendaTotalDashboard');
-            const resultadoTotal = document.getElementById('resultadoTotalDashboard');
             
             console.log('🔍 Elementos encontrados:');
             console.log('  - acoesTableBody:', acoesTableBody);
-            console.log('  - totalAcoes:', totalAcoes);
             console.log('  - rendaTotal:', rendaTotal);
-            console.log('  - resultadoTotal:', resultadoTotal);
 
-            if (!acoesTableBody || !totalAcoes || !rendaTotal || !resultadoTotal) {
+            if (!acoesTableBody || !rendaTotal) {
                 console.error('❌ Elementos da tabela de ações não encontrados');
                 return;
             }
 
-                         if (!acoesData || acoesData.length === 0) {
+             if (!acoesData || acoesData.length === 0) {
                  acoesTableBody.innerHTML = `
                      <tr>
                          <td colspan="11" class="text-center text-muted">
@@ -1211,25 +1195,17 @@
                          </td>
                      </tr>
                  `;
-                 totalAcoes.textContent = 'R$ 0,00';
                  rendaTotal.textContent = 'R$ 0,00';
-                 resultadoTotal.textContent = 'R$ 0,00';
                  return;
              }
 
-            let totalValor = 0;
             let totalRenda = 0;
-            let totalResultado = 0;
 
             acoesData.forEach(acao => {
-                totalValor += acao.qtd;
                 totalRenda += acao.renda_esperada;
-                totalResultado += acao.resultado;
             });
 
-            totalAcoes.textContent = `R$ ${totalValor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             rendaTotal.textContent = `R$ ${totalRenda.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            resultadoTotal.textContent = `R$ ${totalResultado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
                          acoesTableBody.innerHTML = acoesData.map(acao => {
                  return `
