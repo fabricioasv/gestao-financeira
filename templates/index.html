@@ -265,6 +265,33 @@
         #proventosTable .table-hover tbody tr:hover td {
             background-color: rgba(0, 0, 0, 0.075) !important;
         }
+        
+        /* Estilos para tabela de ações no dashboard */
+        #acoesTableDashboard thead tr th:first-child,
+        #acoesTableDashboard thead tr th:nth-child(2) {
+            background-color: #343a40 !important;
+            color: #ffffff !important;
+            position: sticky;
+            left: 0;
+            z-index: 2;
+        }
+        
+        #acoesTableDashboard tbody tr td:first-child,
+        #acoesTableDashboard tbody tr td:nth-child(2) {
+            background-color: #f8f9fa !important;
+            color: #212529 !important;
+            position: sticky;
+            left: 0;
+            z-index: 2;
+        }
+        
+        #acoesTableDashboard th:first-child, #acoesTableDashboard td:first-child {
+            border-right: 2px solid #dee2e6;
+        }
+        
+        #acoesTableDashboard th:nth-child(2), #acoesTableDashboard td:nth-child(2) {
+            border-right: 2px solid #dee2e6;
+        }
     </style>
 </head>
 <body>
@@ -334,6 +361,11 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cartao-tab" data-bs-toggle="tab" data-bs-target="#cartao" type="button" role="tab">
+                            <i class="fas fa-credit-card me-2"></i>Cartão
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="table-tab" data-bs-toggle="tab" data-bs-target="#table" type="button" role="tab">
                             <i class="fas fa-table me-2"></i>Tabela de Dados
                         </button>
@@ -363,26 +395,6 @@
                             </div>
                         </div>
 
-                        <!-- Cartão Chart -->
-                        <div class="col-lg-6">
-                            <div class="card">
-                                <div class="card-header bg-warning text-dark">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-credit-card me-2"></i>
-                                        Cartão
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="chart-container">
-                                        <canvas id="cartaoChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Segunda linha de gráficos -->
-                    <div class="row mb-4">
                         <!-- Investimento Chart -->
                         <div class="col-lg-6">
                             <div class="card">
@@ -399,50 +411,53 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Painel de Ações -->
-                        <div class="col-lg-6">
+                    </div>
+                    
+                    <!-- Tabela de Ações -->
+                    <div class="row mb-4">
+                        <!-- Carteira de Ações -->
+                        <div class="col-12">
                             <div class="card">
                                 <div class="card-header bg-success text-white">
                                     <h5 class="mb-0">
-                                        <i class="fas fa-chart-line me-2"></i>
+                                        <i class="fas fa-chart-pie me-2"></i>
                                         Carteira de Ações
                                     </h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
-                                        <table class="table table-sm table-striped table-hover table-bordered" id="acoesTable">
+                                        <table class="table table-sm table-striped table-hover table-bordered" id="acoesTableDashboard">
                                             <thead class="table-dark">
                                                 <tr>
                                                     <th scope="col" style="min-width: 40px;">Ticker</th>
                                                     <th scope="col" style="min-width: 80px;">Qtd</th>
                                                     <th scope="col" style="min-width: 140px;">Renda Esperada</th>
-                                                    <th scope="col" style="min-width: 140px;">Dividend Yield Pago</th>
                                                     <th scope="col" style="min-width: 120px;">Resultado</th>
+                                                    <th scope="col" style="min-width: 80px;">%</th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="acoesTableBody">
+                                            <tbody id="acoesTableDashboardBody">
                                             </tbody>
                                         </table>
                                     </div>
                                     <div class="mt-3">
                                         <div class="row text-center">
-                                            <div class="col-4">
-                                                <div class="border rounded p-2">
-                                                    <small class="text-muted d-block">Total Ações</small>
-                                                    <strong id="totalAcoes">0</strong>
+                                            <div class="col-md-4">
+                                                <div class="bg-light p-3 rounded">
+                                                    <h6 class="text-muted mb-1">Total Ações</h6>
+                                                    <h5 class="text-primary mb-0" id="totalAcoesDashboard">R$ 0,00</h5>
                                                 </div>
                                             </div>
-                                            <div class="col-4">
-                                                <div class="border rounded p-2">
-                                                    <small class="text-muted d-block">Renda Total</small>
-                                                    <strong id="rendaTotal">R$ 0,00</strong>
+                                            <div class="col-md-4">
+                                                <div class="bg-light p-3 rounded">
+                                                    <h6 class="text-muted mb-1">Renda Total</h6>
+                                                    <h5 class="text-success mb-0" id="rendaTotalDashboard">R$ 0,00</h5>
                                                 </div>
                                             </div>
-                                            <div class="col-4">
-                                                <div class="border rounded p-2">
-                                                    <small class="text-muted d-block">Resultado</small>
-                                                    <strong id="resultadoTotal">R$ 0,00</strong>
+                                            <div class="col-md-4">
+                                                <div class="bg-light p-3 rounded">
+                                                    <h6 class="text-muted mb-1">Resultado Total</h6>
+                                                    <h5 class="mb-0" id="resultadoTotalDashboard">R$ 0,00</h5>
                                                 </div>
                                             </div>
                                         </div>
@@ -452,6 +467,8 @@
                         </div>
                     </div>
                 </div>
+
+
 
                 <!-- Proventos Tab -->
                 <div class="tab-pane fade" id="proventos" role="tabpanel">
@@ -540,6 +557,28 @@
                                             <tbody id="proventosTableBody">
                                             </tbody>
                                         </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cartão Tab -->
+                <div class="tab-pane fade" id="cartao" role="tabpanel">
+                    <div class="row mb-4">
+                        <!-- Gráfico de Cartão -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-credit-card me-2"></i>
+                                        Gastos com Cartão por Instituição
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="cartaoChart"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -681,6 +720,7 @@
         }
 
         function displayData(data) {
+            console.log('🔍 displayData chamada com:', data);
             currentData = data;
             
             // Display data section
@@ -696,18 +736,32 @@
             
             // Create ações table
             if (data.acoes_data) {
-                createAcoesTable(data.acoes_data);
+                console.log('🔍 Criando tabela de ações com:', data.acoes_data);
+                createAcoesTableDashboard(data.acoes_data);
+            } else {
+                console.log('❌ data.acoes_data não encontrado');
             }
             
             // Create proventos chart and table
             if (data.proventos_data) {
+                console.log('🔍 Criando tabela de proventos com:', data.proventos_data);
                 createProventosChart(data.proventos_data);
                 createProventosTable(data.proventos_data);
+            } else {
+                console.log('❌ data.proventos_data não encontrado');
             }
         }
 
         function createConsolidatedChart(chartData) {
-            const ctx = document.getElementById('consolidatedChart').getContext('2d');
+            console.log('🔍 createConsolidatedChart chamada com:', chartData);
+            
+            const canvas = document.getElementById('consolidatedChart');
+            if (!canvas) {
+                console.error('❌ Elemento consolidatedChart não encontrado');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
             
             if (consolidatedChart) {
                 consolidatedChart.destroy();
@@ -809,7 +863,15 @@
         }
 
         function createCartaoChart(chartData) {
-            const ctx = document.getElementById('cartaoChart').getContext('2d');
+            console.log('🔍 createCartaoChart chamada com:', chartData);
+            
+            const canvas = document.getElementById('cartaoChart');
+            if (!canvas) {
+                console.error('❌ Elemento cartaoChart não encontrado');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
             
             if (cartaoChart) {
                 cartaoChart.destroy();
@@ -929,7 +991,15 @@
         }
 
         function createInvestimentoChart(chartData) {
-            const ctx = document.getElementById('investimentoChart').getContext('2d');
+            console.log('🔍 createInvestimentoChart chamada com:', chartData);
+            
+            const canvas = document.getElementById('investimentoChart');
+            if (!canvas) {
+                console.error('❌ Elemento investimentoChart não encontrado');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
             
             if (investimentoChart) {
                 investimentoChart.destroy();
@@ -1005,8 +1075,15 @@
         }
 
         function createFinancialTable(tableData, months) {
+            console.log('🔍 createFinancialTable chamada com:', tableData, months);
+            
             const tableBody = document.getElementById('tableBody');
             const thead = document.querySelector('#financialTable thead tr');
+            
+            if (!tableBody || !thead) {
+                console.error('❌ Elementos da tabela financeira não encontrados');
+                return;
+            }
             
             // Limpar cabeçalhos existentes (exceto Categoria e ID)
             const existingHeaders = thead.querySelectorAll('th');
@@ -1073,14 +1150,26 @@
             });
         }
 
-        function createAcoesTable(acoesData) {
-            const acoesTableBody = document.getElementById('acoesTableBody');
-            const totalAcoes = document.getElementById('totalAcoes');
-            const rendaTotal = document.getElementById('rendaTotal');
-            const resultadoTotal = document.getElementById('resultadoTotal');
+        function createAcoesTableDashboard(acoesData) {
+            console.log('🔍 createAcoesTableDashboard chamada com:', acoesData);
+            
+            const acoesTableBody = document.getElementById('acoesTableDashboardBody');
+            const totalAcoes = document.getElementById('totalAcoesDashboard');
+            const rendaTotal = document.getElementById('rendaTotalDashboard');
+            const resultadoTotal = document.getElementById('resultadoTotalDashboard');
+            
+            console.log('🔍 Elementos encontrados:');
+            console.log('  - acoesTableBody:', acoesTableBody);
+            console.log('  - totalAcoes:', totalAcoes);
+            console.log('  - rendaTotal:', rendaTotal);
+            console.log('  - resultadoTotal:', resultadoTotal);
+
+            if (!acoesTableBody || !totalAcoes || !rendaTotal || !resultadoTotal) {
+                console.error('❌ Elementos da tabela de ações não encontrados');
+                return;
+            }
 
             if (!acoesData || acoesData.length === 0) {
-                // Não há dados de ações
                 acoesTableBody.innerHTML = `
                     <tr>
                         <td colspan="5" class="text-center text-muted">
@@ -1089,45 +1178,55 @@
                         </td>
                     </tr>
                 `;
-                
-                totalAcoes.textContent = "0";
-                rendaTotal.textContent = "R$ 0,00";
-                resultadoTotal.textContent = "R$ 0,00";
+                totalAcoes.textContent = 'R$ 0,00';
+                rendaTotal.textContent = 'R$ 0,00';
+                resultadoTotal.textContent = 'R$ 0,00';
                 return;
             }
 
-            let totalQtd = 0;
-            let totalRendaEsperada = 0;
-            let totalDividendYieldPago = 0;
+            let totalValor = 0;
+            let totalRenda = 0;
             let totalResultado = 0;
 
             acoesData.forEach(acao => {
-                totalQtd += acao.qtd;
-                totalRendaEsperada += acao.renda_esperada;
-                totalDividendYieldPago += acao.dividend_yield_pago;
+                totalValor += acao.qtd;
+                totalRenda += acao.renda_esperada;
                 totalResultado += acao.resultado;
             });
 
-            totalAcoes.textContent = totalQtd;
-            rendaTotal.textContent = `R$ ${totalRendaEsperada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            totalAcoes.textContent = `R$ ${totalValor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            rendaTotal.textContent = `R$ ${totalRenda.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             resultadoTotal.textContent = `R$ ${totalResultado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
             acoesTableBody.innerHTML = acoesData.map(acao => {
+                const percentual = acao.resultado !== 0 ? ((acao.resultado / acao.renda_esperada) * 100) : 0;
+                const percentualClass = percentual >= 0 ? 'text-success' : 'text-danger';
+                const resultadoClass = acao.resultado >= 0 ? 'text-success' : 'text-danger';
+
                 return `
                     <tr>
                         <td><strong>${acao.ticker}</strong></td>
                         <td class="text-end">${acao.qtd.toLocaleString('pt-BR')}</td>
                         <td class="text-end text-success">R$ ${acao.renda_esperada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td class="text-end text-info">R$ ${acao.dividend_yield_pago.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td class="text-end ${acao.resultado >= 0 ? 'text-success' : 'text-danger'}">R$ ${acao.resultado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td class="text-end ${resultadoClass}">R$ ${acao.resultado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td class="text-end ${percentualClass}">${percentual.toLocaleString('pt-BR', {minimumFractionDigits: 2})}%</td>
                     </tr>
                 `;
             }).join('');
         }
 
+
+
         function createProventosChart(proventosData) {
+            console.log('🔍 createProventosChart chamada com:', proventosData);
             
-            const ctx = document.getElementById('proventosChart').getContext('2d');
+            const canvas = document.getElementById('proventosChart');
+            if (!canvas) {
+                console.error('❌ Elemento proventosChart não encontrado');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
             
             if (proventosChart) {
                 proventosChart.destroy();
@@ -1228,8 +1327,15 @@
         }
 
         function createProventosTable(proventosData) {
+            console.log('🔍 createProventosTable chamada com:', proventosData);
             
             const tableBody = document.getElementById('proventosTableBody');
+            console.log('🔍 tableBody encontrado:', tableBody);
+            
+            if (!tableBody) {
+                console.error('❌ Elemento proventosTableBody não encontrado');
+                return;
+            }
             
             // Aplicar filtro atual
             const filteredData = filterProventosData(proventosData, currentProventosFilter);
