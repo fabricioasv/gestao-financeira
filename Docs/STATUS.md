@@ -17,18 +17,31 @@ Transformar o sistema monolítico atual em uma arquitetura modular, testável e 
 - [x] Definir padrões de código
 - [x] Criar guia de desenvolvimento
 
+### **Fase 2: Estrutura e Separação de Responsabilidades**
+- [x] Criar estrutura de pastas `static/`
+- [x] Fazer backup do código atual
+- [x] Extrair CSS para arquivos separados
+  - [x] `main.css` - Estilos principais e variáveis CSS
+  - [x] `tables.css` - Estilos específicos para tabelas
+  - [x] `charts.css` - Estilos para gráficos e containers
+  - [x] `components.css` - Estilos para componentes
+- [x] Limpar HTML (remover CSS inline - 300+ linhas)
+- [x] Adicionar referências aos arquivos CSS externos
+
 ## 🔄 **Em Andamento**
 
-### **Fase 1: Preparação e Estrutura**
-- [ ] Criar estrutura de pastas `static/`
-- [ ] Fazer backup do código atual
-- [ ] Preparar ambiente para refatoração
+### **Fase 2: Separação de Responsabilidades**
+- [ ] Limpeza e organização do HTML
+- [ ] Testar funcionalidade após separação CSS
+- [ ] Preparar para modularização JavaScript
 
 ## ⏳ **Próximos Passos**
 
 ### **Fase 2: Separação de Responsabilidades**
-- [ ] Extrair CSS para arquivos separados
-- [ ] Limpar HTML (remover CSS/JS inline)
+- [x] Extrair CSS para arquivos separados
+- [x] Limpar HTML (remover CSS inline)
+- [ ] Limpar JavaScript inline
+- [ ] Organizar estrutura HTML
 - [ ] Testar funcionalidade após separação
 
 ### **Fase 3: Modularização JavaScript**
@@ -55,9 +68,9 @@ Transformar o sistema monolítico atual em uma arquitetura modular, testável e 
 - **Conteúdo**: Completo
 
 ### **Código**
-- **Status**: 0% ⏳
-- **Arquivos Refatorados**: 0/15
-- **Funcionalidades**: 0/8
+- **Status**: 25% 🔄
+- **Arquivos Refatorados**: 4/15
+- **Funcionalidades**: 2/8
 
 ### **Testes**
 - **Status**: 0% ⏳
@@ -127,5 +140,5 @@ Transformar o sistema monolítico atual em uma arquitetura modular, testável e 
 
 ---
 
-**Última Atualização**: 20/08/2025 22:50
+**Última Atualização**: 20/08/2025 23:15
 **Próxima Atualização**: 21/08/2025 10:00

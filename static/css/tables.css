@@ -1,0 +1,253 @@
+/* ========================================
+   SISTEMA DE GESTÃO FINANCEIRA PESSOAL
+   ========================================
+   Arquivo: tables.css
+   Descrição: Estilos específicos para tabelas
+   ======================================== */
+
+/* ========================================
+   TABELAS RESPONSIVAS
+   ======================================== */
+.table-responsive {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* ========================================
+   ESTILOS BASE DAS TABELAS
+   ======================================== */
+.table th, .table td {
+    white-space: nowrap;
+    min-width: 120px;
+    vertical-align: middle;
+}
+
+/* ========================================
+   SCROLLBAR PERSONALIZADA
+   ======================================== */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ========================================
+   MESES FUTUROS
+   ======================================== */
+.month-future {
+    color: #495057 !important;
+    font-style: italic;
+    background-color: #e9ecef !important;
+}
+
+.table td.month-future {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+}
+
+.table th.month-future {
+    background-color: #6c757d !important;
+    color: #ffffff !important;
+}
+
+/* ========================================
+   TABELA PRINCIPAL (FINANCIAL TABLE)
+   ======================================== */
+#financialTable th:first-child, #financialTable td:first-child {
+    min-width: 200px;
+    position: sticky;
+    left: 0;
+    background-color: var(--light-color) !important;
+    z-index: 1;
+    border-right: 2px solid var(--border-color);
+}
+
+#financialTable th:nth-child(2), #financialTable td:nth-child(2) {
+    min-width: 100px;
+    position: sticky;
+    left: 200px;
+    background-color: var(--light-color) !important;
+    z-index: 1;
+    border-right: 2px solid var(--border-color);
+}
+
+/* Cabeçalhos fixos da tabela principal */
+#financialTable thead tr th:first-child,
+#financialTable thead tr th:nth-child(2) {
+    background-color: var(--dark-color) !important;
+    color: var(--white-color) !important;
+}
+
+#financialTable tbody tr td:first-child,
+#financialTable tbody tr td:nth-child(2) {
+    background-color: var(--light-color) !important;
+    color: #212529 !important;
+}
+
+/* Garantir prioridade das colunas fixas */
+#financialTable .table-dark th:first-child,
+#financialTable .table-dark th:nth-child(2) {
+    background-color: var(--dark-color) !important;
+    color: var(--white-color) !important;
+}
+
+/* ========================================
+   TABELA DE AÇÕES (ACOES TABLE)
+   ======================================== */
+#acoesTable thead tr th:first-child,
+#acoesTable thead tr th:nth-child(2) {
+    background-color: var(--dark-color) !important;
+    color: var(--white-color) !important;
+}
+
+#acoesTable tbody tr td:first-child,
+#acoesTable tbody tr td:nth-child(2) {
+    background-color: var(--light-color) !important;
+    color: #212529 !important;
+}
+
+#acoesTable th:first-child, #acoesTable td:first-child {
+    min-width: 40px;
+    position: sticky;
+    left: 0;
+    background-color: var(--light-color) !important;
+    z-index: 1;
+    border-right: 2px solid var(--border-color);
+}
+
+#acoesTable th:nth-child(2), #acoesTable td:nth-child(2) {
+    min-width: 80px;
+    position: sticky;
+    left: 40px;
+    background-color: var(--light-color) !important;
+    z-index: 1;
+    border-right: 2px solid var(--border-color);
+}
+
+/* Garantir prioridade das colunas fixas */
+#acoesTable .table-dark th:first-child,
+#acoesTable .table-dark th:nth-child(2) {
+    background-color: var(--dark-color) !important;
+    color: var(--white-color) !important;
+}
+
+/* ========================================
+   TABELA DE PROVENTOS (PROVENTOS TABLE)
+   ======================================== */
+#proventosTable thead tr th {
+    background-color: var(--dark-color) !important;
+    color: var(--white-color) !important;
+}
+
+#proventosTable tbody tr td {
+    background-color: inherit !important;
+    color: inherit !important;
+}
+
+/* Coluna Ano fixa */
+#proventosTable thead tr th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    border-right: 2px solid var(--border-color);
+}
+
+#proventosTable tbody tr td:first-child {
+    background-color: var(--light-color) !important;
+    color: #212529 !important;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    border-right: 2px solid var(--border-color);
+}
+
+/* Garantir que todas as colunas tenham fundo correto */
+#proventosTable .table-dark th {
+    background-color: var(--dark-color) !important;
+    color: var(--white-color) !important;
+}
+
+#proventosTable .table-striped tbody tr:nth-of-type(odd) td {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+#proventosTable .table-striped tbody tr:nth-of-type(even) td {
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+
+#proventosTable .table-hover tbody tr:hover td {
+    background-color: rgba(0, 0, 0, 0.075) !important;
+}
+
+/* ========================================
+   TABELA DE AÇÕES NO DASHBOARD
+   ======================================== */
+#acoesTableDashboard thead tr th:first-child,
+#acoesTableDashboard thead tr th:nth-child(2) {
+    background-color: var(--dark-color) !important;
+    color: var(--white-color) !important;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+
+#acoesTableDashboard tbody tr td:first-child,
+#acoesTableDashboard tbody tr td:nth-child(2) {
+    background-color: var(--light-color) !important;
+    color: #212529 !important;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+
+#acoesTableDashboard th:first-child, #acoesTableDashboard td:first-child {
+    border-right: 2px solid var(--border-color);
+}
+
+#acoesTableDashboard th:nth-child(2), #acoesTableDashboard td:nth-child(2) {
+    border-right: 2px solid var(--border-color);
+}
+
+/* Ajustar largura da tabela para acomodar todas as colunas */
+#acoesTableDashboard {
+    min-width: 1400px;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+@media (max-width: 768px) {
+    .table-responsive {
+        max-height: 400px;
+    }
+    
+    .table th, .table td {
+        min-width: 100px;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        max-height: 300px;
+    }
+    
+    .table th, .table td {
+        min-width: 80px;
+    }
+}

@@ -1,0 +1,198 @@
+/* ========================================
+   SISTEMA DE GESTÃO FINANCEIRA PESSOAL
+   ========================================
+   Arquivo: main.css
+   Descrição: Estilos principais da aplicação
+   ======================================== */
+
+/* ========================================
+   VARIÁVEIS CSS GLOBAIS
+   ======================================== */
+:root {
+    /* Cores primárias */
+    --primary-color: #007bff;
+    --primary-dark: #0056bff;
+    --primary-light: #e7f3ff;
+    
+    /* Cores de estado */
+    --success-color: #28a745;
+    --success-dark: #1e7e34;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    
+    /* Cores neutras */
+    --dark-color: #343a40;
+    --light-color: #f8f9fa;
+    --gray-color: #6c757d;
+    --white-color: #ffffff;
+    
+    /* Espaçamentos */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Sombras */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    
+    /* Bordas */
+    --border-radius: 0.375rem;
+    --border-color: #dee2e6;
+}
+
+/* ========================================
+   RESET E BASE
+   ======================================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-color);
+    background-color: var(--white-color);
+}
+
+/* ========================================
+   COMPONENTES PRINCIPAIS
+   ======================================== */
+
+/* Área de Upload */
+.upload-area {
+    border: 2px dashed var(--primary-color);
+    border-radius: 10px;
+    padding: var(--spacing-lg);
+    text-align: center;
+    background-color: var(--light-color);
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+    border-color: var(--primary-dark);
+    background-color: #e9ecef;
+}
+
+.upload-area.dragover {
+    border-color: var(--success-color);
+    background-color: #d4edda;
+}
+
+/* Container de Gráficos */
+.chart-container {
+    position: relative;
+    height: 400px;
+    margin: var(--spacing-lg) 0;
+}
+
+/* Badges de Categoria */
+.category-badge {
+    font-size: 0.8em;
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+/* Valores */
+.value-positive {
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+.value-negative {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+.value-neutral {
+    color: var(--gray-color);
+}
+
+/* Estados de Carregamento */
+.loading {
+    display: none;
+}
+
+.loading.show {
+    display: block;
+}
+
+/* ========================================
+   NAVEGAÇÃO
+   ======================================== */
+.nav-tabs .nav-link {
+    color: #495057;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    border-color: var(--primary-color);
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* ========================================
+   UTILITÁRIOS
+   ======================================== */
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+.mb-5 { margin-bottom: var(--spacing-xl); }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+.mt-5 { margin-top: var(--spacing-xl); }
+
+.p-0 { padding: 0; }
+.p-1 { padding: var(--spacing-xs); }
+.p-2 { padding: var(--spacing-sm); }
+.p-3 { padding: var(--spacing-md); }
+.p-4 { padding: var(--spacing-lg); }
+.p-5 { padding: var(--spacing-xl); }
+
+/* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 300px;
+        margin: var(--spacing-md) 0;
+    }
+    
+    .upload-area {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 576px) {
+    .chart-container {
+        height: 250px;
+    }
+    
+    .upload-area {
+        padding: var(--spacing-sm);
+    }
+}
