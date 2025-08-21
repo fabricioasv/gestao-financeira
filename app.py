@@ -67,45 +67,35 @@ def process_excel_data(file_path):
         if df_acoes is not None and len(df_acoes) > 0:
             for _, row in df_acoes.iterrows():
                 if pd.notna(row.get('Ticker', '')):
-                    # Processar quantidade
-                    qtd = 0
-                    if pd.notna(row.get('Qtd', 0)):
-                        try:
-                            qtd = float(row['Qtd'])
-                        except:
-                            qtd = 0
-                    
-                    # Processar renda esperada (remover R$ e converter vírgula)
-                    renda_esperada = 0
-                    if pd.notna(row.get('Renda Esperada', 0)):
-                        try:
-                            if isinstance(row['Renda Esperada'], str):
-                                clean_val = row['Renda Esperada'].replace('R$', '').replace(',', '.').strip()
-                                renda_esperada = float(clean_val)
-                            else:
-                                renda_esperada = float(row['Renda Esperada'])
-                        except:
-                            renda_esperada = 0
-                    
-                    # Processar dividend yield pago (remover R$ e converter vírgula)
-                    dividend_yield_pago = 0
-                    if pd.notna(row.get('Dividend Yield Pago', 0)):
-                        try:
-                            if isinstance(row['Dividend Yield Pago'], str):
-                                clean_val = row['Dividend Yield Pago'].replace('R$', '').replace(',', '.').strip()
-                                dividend_yield_pago = float(clean_val)
-                            else:
-                                dividend_yield_pago = float(row['Dividend Yield Pago'])
-                        except:
-                            dividend_yield_pago = 0
+                    def process_numeric_value(col_name, default=0):
+                        """Função auxiliar para processar valores numéricos"""
+                        value = default
+                        if pd.notna(row.get(col_name, default)):
+                            try:
+                                if isinstance(row[col_name], str):
+                                    clean_val = row[col_name].replace('R$', '').replace(',', '.').strip()
+                                    value = float(clean_val)
+                                else:
+                                    value = float(row[col_name])
+                            except:
+                                value = default
+                        return value
                     
                     acao_data = {
                         'ticker': str(row.get('Ticker', '')),
-                        'qtd': qtd,
-                        'renda_esperada': renda_esperada,
-                        'dividend_yield_pago': dividend_yield_pago
+                        'qtd': process_numeric_value('Qtd'),
+                        'div_esperado_2025': process_numeric_value('Div. Esperado\n2025'),
+                        'renda_esperada': process_numeric_value('Renda Esperada'),
+                        'capital_atual': process_numeric_value('Capital Atual'),
+                        'dividend_yield_esperado': process_numeric_value('Dividend Yield Esperado') * 100,
+                        'dividend_yield_pago': process_numeric_value('Dividend Yield Pago'),
+                        'proporcao_hoje': process_numeric_value('Proporção Hoje'),
+                        'meta_28k': process_numeric_value('Meta 28k'),
+                        'meta_1_ano': process_numeric_value('Meta +1.a.'),
+                        'meta_qtd_2033': process_numeric_value('Meta qtd. 2033')
                     }
-                    # Calcular resultado
+                    
+                    # Calcular resultado (mantendo compatibilidade)
                     acao_data['resultado'] = acao_data['renda_esperada'] - acao_data['dividend_yield_pago']
                     acoes_data.append(acao_data)
         
