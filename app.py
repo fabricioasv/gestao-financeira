@@ -42,6 +42,12 @@ def process_excel_data(file_path):
         # Ler aba "Proventos"
         df_proventos = pd.read_excel(file_path, sheet_name='Proventos')
         
+        # Ler aba "Cartão"
+        df_cartao = pd.read_excel(file_path, sheet_name='Cartão')
+        
+        # Ler aba "Cartão-Detalhe"
+        df_cartao_detalhe = pd.read_excel(file_path, sheet_name='Cartão-Detalhe')
+        
         # Extrair meses das colunas da aba Consolidado
         months = [col for col in df_consolidado.columns if col.startswith('25-')]
         months.sort()
@@ -155,6 +161,51 @@ def process_excel_data(file_path):
                     year_data['total'] = total_year
                     proventos_data.append(year_data)
         
+        # Preparar dados da aba Cartão
+        cartao_data = []
+        if df_cartao is not None and len(df_cartao) > 0:
+            # Extrair meses das colunas (excluindo a primeira coluna 'Grupo')
+            cartao_months = []
+            for col in df_cartao.columns[1:]:
+                if isinstance(col, (pd.Timestamp, datetime)):
+                    month_str = f"{col.year}-{col.month:02d}"
+                    cartao_months.append(month_str)
+            
+            # Processar dados de cartão linha por linha
+            for _, row in df_cartao.iterrows():
+                if pd.notna(row.get('Grupo', '')):
+                    grupo_data = {
+                        'grupo': str(row['Grupo']),
+                        'months': {}
+                    }
+                    
+                    for i, month in enumerate(cartao_months):
+                        if i + 1 < len(row):  # +1 porque a primeira coluna é o Grupo
+                            value = row.iloc[i + 1] if pd.notna(row.iloc[i + 1]) else 0
+                            try:
+                                value = float(value)
+                            except:
+                                value = 0
+                            grupo_data['months'][month] = value
+                    
+                    cartao_data.append(grupo_data)
+        
+        # Preparar dados da aba Cartão-Detalhe
+        cartao_detalhe_data = []
+        if df_cartao_detalhe is not None and len(df_cartao_detalhe) > 0:
+            for _, row in df_cartao_detalhe.iterrows():
+                if pd.notna(row.get('Fatura', '')):
+                    detalhe_data = {
+                        'fatura': str(row['Fatura']),
+                        'data': str(row['Data']) if pd.notna(row['Data']) else '',
+                        'estabelecimento': str(row['Estabelecimento']) if pd.notna(row['Estabelecimento']) else '',
+                        'valor': float(row['Valor']) if pd.notna(row['Valor']) else 0,
+                        'cartao': str(row['Cartão']) if pd.notna(row['Cartão']) else '',
+                        'estabelecimento_fmt': str(row['Estabelecimento Fmt']) if pd.notna(row['Estabelecimento Fmt']) else '',
+                        'grupo': str(row['Grupo']) if pd.notna(row['Grupo']) else ''
+                    }
+                    cartao_detalhe_data.append(detalhe_data)
+        
         # Preparar dados para gráficos
         chart_data = {
             'months': months,
@@ -266,7 +317,9 @@ def process_excel_data(file_path):
             'table_data': table_data,
             'chart_data': chart_data,
             'acoes_data': acoes_data,
-            'proventos_data': proventos_data
+            'proventos_data': proventos_data,
+            'cartao_data': cartao_data,
+            'cartao_detalhe_data': cartao_detalhe_data
         }
         
     except Exception as e:
