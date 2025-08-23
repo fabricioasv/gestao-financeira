@@ -63,6 +63,7 @@ function isFutureMonth(monthStr) {
  * @param {Object} data - Dados recebidos do backend
  */
 function displayData(data) {
+    console.log('🚀 displayData chamada com:', data);  // Debug log
     
     currentData = data;
     
@@ -75,12 +76,36 @@ function displayData(data) {
     document.getElementById('dataSection').style.display = 'block';
     
     // Create charts
-    createConsolidatedChart(data.chart_data);
-    createCartaoChart(data.chart_data);
-    createInvestimentoChart(data.chart_data);
+    console.log('🎨 Criando gráficos...');  // Debug log
+    try {
+        createConsolidatedChart(data.chart_data);
+        console.log('✅ Gráfico consolidado criado');  // Debug log
+    } catch (error) {
+        console.error('❌ Erro ao criar gráfico consolidado:', error);  // Debug log
+    }
+    
+    try {
+        createCartaoChart(data.chart_data);
+        console.log('✅ Gráfico de cartão criado');  // Debug log
+    } catch (error) {
+        console.error('❌ Erro ao criar gráfico de cartão:', error);  // Debug log
+    }
+    
+    try {
+        createInvestimentoChart(data.chart_data);
+        console.log('✅ Gráfico de investimento criado');  // Debug log
+    } catch (error) {
+        console.error('❌ Erro ao criar gráfico de investimento:', error);  // Debug log
+    }
     
     // Create table
-    createFinancialTable(data.table_data, data.chart_data.months);
+    console.log('📊 Criando tabelas...');  // Debug log
+    try {
+        createFinancialTable(data.table_data, data.chart_data.months);
+        console.log('✅ Tabela financeira criada');  // Debug log
+    } catch (error) {
+        console.error('❌ Erro ao criar tabela financeira:', error);  // Debug log
+    }
     
     // Create ações table
     if (data.acoes_data) {
@@ -157,7 +182,15 @@ function handleFile(file) {
     .then(data => {
         showLoading(false);
         if (data.success) {
-            displayData(data);
+            // Mostrar mensagem de sucesso
+            if (data.message) {
+                alert(data.message);
+            }
+            // Fazer refresh da página para carregar os novos dados
+            console.log('🔄 Fazendo refresh da página após upload...');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500); // Aguardar 1.5 segundos para mostrar a mensagem
         } else {
             alert('Erro ao processar arquivo: ' + data.error);
         }

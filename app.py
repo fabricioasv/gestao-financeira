@@ -354,8 +354,9 @@ def upload_file():
         result = process_excel_data(file_path)
         
         if result['success']:
-            # Salvar dados na sessão (em produção, usar banco de dados)
-            return jsonify(result)
+            print("✅ Dados processados com sucesso - retornando sucesso para refresh")
+            # Retornar sucesso para o frontend fazer refresh
+            return jsonify({'success': True, 'message': '✅ Arquivo processado com sucesso! A página será recarregada automaticamente...'})
         else:
             return jsonify({'success': False, 'error': result['error']})
     
@@ -364,11 +365,25 @@ def upload_file():
 
 @app.route('/load_default')
 def load_default():
-    """Carrega os dados padrão do arquivo dados.xlsx"""
+    """Carrega os dados da pasta uploads - sempre prioriza arquivos Excel mais recentes"""
     try:
-        result = process_excel_data('dados.xlsx')
+        # Verificar se há arquivos na pasta uploads
+        upload_files = [f for f in os.listdir(UPLOAD_FOLDER) if f.endswith(('.xlsx', '.xls'))]
+        
+        if upload_files:
+            # Usar o arquivo mais recente da pasta uploads
+            latest_file = max(upload_files, key=lambda f: os.path.getmtime(os.path.join(UPLOAD_FOLDER, f)))
+            file_path = os.path.join(UPLOAD_FOLDER, latest_file)
+            print(f"📁 Carregando arquivo mais recente: {file_path}")
+            result = process_excel_data(file_path)
+        else:
+            # Se não houver arquivos em uploads, retornar erro
+            print("❌ Nenhum arquivo Excel encontrado na pasta uploads")
+            return jsonify({'success': False, 'error': 'Nenhum arquivo Excel encontrado na pasta uploads. Faça upload de uma planilha primeiro.'})
+        
         return jsonify(result)
     except Exception as e:
+        print(f"❌ Erro ao carregar dados: {str(e)}")
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
