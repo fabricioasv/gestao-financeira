@@ -355,8 +355,10 @@ def upload_file():
         
         if result['success']:
             print("✅ Dados processados com sucesso - retornando sucesso para refresh")
+            response_data = {'success': True, 'message': '✅ Arquivo processado com sucesso! A página será recarregada automaticamente...'}
+            print(f"📤 Retornando resposta: {response_data}")
             # Retornar sucesso para o frontend fazer refresh
-            return jsonify({'success': True, 'message': '✅ Arquivo processado com sucesso! A página será recarregada automaticamente...'})
+            return jsonify(response_data)
         else:
             return jsonify({'success': False, 'error': result['error']})
     

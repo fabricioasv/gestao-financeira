@@ -181,17 +181,62 @@ function handleFile(file) {
     .then(response => response.json())
     .then(data => {
         showLoading(false);
+        console.log('📥 Resposta recebida do upload:', data);  // Debug log
         if (data.success) {
-            // Mostrar mensagem de sucesso
-            if (data.message) {
-                alert(data.message);
-            }
+            console.log('✅ Upload bem-sucedido, preparando refresh...');  // Debug log
             // Fazer refresh da página para carregar os novos dados
             console.log('🔄 Fazendo refresh da página após upload...');
+            // Mostrar mensagem de sucesso (comentado temporariamente para debug)
+            if (data.message) {
+                console.log('📢 Mensagem de sucesso:', data.message);  // Debug log
+                // alert(data.message); // Comentado para debug
+            }
+            // Aguardar um pouco mais para garantir que o alert foi fechado
             setTimeout(() => {
-                window.location.reload();
-            }, 1500); // Aguardar 1.5 segundos para mostrar a mensagem
+                console.log('🔄 Executando refresh via href...');  // Debug log
+                
+                // Método 1: Usar href para forçar o refresh - mais confiável
+                try {
+                    console.log('🔄 Método 1: Redirecionando via href...');  // Debug log
+                    const currentUrl = window.location.href;
+                    console.log('🔄 URL atual:', currentUrl);  // Debug log
+                    window.location.href = currentUrl;
+                    return; // Se funcionar, sair da função
+                } catch (error) {
+                    console.error('❌ Método 1 falhou:', error);
+                }
+                
+                // Método 2: Fallback com window.location.reload()
+                try {
+                    console.log('🔄 Método 2: Tentando window.location.reload()...');  // Debug log
+                    window.location.reload();
+                    return; // Se funcionar, sair da função
+                } catch (error) {
+                    console.error('❌ Método 2 falhou:', error);
+                }
+                
+                // Método 3: Fallback com document.location.reload()
+                try {
+                    console.log('🔄 Método 3: Tentando document.location.reload()...');  // Debug log
+                    document.location.reload();
+                    return; // Se funcionar, sair da função
+                } catch (error) {
+                    console.error('❌ Método 3 falhou:', error);
+                }
+                
+                // Método 4: Fallback com location.assign()
+                try {
+                    console.log('🔄 Método 4: Tentando location.assign()...');  // Debug log
+                    location.assign(location.href);
+                    return; // Se funcionar, sair da função
+                } catch (error) {
+                    console.error('❌ Método 4 falhou:', error);
+                }
+                
+                console.error('❌ Todos os métodos de refresh falharam!');
+            }, 2000); // Aguardar 2 segundos para garantir que o alert foi fechado
         } else {
+            console.log('❌ Upload falhou:', data.error);  // Debug log
             alert('Erro ao processar arquivo: ' + data.error);
         }
     })
