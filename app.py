@@ -95,6 +95,7 @@ def process_excel_data(file_path):
                         'capital_atual': process_numeric_value('Capital Atual'),
                         'dividend_yield_esperado': process_numeric_value('Dividend Yield Esperado') * 100,
                         'dividend_yield_pago': process_numeric_value('Dividend Yield Pago'),
+                        'dividend_yield_restante': process_numeric_value('Dividend Yield Restante') * 100,  # Lê da planilha (0 se não existir)
                         'proporcao_hoje': process_numeric_value('Proporção Hoje'),
                         'meta_28k': process_numeric_value('Meta 28k'),
                         'meta_1_ano': process_numeric_value('Meta +1.a.'),
