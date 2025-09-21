@@ -57,7 +57,7 @@ export function createAcoesTableDashboard(acoesData) {
                 <td class="text-end">R$ ${(acao.capital_atual || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                 <td class="text-end">${(acao.dividend_yield_esperado || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}%</td>
                 <td class="text-end">R$ ${(acao.dividend_yield_pago || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td class="text-end">${(acao.dividend_yield_restante || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}%</td>
+                <td class="text-end ${(acao.dividend_yield_restante || 0) < 0 ? 'text-success' : ''}">${(acao.dividend_yield_restante || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}%</td>
                 <td class="text-end">${((acao.proporcao_hoje || 0) * 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}%</td>
                 <td class="text-end">${(acao.meta_28k || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                 <td class="text-end">${(acao.meta_1_ano || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
