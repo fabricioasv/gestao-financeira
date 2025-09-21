@@ -79,9 +79,31 @@ export function createInvestimentoChart(chartData) {
                                 label += 'R$ ' + context.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2});
                             }
                             return label;
+                        },
+                        footer: function(tooltipItems) {
+                            // Calcular total do mês
+                            let total = 0;
+                            tooltipItems.forEach(function(tooltipItem) {
+                                if (tooltipItem.parsed.y !== null) {
+                                    total += tooltipItem.parsed.y;
+                                }
+                            });
+                            return 'Total: R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
                         }
                     }
                 }
+            },
+            onHover: function(event, elements) {
+                // Mudar cursor quando passar sobre o eixo X
+                if (elements.length > 0) {
+                    event.native.target.style.cursor = 'pointer';
+                } else {
+                    event.native.target.style.cursor = 'default';
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
             },
             scales: {
                 x: {
