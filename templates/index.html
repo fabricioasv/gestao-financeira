@@ -90,6 +90,11 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="acoes-tab" data-bs-toggle="tab" data-bs-target="#acoes" type="button" role="tab">
+                            <i class="fas fa-chart-line me-2"></i>Ações
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="table-tab" data-bs-toggle="tab" data-bs-target="#table" type="button" role="tab">
                             <i class="fas fa-table me-2"></i>Tabela de Dados
                         </button>
@@ -137,54 +142,6 @@
                             </div>
                         </div>
 
-                    <!-- Tabela de Ações -->
-                    <div class="row mb-4">
-                        <!-- Carteira de Ações -->
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header bg-success text-white">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-chart-pie me-2"></i>
-                                        Carteira de Ações
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                                        <table class="table table-sm table-striped table-hover table-bordered" id="acoesTableDashboard">
-                                            <thead class="table-dark">
-                                                <tr>
-                                                    <th scope="col" style="min-width: 40px;">Ticker</th>
-                                                    <th scope="col" style="min-width: 80px;">Qtd</th>
-                                                    <th scope="col" style="min-width: 140px;">Div. Esperado 2025</th>
-                                                    <th scope="col" style="min-width: 140px;">Renda Esperada</th>
-                                                    <th scope="col" style="min-width: 140px;">Capital Atual</th>
-                                                    <th scope="col" style="min-width: 140px;">Dividend Yield Esperado</th>
-                                                    <th scope="col" style="min-width: 140px;">Dividend Yield Pago</th>
-                                                    <th scope="col" style="min-width: 140px;">Dividend Yield Restante</th>
-                                                    <th scope="col" style="min-width: 140px;">Proporção Hoje</th>
-                                                    <th scope="col" style="min-width: 140px;">Meta 28k</th>
-                                                    <th scope="col" style="min-width: 140px;">Meta +1.a.</th>
-                                                    <th scope="col" style="min-width: 140px;">Meta qtd. 2033</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="acoesTableDashboardBody">
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="mt-3">
-                                        <div class="row text-center">
-                                            <div class="col-md-12">
-                                                <div class="bg-light p-3 rounded">
-                                                    <h6 class="text-muted mb-1">Renda Total</h6>
-                                                    <h5 class="text-success mb-0" id="rendaTotalDashboard">R$ 0,00</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Proventos Tab -->
@@ -378,6 +335,115 @@
                     </div>
                 </div>
 
+                <!-- Ações Tab -->
+                <div class="tab-pane fade" id="acoes" role="tabpanel">
+                    <div class="row mb-4">
+                        <!-- Quadro Resumo da Carteira -->
+                        <div class="col-12 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-pie me-2"></i>
+                                        Quadro Resumo da Carteira
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center mb-3">
+                                        <div class="col-md-3">
+                                            <div class="bg-light p-3 rounded">
+                                                <h6 class="text-muted mb-1">Total Investido</h6>
+                                                <h5 class="text-primary mb-0" id="totalInvestido">R$ 0,00</h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="bg-light p-3 rounded">
+                                                <h6 class="text-muted mb-1">Proventos Projetados (Ano)</h6>
+                                                <h5 class="text-success mb-0" id="proventosProjetados">R$ 0,00</h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="bg-light p-3 rounded">
+                                                <h6 class="text-muted mb-1">Proventos Recebidos (Ano)</h6>
+                                                <h5 class="text-info mb-0" id="proventosRecebidos">R$ 0,00</h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="bg-light p-3 rounded">
+                                                <h6 class="text-muted mb-1">Pendente</h6>
+                                                <h5 class="text-warning mb-0" id="proventosPendentes">R$ 0,00</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Ações da Carteira -->
+                        <div class="col-12 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-table me-2"></i>
+                                        Carteira de Ações
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped table-hover table-bordered" id="acoesCarteiraTable">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th scope="col" style="min-width: 80px;">Ticker</th>
+                                                    <th scope="col" style="min-width: 80px;">Quantidade</th>
+                                                    <th scope="col" style="min-width: 100px;">Preço Médio</th>
+                                                    <th scope="col" style="min-width: 120px;">Valor Investido</th>
+                                                    <th scope="col" style="min-width: 120px;">Div. Proj. (Ano)</th>
+                                                    <th scope="col" style="min-width: 120px;">Div. Recebido (Ano)</th>
+                                                    <th scope="col" style="min-width: 120px;">Pendente</th>
+                                                    <th scope="col" style="min-width: 100px;">% Div. Proj.</th>
+                                                    <th scope="col" style="min-width: 100px;">Nota</th>
+                                                    <th scope="col" style="min-width: 120px;">Última Atual.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="acoesCarteiraTableBody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Proventos Recebidos -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-money-bill-wave me-2"></i>
+                                        Proventos Recebidos por Ticker
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped table-hover table-bordered" id="proventosRecebidosTable">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th scope="col" style="min-width: 80px;">Ticker</th>
+                                                    <th scope="col" style="min-width: 100px;">Data Pagamento</th>
+                                                    <th scope="col" style="min-width: 60px;">Mês</th>
+                                                    <th scope="col" style="min-width: 80px;">Ano</th>
+                                                    <th scope="col" style="min-width: 100px;">Valor</th>
+                                                    <th scope="col" style="min-width: 100px;">Valor Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="proventosRecebidosTableBody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Table Tab -->
                 <div class="tab-pane fade" id="table" role="tabpanel">
                     <div class="col-12">
@@ -421,7 +487,7 @@
         // Importar módulos
         import { initUpload } from '/static/js/upload.js';
         import { displayData, showLoading, loadDefaultData, currentData } from '/static/js/app.js';
-        import { createProventosTable } from '/static/js/tables/index.js';
+        import { createProventosTable, createAcoesCarteiraTable } from '/static/js/tables/index.js';
         import { filtrarCartaoDetalhe } from '/static/js/filters/cartao.js';
         import { createProventosChart } from '/static/js/charts/index.js';
         

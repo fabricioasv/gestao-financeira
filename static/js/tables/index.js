@@ -10,3 +10,4 @@ export { createFinancialTable } from './financial.js';
 export { createAcoesTableDashboard } from './acoes.js';
 export { createProventosTable } from './proventos.js';
 export { createCartaoDetalheTable, displayFilteredCartaoDetalhe } from './cartao.js';
+export { createAcoesCarteiraTable } from './acoesCarteira.js';

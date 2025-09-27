@@ -20,7 +20,8 @@ import {
     createFinancialTable,
     createAcoesTableDashboard,
     createProventosTable,
-    createCartaoDetalheTable
+    createCartaoDetalheTable,
+    createAcoesCarteiraTable
 } from './tables/index.js';
 
 import { populateCartaoFilters } from './filters/cartao.js';
@@ -139,6 +140,19 @@ function displayData(data) {
          window.originalCartaoData = data.cartao_data;
      } else {
  
+     }
+     
+     // Create ações carteira table
+     if (data.acoes_carteira_data && data.proventos_recebidos_data) {
+         console.log('📊 Criando tabela de ações da carteira...');
+         try {
+             createAcoesCarteiraTable(data.acoes_carteira_data, data.proventos_recebidos_data);
+             console.log('✅ Tabela de ações da carteira criada');
+         } catch (error) {
+             console.error('❌ Erro ao criar tabela de ações da carteira:', error);
+         }
+     } else {
+         console.log('⚠️ Dados de ações da carteira ou proventos recebidos não disponíveis');
      }
 }
 

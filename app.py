@@ -48,6 +48,12 @@ def process_excel_data(file_path):
         # Ler aba "Cartão-Detalhe"
         df_cartao_detalhe = pd.read_excel(file_path, sheet_name='Cartão-Detalhe')
         
+        # Ler aba "Ações-Carteira"
+        df_acoes_carteira = pd.read_excel(file_path, sheet_name='Ações-Carteira')
+        
+        # Ler aba "Proventos-Recebidos"
+        df_proventos_recebidos = pd.read_excel(file_path, sheet_name='Proventos-Recebidos')
+        
         # Extrair meses das colunas da aba Consolidado
         months = [col for col in df_consolidado.columns if col.startswith('25-')]
         months.sort()
@@ -207,6 +213,79 @@ def process_excel_data(file_path):
                     }
                     cartao_detalhe_data.append(detalhe_data)
         
+        # Preparar dados da aba Ações-Carteira
+        acoes_carteira_data = []
+        if df_acoes_carteira is not None and len(df_acoes_carteira) > 0:
+            for _, row in df_acoes_carteira.iterrows():
+                if pd.notna(row.get('Ticker', '')):
+                    def process_numeric_value_carteira(col_name, default=0):
+                        """Função auxiliar para processar valores numéricos da carteira"""
+                        value = default
+                        if pd.notna(row.get(col_name, default)):
+                            try:
+                                if isinstance(row[col_name], str):
+                                    clean_val = row[col_name].replace('R$', '').replace(',', '.').strip()
+                                    value = float(clean_val)
+                                else:
+                                    value = float(row[col_name])
+                            except:
+                                value = default
+                        return value
+                    
+                    carteira_data = {
+                        'ticker': str(row.get('Ticker', '')),
+                        'amount': process_numeric_value_carteira('Amount'),
+                        'average_price': process_numeric_value_carteira('Average Price'),
+                        'nota': process_numeric_value_carteira('Nota\n0-7'),
+                        'r_alvo': process_numeric_value_carteira('R$ Alvo'),
+                        'r_base_pt': process_numeric_value_carteira('R$ Base\np/ PT'),
+                        'ultima_atualizacao': str(row.get('Última Atual.', '')) if pd.notna(row.get('Última Atual.', '')) else '',
+                        'desvio_pl_proj': process_numeric_value_carteira('Desvio PL Proj.'),
+                        'cagr_lcr_5a': process_numeric_value_carteira('CAGR LCR (5A)'),
+                        'div_l_ebitda': process_numeric_value_carteira('Div. L/\nEBITDA'),
+                        'div_proj': process_numeric_value_carteira('Div. Proj.'),
+                        'pct_div_proj': process_numeric_value_carteira('% Div. Proj.') * 100
+                    }
+                    acoes_carteira_data.append(carteira_data)
+        
+        # Preparar dados da aba Proventos-Recebidos
+        proventos_recebidos_data = []
+        if df_proventos_recebidos is not None and len(df_proventos_recebidos) > 0:
+            for _, row in df_proventos_recebidos.iterrows():
+                if pd.notna(row.get('Ticker', '')):
+                    def process_numeric_value_recebidos(col_name, default=0):
+                        """Função auxiliar para processar valores numéricos dos proventos recebidos"""
+                        value = default
+                        if pd.notna(row.get(col_name, default)):
+                            try:
+                                if isinstance(row[col_name], str):
+                                    clean_val = row[col_name].replace('R$', '').replace(',', '.').strip()
+                                    value = float(clean_val)
+                                else:
+                                    value = float(row[col_name])
+                            except:
+                                value = default
+                        return value
+                    
+                    # Processar data de pagamento
+                    pagamento_str = ''
+                    if pd.notna(row.get('Pagamento', '')):
+                        pagamento = row['Pagamento']
+                        if isinstance(pagamento, (pd.Timestamp, datetime)):
+                            pagamento_str = pagamento.strftime('%d/%m/%Y')
+                        else:
+                            pagamento_str = str(pagamento)
+                    
+                    recebido_data = {
+                        'ticker': str(row.get('Ticker', '')),
+                        'pagamento': pagamento_str,
+                        'mes': int(row.get('Mês', 0)) if pd.notna(row.get('Mês', 0)) else 0,
+                        'referencia': int(row.get('Referencia', 0)) if pd.notna(row.get('Referencia', 0)) else 0,
+                        'valor': process_numeric_value_recebidos('Valor'),
+                        'valor_total': process_numeric_value_recebidos('Valor Total')
+                    }
+                    proventos_recebidos_data.append(recebido_data)
+        
         # Preparar dados para gráficos
         chart_data = {
             'months': months,
@@ -320,7 +399,9 @@ def process_excel_data(file_path):
             'acoes_data': acoes_data,
             'proventos_data': proventos_data,
             'cartao_data': cartao_data,
-            'cartao_detalhe_data': cartao_detalhe_data
+            'cartao_detalhe_data': cartao_detalhe_data,
+            'acoes_carteira_data': acoes_carteira_data,
+            'proventos_recebidos_data': proventos_recebidos_data
         }
         
     except Exception as e:
