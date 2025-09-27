@@ -13,7 +13,9 @@ import {
     createCartaoChart, 
     createInvestimentoChart, 
     createProventosChart, 
-    createCartaoCategoriaChart
+    createCartaoCategoriaChart,
+    createRendaProjetivaChart,
+    createRendaProjetivaTable
 } from './charts/index.js';
 
 import {
@@ -153,6 +155,20 @@ function displayData(data) {
          }
      } else {
          console.log('⚠️ Dados de ações da carteira ou proventos recebidos não disponíveis');
+     }
+     
+     // Create renda projetiva chart and table
+     if (data.renda_projetiva_data) {
+         console.log('📊 Criando gráfico e tabela de renda projetiva...');
+         try {
+             createRendaProjetivaChart(data.renda_projetiva_data);
+             createRendaProjetivaTable(data.renda_projetiva_data);
+             console.log('✅ Gráfico e tabela de renda projetiva criados');
+         } catch (error) {
+             console.error('❌ Erro ao criar gráfico e tabela de renda projetiva:', error);
+         }
+     } else {
+         console.log('⚠️ Dados de renda projetiva não disponíveis');
      }
 }
 

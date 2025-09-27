@@ -11,3 +11,4 @@ export { createCartaoChart } from './cartao.js';
 export { createInvestimentoChart } from './investimento.js';
 export { createProventosChart } from './proventos.js';
 export { createCartaoCategoriaChart } from './cartaoCategoria.js';
+export { createRendaProjetivaChart, createRendaProjetivaTable } from './rendaProjetiva.js';

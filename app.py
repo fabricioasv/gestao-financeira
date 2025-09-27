@@ -54,6 +54,9 @@ def process_excel_data(file_path):
         # Ler aba "Proventos-Recebidos"
         df_proventos_recebidos = pd.read_excel(file_path, sheet_name='Proventos-Recebidos')
         
+        # Ler aba "Renda-Projetiva"
+        df_renda_projetiva = pd.read_excel(file_path, sheet_name='Renda-Projetiva')
+        
         # Extrair meses das colunas da aba Consolidado
         months = [col for col in df_consolidado.columns if col.startswith('25-')]
         months.sort()
@@ -286,6 +289,39 @@ def process_excel_data(file_path):
                     }
                     proventos_recebidos_data.append(recebido_data)
         
+        # Preparar dados da aba Renda-Projetiva
+        renda_projetiva_data = []
+        if df_renda_projetiva is not None and len(df_renda_projetiva) > 0:
+            for _, row in df_renda_projetiva.iterrows():
+                if pd.notna(row.get('Ticker', '')) and pd.notna(row.get('Ano', '')):
+                    def process_numeric_value_renda(col_name, default=0):
+                        """Função auxiliar para processar valores numéricos da renda projetiva"""
+                        value = default
+                        if pd.notna(row.get(col_name, default)):
+                            try:
+                                if isinstance(row[col_name], str):
+                                    clean_val = row[col_name].replace('R$', '').replace(',', '.').strip()
+                                    value = float(clean_val)
+                                else:
+                                    value = float(row[col_name])
+                            except:
+                                value = default
+                        return value
+                    
+                    renda_data = {
+                        'ticker': str(row.get('Ticker', '')),
+                        'qtd_acoes': process_numeric_value_renda('Qtd. de ações'),
+                        'dividendo_por_acao': process_numeric_value_renda('Dividendo por ação'),
+                        'renda_anual_esperada': process_numeric_value_renda('Renda anual esperada'),
+                        'capital_alocado': process_numeric_value_renda('Capital alocado'),
+                        'dividend_yield': process_numeric_value_renda('Dividend Yield'),
+                        'ano': int(row.get('Ano', 0)) if pd.notna(row.get('Ano', 0)) else 0,
+                        'renda_anual': process_numeric_value_renda('Renda Anual'),
+                        'renda_mensal': process_numeric_value_renda('Renda Mensal'),
+                        'taxa_crescimento': process_numeric_value_renda('Taxa de crescimento (vs ano anterior)') * 100
+                    }
+                    renda_projetiva_data.append(renda_data)
+        
         # Preparar dados para gráficos
         chart_data = {
             'months': months,
@@ -401,7 +437,8 @@ def process_excel_data(file_path):
             'cartao_data': cartao_data,
             'cartao_detalhe_data': cartao_detalhe_data,
             'acoes_carteira_data': acoes_carteira_data,
-            'proventos_recebidos_data': proventos_recebidos_data
+            'proventos_recebidos_data': proventos_recebidos_data,
+            'renda_projetiva_data': renda_projetiva_data
         }
         
     except Exception as e:
