@@ -57,6 +57,9 @@ def process_excel_data(file_path):
         # Ler aba "Renda-Projetiva"
         df_renda_projetiva = pd.read_excel(file_path, sheet_name='Renda-Projetiva')
         
+        # Ler aba "Proventos-A-Receber"
+        df_proventos_a_receber = pd.read_excel(file_path, sheet_name='Proventos-A-Receber')
+        
         # Extrair meses das colunas da aba Consolidado
         months = [col for col in df_consolidado.columns if col.startswith('25-')]
         months.sort()
@@ -322,6 +325,59 @@ def process_excel_data(file_path):
                     }
                     renda_projetiva_data.append(renda_data)
         
+        # Preparar dados da aba Proventos-A-Receber
+        proventos_a_receber_data = []
+        if df_proventos_a_receber is not None and len(df_proventos_a_receber) > 0:
+            for _, row in df_proventos_a_receber.iterrows():
+                if pd.notna(row.get('Ticker', '')):
+                    def process_numeric_value_a_receber(col_name, default=0):
+                        """Função auxiliar para processar valores numéricos dos proventos a receber"""
+                        value = default
+                        if pd.notna(row.get(col_name, default)):
+                            try:
+                                if isinstance(row[col_name], str):
+                                    clean_val = row[col_name].replace('R$', '').replace(',', '.').strip()
+                                    value = float(clean_val)
+                                else:
+                                    value = float(row[col_name])
+                            except:
+                                value = default
+                        return value
+                    
+                    # Processar data de pagamento
+                    pagamento_str = ''
+                    if pd.notna(row.get('Pagamento', '')):
+                        pagamento = row['Pagamento']
+                        if isinstance(pagamento, (pd.Timestamp, datetime)):
+                            pagamento_str = pagamento.strftime('%d/%m/%Y')
+                        else:
+                            pagamento_str = str(pagamento)
+                    
+                    # Processar valores inteiros com validação
+                    def process_int_value(col_name, default=0):
+                        """Função auxiliar para processar valores inteiros"""
+                        value = default
+                        if pd.notna(row.get(col_name, default)):
+                            try:
+                                val = row[col_name]
+                                if isinstance(val, str) and val.strip() in ['-', '', 'N/A']:
+                                    value = default
+                                else:
+                                    value = int(float(val))
+                            except:
+                                value = default
+                        return value
+                    
+                    a_receber_data = {
+                        'ticker': str(row.get('Ticker', '')),
+                        'pagamento': pagamento_str,
+                        'mes': process_int_value('Mês'),
+                        'referencia': process_int_value('Referencia'),
+                        'valor': process_numeric_value_a_receber('Valor'),
+                        'valor_total': process_numeric_value_a_receber('Valor Total')
+                    }
+                    proventos_a_receber_data.append(a_receber_data)
+        
         # Preparar dados para gráficos
         chart_data = {
             'months': months,
@@ -438,7 +494,8 @@ def process_excel_data(file_path):
             'cartao_detalhe_data': cartao_detalhe_data,
             'acoes_carteira_data': acoes_carteira_data,
             'proventos_recebidos_data': proventos_recebidos_data,
-            'renda_projetiva_data': renda_projetiva_data
+            'renda_projetiva_data': renda_projetiva_data,
+            'proventos_a_receber_data': proventos_a_receber_data
         }
         
     except Exception as e:

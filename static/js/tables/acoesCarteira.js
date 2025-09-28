@@ -15,11 +15,13 @@ import { validateElement, logDebug, logError } from '../utils/index.js';
  * Cria a tabela de ações da carteira
  * @param {Array} acoesCarteiraData - Dados das ações da carteira
  * @param {Array} proventosRecebidosData - Dados dos proventos recebidos
+ * @param {Array} proventosAReceberData - Dados dos proventos a receber
  */
-export function createAcoesCarteiraTable(acoesCarteiraData, proventosRecebidosData) {
+export function createAcoesCarteiraTable(acoesCarteiraData, proventosRecebidosData, proventosAReceberData) {
     console.log('🚀 createAcoesCarteiraTable INICIADA');
     logDebug('🔍 Dados da carteira:', acoesCarteiraData);
     logDebug('🔍 Dados dos proventos recebidos:', proventosRecebidosData);
+    logDebug('🔍 Dados dos proventos a receber:', proventosAReceberData);
     
     const acoesCarteiraTableBody = validateElement('acoesCarteiraTableBody', 'createAcoesCarteiraTable');
     const proventosRecebidosTableBody = validateElement('proventosRecebidosTableBody', 'createAcoesCarteiraTable');
@@ -33,10 +35,19 @@ export function createAcoesCarteiraTable(acoesCarteiraData, proventosRecebidosDa
     updateQuadroResumo(acoesCarteiraData, proventosRecebidosData);
 
     // Processar dados da carteira
-    if (!acoesCarteiraData || acoesCarteiraData.length === 0) {
+    // Calcular proventos recebidos por ticker no ano atual
+    const proventosRecebidosPorTicker = calcularProventosRecebidosPorTicker(proventosRecebidosData);
+    
+    // Calcular proventos a receber por ticker
+    const proventosAReceberPorTicker = calcularProventosAReceberPorTicker(proventosAReceberData);
+    
+    // Criar lista combinada de ações (carteira + ações com proventos a receber)
+    const acoesCompletas = criarListaAcoesCombinada(acoesCarteiraData, proventosAReceberPorTicker);
+    
+    if (!acoesCompletas || acoesCompletas.length === 0) {
         acoesCarteiraTableBody.innerHTML = `
             <tr>
-                <td colspan="10" class="text-center text-muted">
+                <td colspan="8" class="text-center text-muted">
                     <i class="fas fa-info-circle me-2"></i>
                     Nenhuma ação encontrada na carteira.
                 </td>
@@ -45,27 +56,30 @@ export function createAcoesCarteiraTable(acoesCarteiraData, proventosRecebidosDa
         return;
     }
 
-    // Calcular proventos recebidos por ticker no ano atual
-    const proventosRecebidosPorTicker = calcularProventosRecebidosPorTicker(proventosRecebidosData);
-    
-    // Criar tabela da carteira
-    acoesCarteiraTableBody.innerHTML = acoesCarteiraData.map(acao => {
-        const valorInvestido = acao.amount * acao.average_price;
+    // Criar tabela da carteira com nova estrutura
+    acoesCarteiraTableBody.innerHTML = acoesCompletas.map(acao => {
+        const valorInvestido = (acao.amount || 0) * (acao.average_price || 0);
         const proventosRecebidosAno = proventosRecebidosPorTicker[acao.ticker] || 0;
-        const proventosPendentes = Math.max(0, acao.div_proj - proventosRecebidosAno);
+        const proventosAReceber = proventosAReceberPorTicker[acao.ticker] || 0;
+        
+        // Formatação condicional para ações que não estão na carteira
+        const isAcaoNaCarteira = acao.amount > 0;
+        const quantidade = isAcaoNaCarteira ? acao.amount.toLocaleString('pt-BR') : '-';
+        const precoMedio = isAcaoNaCarteira ? `R$ ${acao.average_price.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '-';
+        const valorInvestidoFormatted = isAcaoNaCarteira ? `R$ ${valorInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : '-';
+        const pctDivProj = isAcaoNaCarteira ? `${(acao.pct_div_proj || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}%` : '-';
+        const divProj = isAcaoNaCarteira ? `R$ ${(acao.div_proj || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : '-';
         
         return `
             <tr>
                 <td><strong>${acao.ticker}</strong></td>
-                <td class="text-end">${acao.amount.toLocaleString('pt-BR')}</td>
-                <td class="text-end">R$ ${acao.average_price.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td class="text-end">R$ ${valorInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                <td class="text-end">R$ ${(acao.div_proj || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td class="text-end">${quantidade}</td>
+                <td class="text-end">${precoMedio}</td>
+                <td class="text-end">${valorInvestidoFormatted}</td>
                 <td class="text-end text-info">R$ ${proventosRecebidosAno.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                <td class="text-end ${proventosPendentes > 0 ? 'text-warning' : 'text-success'}">R$ ${proventosPendentes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                <td class="text-end">${(acao.pct_div_proj || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}%</td>
-                <td class="text-end">${(acao.nota || 0).toLocaleString('pt-BR', {minimumFractionDigits: 1})}</td>
-                <td class="text-center">${acao.ultima_atualizacao || '-'}</td>
+                <td class="text-end ${proventosAReceber > 0 ? 'text-warning' : 'text-success'}">R$ ${proventosAReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td class="text-end">${pctDivProj}</td>
+                <td class="text-end">${divProj}</td>
             </tr>
         `;
     }).join('');
@@ -153,6 +167,76 @@ function calcularProventosRecebidosPorTicker(proventosRecebidosData) {
     
     logDebug('🔍 Proventos recebidos por ticker no ano atual:', proventosPorTicker);
     return proventosPorTicker;
+}
+
+/**
+ * Calcula os proventos a receber por ticker
+ * @param {Array} proventosAReceberData - Dados dos proventos a receber
+ * @returns {Object} Objeto com proventos a receber por ticker
+ */
+function calcularProventosAReceberPorTicker(proventosAReceberData) {
+    console.log('🚀 calcularProventosAReceberPorTicker INICIADA');
+    
+    const proventosAReceberPorTicker = {};
+    
+    if (!proventosAReceberData || proventosAReceberData.length === 0) {
+        logDebug('⚠️ Nenhum dado de proventos a receber disponível');
+        return proventosAReceberPorTicker;
+    }
+    
+    proventosAReceberData.forEach(provento => {
+        if (!proventosAReceberPorTicker[provento.ticker]) {
+            proventosAReceberPorTicker[provento.ticker] = 0;
+        }
+        proventosAReceberPorTicker[provento.ticker] += provento.valor_total;
+    });
+    
+    logDebug('🔍 Proventos a receber por ticker:', proventosAReceberPorTicker);
+    return proventosAReceberPorTicker;
+}
+
+/**
+ * Cria lista combinada de ações (carteira + ações com proventos a receber)
+ * @param {Array} acoesCarteiraData - Dados das ações da carteira
+ * @param {Object} proventosAReceberPorTicker - Proventos a receber por ticker
+ * @returns {Array} Lista combinada de ações
+ */
+function criarListaAcoesCombinada(acoesCarteiraData, proventosAReceberPorTicker) {
+    console.log('🚀 criarListaAcoesCombinada INICIADA');
+    
+    const acoesCompletas = [];
+    const tickersNaCarteira = new Set();
+    
+    // Adicionar ações da carteira
+    if (acoesCarteiraData && acoesCarteiraData.length > 0) {
+        acoesCarteiraData.forEach(acao => {
+            acoesCompletas.push(acao);
+            tickersNaCarteira.add(acao.ticker);
+        });
+    }
+    
+    // Adicionar ações que têm proventos a receber mas não estão na carteira
+    Object.keys(proventosAReceberPorTicker).forEach(ticker => {
+        if (!tickersNaCarteira.has(ticker)) {
+            acoesCompletas.push({
+                ticker: ticker,
+                amount: 0,
+                average_price: 0,
+                nota: 0,
+                r_alvo: 0,
+                r_base_pt: 0,
+                ultima_atualizacao: '-',
+                desvio_pl_proj: 0,
+                cagr_lcr_5a: 0,
+                div_l_ebitda: 0,
+                div_proj: 0,
+                pct_div_proj: 0
+            });
+        }
+    });
+    
+    logDebug('🔍 Lista combinada de ações:', acoesCompletas);
+    return acoesCompletas;
 }
 
 /**

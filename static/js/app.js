@@ -148,7 +148,7 @@ function displayData(data) {
      if (data.acoes_carteira_data && data.proventos_recebidos_data) {
          console.log('📊 Criando tabela de ações da carteira...');
          try {
-             createAcoesCarteiraTable(data.acoes_carteira_data, data.proventos_recebidos_data);
+             createAcoesCarteiraTable(data.acoes_carteira_data, data.proventos_recebidos_data, data.proventos_a_receber_data);
              console.log('✅ Tabela de ações da carteira criada');
          } catch (error) {
              console.error('❌ Erro ao criar tabela de ações da carteira:', error);
