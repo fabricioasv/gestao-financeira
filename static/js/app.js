@@ -118,14 +118,8 @@ function displayData(data) {
 
     }
     
-         // Create proventos chart and table
-     if (data.proventos_data) {
-         
-         createProventosChart(data.proventos_data);
-         createProventosTable(data.proventos_data);
-     } else {
- 
-     }
+         // Proventos agora são processados na aba Ações
+         // (removido daqui pois foi movido para a aba Ações)
     
          // Create cartão detalhado chart and table
      if (data.cartao_data && data.cartao_detalhe_data) {
@@ -144,7 +138,7 @@ function displayData(data) {
  
      }
      
-     // Create ações carteira table
+     // Create ações carteira table and proventos section
      if (data.acoes_carteira_data && data.proventos_recebidos_data) {
          console.log('📊 Criando tabela de ações da carteira...');
          try {
@@ -152,6 +146,18 @@ function displayData(data) {
              console.log('✅ Tabela de ações da carteira criada');
          } catch (error) {
              console.error('❌ Erro ao criar tabela de ações da carteira:', error);
+         }
+         
+         // Create proventos chart and table in ações tab
+         if (data.proventos_data) {
+             console.log('📊 Criando gráfico e tabela de proventos na aba ações...');
+             try {
+                 createProventosChart(data.proventos_data);
+                 createProventosTable(data.proventos_data);
+                 console.log('✅ Gráfico e tabela de proventos criados na aba ações');
+             } catch (error) {
+                 console.error('❌ Erro ao criar gráfico e tabela de proventos:', error);
+             }
          }
      } else {
          console.log('⚠️ Dados de ações da carteira ou proventos recebidos não disponíveis');
@@ -299,6 +305,44 @@ function loadDefaultData() {
 }
 
 
+// ========================================
+// FUNÇÕES DE FILTROS
+// ========================================
+
+/**
+ * Função para filtrar proventos (chamada pelo HTML)
+ * @param {string} filterType - Tipo de filtro
+ */
+function filtrarProventos(filterType) {
+    console.log('🚀 filtrarProventos INICIADA com:', filterType);
+    
+    if (!currentData || !currentData.proventos_data) {
+        console.log('⚠️ Dados de proventos não disponíveis');
+        return;
+    }
+    
+    try {
+        // Atualizar filtro atual
+        currentProventosFilter = filterType || 'desde-inicio';
+        
+        // Atualizar select
+        const filterSelect = document.getElementById('proventosFilter');
+        if (filterSelect) {
+            filterSelect.value = currentProventosFilter;
+        }
+        
+        // Recriar gráfico e tabela com novo filtro
+        createProventosChart(currentData.proventos_data, currentProventosFilter);
+        createProventosTable(currentData.proventos_data, currentProventosFilter);
+        
+        console.log('✅ Filtro de proventos aplicado:', currentProventosFilter);
+    } catch (error) {
+        console.error('❌ Erro ao filtrar proventos:', error);
+    }
+}
+
+// Expor função globalmente
+window.filtrarProventos = filtrarProventos;
 
 // ========================================
 // INICIALIZAÇÃO
