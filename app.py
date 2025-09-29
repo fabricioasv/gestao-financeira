@@ -156,7 +156,8 @@ def process_excel_data(file_path):
                     year_data = {
                         'year': year,
                         'months': {},
-                        'total': 0
+                        'total': 0,
+                        'variacao': 0
                     }
                     
                     total_year = 0
@@ -173,6 +174,25 @@ def process_excel_data(file_path):
                     
                     year_data['total'] = total_year
                     proventos_data.append(year_data)
+        
+        # Calcular variação percentual entre anos consecutivos
+        if len(proventos_data) > 1:
+            # Ordenar por ano para garantir ordem correta
+            proventos_data.sort(key=lambda x: x['year'])
+            
+            for i in range(len(proventos_data)):
+                if i == 0:
+                    # Primeiro ano não tem variação
+                    proventos_data[i]['variacao'] = 0
+                else:
+                    ano_atual = proventos_data[i]['total']
+                    ano_anterior = proventos_data[i-1]['total']
+                    
+                    if ano_anterior != 0:
+                        variacao = ((ano_atual - ano_anterior) / ano_anterior) * 100
+                        proventos_data[i]['variacao'] = round(variacao, 2)
+                    else:
+                        proventos_data[i]['variacao'] = 0 if ano_atual == 0 else 100
         
         # Preparar dados da aba Cartão
         cartao_data = []

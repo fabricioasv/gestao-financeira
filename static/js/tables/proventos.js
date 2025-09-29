@@ -125,6 +125,23 @@ export function createProventosTable(proventosData, filterType = 'desde-inicio')
         tdTotal.textContent = `R$ ${yearData.total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
         tr.appendChild(tdTotal);
         
+        // Célula da variação
+        const tdVariacao = document.createElement('td');
+        tdVariacao.className = 'text-end fw-bold';
+        
+        const variacao = yearData.variacao || 0;
+        if (variacao > 0) {
+            tdVariacao.className += ' text-success';
+            tdVariacao.innerHTML = `<i class="fas fa-arrow-up me-1"></i>+${variacao.toFixed(1)}%`;
+        } else if (variacao < 0) {
+            tdVariacao.className += ' text-danger';
+            tdVariacao.innerHTML = `<i class="fas fa-arrow-down me-1"></i>${variacao.toFixed(1)}%`;
+        } else {
+            tdVariacao.className += ' text-muted';
+            tdVariacao.innerHTML = `<i class="fas fa-minus me-1"></i>0.0%`;
+        }
+        tr.appendChild(tdVariacao);
+        
         tableBody.appendChild(tr);
     });
 }

@@ -246,7 +246,7 @@ export function createRendaProjetivaTable(rendaProjetivaData) {
     if (!rendaProjetivaData || rendaProjetivaData.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="5" class="text-center text-muted">
+                <td colspan="4" class="text-center text-muted">
                     <i class="fas fa-info-circle me-2"></i>
                     Nenhum dado de renda projetiva encontrado.
                 </td>
@@ -264,7 +264,6 @@ export function createRendaProjetivaTable(rendaProjetivaData) {
                 ano: ano,
                 renda_anual: 0,
                 renda_mensal: 0,
-                capital_alocado: 0,
                 taxa_crescimento: 0,
                 count: 0
             };
@@ -272,7 +271,6 @@ export function createRendaProjetivaTable(rendaProjetivaData) {
         
         dadosPorAno[ano].renda_anual += item.renda_anual || 0;
         dadosPorAno[ano].renda_mensal += item.renda_mensal || 0;
-        dadosPorAno[ano].capital_alocado += item.capital_alocado || 0;
         dadosPorAno[ano].taxa_crescimento += item.taxa_crescimento || 0;
         dadosPorAno[ano].count++;
     });
@@ -296,7 +294,6 @@ export function createRendaProjetivaTable(rendaProjetivaData) {
                 <td class="text-end">R$ ${dados.renda_anual.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                 <td class="text-end">R$ ${dados.renda_mensal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                 <td class="text-end">${dados.taxa_crescimento.toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})}%</td>
-                <td class="text-end">R$ ${dados.capital_alocado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
             </tr>
         `;
     });
