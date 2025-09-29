@@ -246,7 +246,7 @@ export function createRendaProjetivaTable(rendaProjetivaData) {
     if (!rendaProjetivaData || rendaProjetivaData.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center text-muted">
+                <td colspan="5" class="text-center text-muted">
                     <i class="fas fa-info-circle me-2"></i>
                     Nenhum dado de renda projetiva encontrado.
                 </td>
@@ -255,51 +255,50 @@ export function createRendaProjetivaTable(rendaProjetivaData) {
         return;
     }
 
-    // Agrupar dados por ticker e ano
-    const dadosPorTicker = {};
+    // Agrupar dados por ano e somar os valores
+    const dadosPorAno = {};
     rendaProjetivaData.forEach(item => {
-        if (!dadosPorTicker[item.ticker]) {
-            dadosPorTicker[item.ticker] = [];
+        const ano = item.ano;
+        if (!dadosPorAno[ano]) {
+            dadosPorAno[ano] = {
+                ano: ano,
+                renda_anual: 0,
+                renda_mensal: 0,
+                capital_alocado: 0,
+                taxa_crescimento: 0,
+                count: 0
+            };
         }
-        dadosPorTicker[item.ticker].push(item);
+        
+        dadosPorAno[ano].renda_anual += item.renda_anual || 0;
+        dadosPorAno[ano].renda_mensal += item.renda_mensal || 0;
+        dadosPorAno[ano].capital_alocado += item.capital_alocado || 0;
+        dadosPorAno[ano].taxa_crescimento += item.taxa_crescimento || 0;
+        dadosPorAno[ano].count++;
     });
 
-    // Ordenar dados por ticker e ano
-    Object.keys(dadosPorTicker).forEach(ticker => {
-        dadosPorTicker[ticker].sort((a, b) => a.ano - b.ano);
+    // Calcular média da taxa de crescimento
+    Object.keys(dadosPorAno).forEach(ano => {
+        if (dadosPorAno[ano].count > 0) {
+            dadosPorAno[ano].taxa_crescimento = dadosPorAno[ano].taxa_crescimento / dadosPorAno[ano].count;
+        }
     });
 
-    // Criar linhas da tabela
+    // Ordenar por ano e criar linhas da tabela
+    const anosOrdenados = Object.keys(dadosPorAno).sort((a, b) => parseInt(a) - parseInt(b));
     let tableHTML = '';
-    Object.keys(dadosPorTicker).sort().forEach(ticker => {
-        const dados = dadosPorTicker[ticker];
-        dados.forEach((item, index) => {
-            const isFirstRow = index === 0;
-            const rowspan = isFirstRow ? dados.length : 0;
-            
-            if (isFirstRow) {
-                tableHTML += `
-                    <tr>
-                        <td rowspan="${rowspan}" class="text-center fw-bold">${ticker}</td>
-                        <td class="text-center">${item.ano}</td>
-                        <td class="text-end">R$ ${(item.renda_anual || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td class="text-end">R$ ${(item.renda_mensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td class="text-end">${(item.taxa_crescimento || 0).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})}%</td>
-                        <td class="text-end">R$ ${(item.capital_alocado || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    </tr>
-                `;
-            } else {
-                tableHTML += `
-                    <tr>
-                        <td class="text-center">${item.ano}</td>
-                        <td class="text-end">R$ ${(item.renda_anual || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td class="text-end">R$ ${(item.renda_mensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td class="text-end">${(item.taxa_crescimento || 0).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})}%</td>
-                        <td class="text-end">R$ ${(item.capital_alocado || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    </tr>
-                `;
-            }
-        });
+    
+    anosOrdenados.forEach(ano => {
+        const dados = dadosPorAno[ano];
+        tableHTML += `
+            <tr>
+                <td class="text-center fw-bold">${dados.ano}</td>
+                <td class="text-end">R$ ${dados.renda_anual.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td class="text-end">R$ ${dados.renda_mensal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td class="text-end">${dados.taxa_crescimento.toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1})}%</td>
+                <td class="text-end">R$ ${dados.capital_alocado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            </tr>
+        `;
     });
 
     tableBody.innerHTML = tableHTML;
