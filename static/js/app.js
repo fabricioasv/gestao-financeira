@@ -20,7 +20,6 @@ import {
 
 import {
     createFinancialTable,
-    createAcoesTableDashboard,
     createProventosTable,
     createCartaoDetalheTable,
     createAcoesCarteiraTable
@@ -110,13 +109,6 @@ function displayData(data) {
         console.error('❌ Erro ao criar tabela financeira:', error);  // Debug log
     }
     
-    // Create ações table
-    if (data.acoes_data) {
-
-        createAcoesTableDashboard(data.acoes_data);
-    } else {
-
-    }
     
          // Proventos agora são processados na aba Ações
          // (removido daqui pois foi movido para a aba Ações)

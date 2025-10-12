@@ -92,6 +92,7 @@ O sistema espera planilhas Excel com **duas abas**:
 ### Investimentos:
 - **Investimento Ações**: Categorias que contêm "Investimento" e "Ações"
 - **Investimento Renda Fixa**: Categorias que contêm "Investimento" e "Renda Fixa"
+- **Investimento Cripto**: Categorias que contêm "Investimento" e "Cripto"
 - **Previdência Privada**: Categorias que contêm "Previdência Privada"
 
 ### Cartão:

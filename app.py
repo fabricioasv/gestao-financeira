@@ -35,10 +35,7 @@ def process_excel_data(file_path):
     try:
         # Ler aba "Consolidado"
         df_consolidado = pd.read_excel(file_path, sheet_name='Consolidado')
-        
-        # Ler aba "Ações"
-        df_acoes = pd.read_excel(file_path, sheet_name='Ações')
-        
+
         # Ler aba "Proventos"
         df_proventos = pd.read_excel(file_path, sheet_name='Proventos')
         
@@ -79,44 +76,6 @@ def process_excel_data(file_path):
                     row_data['months'][month] = float(value)
                 
                 table_data.append(row_data)
-        
-        # Preparar dados da aba Ações
-        acoes_data = []
-        if df_acoes is not None and len(df_acoes) > 0:
-            for _, row in df_acoes.iterrows():
-                if pd.notna(row.get('Ticker', '')):
-                    def process_numeric_value(col_name, default=0):
-                        """Função auxiliar para processar valores numéricos"""
-                        value = default
-                        if pd.notna(row.get(col_name, default)):
-                            try:
-                                if isinstance(row[col_name], str):
-                                    clean_val = row[col_name].replace('R$', '').replace(',', '.').strip()
-                                    value = float(clean_val)
-                                else:
-                                    value = float(row[col_name])
-                            except:
-                                value = default
-                        return value
-                    
-                    acao_data = {
-                        'ticker': str(row.get('Ticker', '')),
-                        'qtd': process_numeric_value('Qtd'),
-                        'div_esperado_2025': process_numeric_value('Div. Esperado\n2025'),
-                        'renda_esperada': process_numeric_value('Renda Esperada'),
-                        'capital_atual': process_numeric_value('Capital Atual'),
-                        'dividend_yield_esperado': process_numeric_value('Dividend Yield Esperado') * 100,
-                        'dividend_yield_pago': process_numeric_value('Dividend Yield Pago'),
-                        'dividend_yield_restante': process_numeric_value('Dividend Yield Restante') * 100,  # Lê da planilha (0 se não existir)
-                        'proporcao_hoje': process_numeric_value('Proporção Hoje'),
-                        'meta_28k': process_numeric_value('Meta 28k'),
-                        'meta_1_ano': process_numeric_value('Meta +1.a.'),
-                        'meta_qtd_2033': process_numeric_value('Meta qtd. 2033')
-                    }
-                    
-                    # Calcular resultado (mantendo compatibilidade)
-                    acao_data['resultado'] = acao_data['renda_esperada'] - acao_data['dividend_yield_pago']
-                    acoes_data.append(acao_data)
         
         # Preparar dados da aba Proventos
         proventos_data = []
@@ -417,7 +376,8 @@ def process_excel_data(file_path):
             'investimento': {
                 'acoes': [],
                 'renda_fixa': [],
-                'previdencia_privada': []
+                'previdencia_privada': [],
+                'cripto': []
             }
         }
         
@@ -490,25 +450,28 @@ def process_excel_data(file_path):
             acoes = 0
             renda_fixa = 0
             previdencia_privada = 0
-            
+            cripto = 0
+
             for row in table_data:
                 value = row['months'][month]
                 if 'Investimento' in row['alias'] and 'Ações' in row['alias']:
                     acoes = abs(value) if value < 0 else value
                 elif 'Investimento' in row['alias'] and 'Renda Fixa' in row['alias']:
                     renda_fixa = abs(value) if value < 0 else value
+                elif 'Investimento' in row['alias'] and 'Cripto' in row['alias']:
+                    cripto = abs(value) if value < 0 else value
                 elif 'Previdência Privada' in row['alias']:
                     previdencia_privada = abs(value) if value < 0 else value
-            
+
             chart_data['investimento']['acoes'].append(acoes)
             chart_data['investimento']['renda_fixa'].append(renda_fixa)
             chart_data['investimento']['previdencia_privada'].append(previdencia_privada)
+            chart_data['investimento']['cripto'].append(cripto)
         
         return {
             'success': True,
             'table_data': table_data,
             'chart_data': chart_data,
-            'acoes_data': acoes_data,
             'proventos_data': proventos_data,
             'cartao_data': cartao_data,
             'cartao_detalhe_data': cartao_detalhe_data,
