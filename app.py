@@ -377,7 +377,8 @@ def process_excel_data(file_path):
                 'acoes': [],
                 'renda_fixa': [],
                 'previdencia_privada': [],
-                'cripto': []
+                'cripto': [],
+                'financiamento_apartamento': []
             }
         }
         
@@ -451,6 +452,7 @@ def process_excel_data(file_path):
             renda_fixa = 0
             previdencia_privada = 0
             cripto = 0
+            financiamento_apartamento = 0
 
             for row in table_data:
                 value = row['months'][month]
@@ -462,11 +464,15 @@ def process_excel_data(file_path):
                     cripto = abs(value) if value < 0 else value
                 elif 'Previdência Privada' in row['alias']:
                     previdencia_privada = abs(value) if value < 0 else value
+                elif row['alias'] == 'Apartamento':
+                    # Para financiamento, manter o sinal negativo pois é uma dívida
+                    financiamento_apartamento = value
 
             chart_data['investimento']['acoes'].append(acoes)
             chart_data['investimento']['renda_fixa'].append(renda_fixa)
             chart_data['investimento']['previdencia_privada'].append(previdencia_privada)
             chart_data['investimento']['cripto'].append(cripto)
+            chart_data['investimento']['financiamento_apartamento'].append(financiamento_apartamento)
         
         return {
             'success': True,

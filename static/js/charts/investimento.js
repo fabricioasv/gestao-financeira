@@ -64,6 +64,13 @@ export function createInvestimentoChart(chartData) {
                     backgroundColor: 'rgba(255, 206, 86, 0.8)',
                     borderColor: 'rgba(255, 206, 86, 1)',
                     borderWidth: 1
+                },
+                {
+                    label: 'Financiamento Apartamento',
+                    data: chartData.investimento.financiamento_apartamento,
+                    backgroundColor: 'rgba(153, 102, 255, 0.8)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
                 }
             ]
         },
@@ -118,7 +125,7 @@ export function createInvestimentoChart(chartData) {
                 },
                 y: {
                     stacked: true,
-                    beginAtZero: true,
+                    // Não forçar beginAtZero para permitir valores negativos
                     ticks: {
                         callback: function(value) {
                             return 'R$ ' + value.toLocaleString('pt-BR');
