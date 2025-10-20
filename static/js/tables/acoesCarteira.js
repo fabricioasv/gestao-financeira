@@ -32,7 +32,7 @@ export function createAcoesCarteiraTable(acoesCarteiraData, proventosRecebidosDa
     }
 
     // Calcular totais do quadro resumo
-    updateQuadroResumo(acoesCarteiraData, proventosRecebidosData);
+    updateQuadroResumo(acoesCarteiraData, proventosRecebidosData, proventosAReceberData);
 
     // Processar dados da carteira
     // Calcular proventos recebidos por ticker no ano atual
@@ -243,8 +243,9 @@ function criarListaAcoesCombinada(acoesCarteiraData, proventosAReceberPorTicker)
  * Atualiza o quadro resumo da carteira
  * @param {Array} acoesCarteiraData - Dados das ações da carteira
  * @param {Array} proventosRecebidosData - Dados dos proventos recebidos
+ * @param {Array} proventosAReceberData - Dados dos proventos a receber
  */
-function updateQuadroResumo(acoesCarteiraData, proventosRecebidosData) {
+function updateQuadroResumo(acoesCarteiraData, proventosRecebidosData, proventosAReceberData) {
     console.log('🚀 updateQuadroResumo INICIADA');
     
     const totalInvestidoEl = validateElement('totalInvestido', 'updateQuadroResumo');
@@ -277,8 +278,10 @@ function updateQuadroResumo(acoesCarteiraData, proventosRecebidosData) {
     // Calcular proventos recebidos no ano atual
     const proventosRecebidosPorTicker = calcularProventosRecebidosPorTicker(proventosRecebidosData);
     const totalProventosRecebidos = Object.values(proventosRecebidosPorTicker).reduce((sum, valor) => sum + valor, 0);
-    
-    const totalProventosPendentes = Math.max(0, totalProventosProjetados - totalProventosRecebidos);
+
+    // Calcular proventos a receber (soma direta dos valores pendentes)
+    const totalProventosPendentes = proventosAReceberData ?
+        proventosAReceberData.reduce((sum, provento) => sum + (provento.valor_total || 0), 0) : 0;
 
     // Atualizar elementos
     totalInvestidoEl.textContent = `R$ ${totalInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
