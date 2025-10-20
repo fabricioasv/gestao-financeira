@@ -71,6 +71,19 @@ export function createInvestimentoChart(chartData) {
                     backgroundColor: 'rgba(153, 102, 255, 0.8)',
                     borderColor: 'rgba(153, 102, 255, 1)',
                     borderWidth: 1
+                },
+                {
+                    label: 'Total',
+                    data: chartData.investimento.total,
+                    type: 'line',
+                    borderColor: 'rgba(0, 0, 0, 1)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 4,
+                    fill: false,
+                    tension: 0.1,
+                    pointBackgroundColor: 'rgba(0, 0, 0, 1)',
+                    pointBorderColor: 'rgba(0, 0, 0, 1)',
+                    pointRadius: 4
                 }
             ]
         },

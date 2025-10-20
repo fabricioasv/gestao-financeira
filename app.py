@@ -378,7 +378,8 @@ def process_excel_data(file_path):
                 'renda_fixa': [],
                 'previdencia_privada': [],
                 'cripto': [],
-                'financiamento_apartamento': []
+                'financiamento_apartamento': [],
+                'total': []
             }
         }
         
@@ -468,11 +469,15 @@ def process_excel_data(file_path):
                     # Para financiamento, manter o sinal negativo pois é uma dívida
                     financiamento_apartamento = value
 
+            # Calcular total dos investimentos
+            total_investimentos = acoes + renda_fixa + previdencia_privada + cripto + financiamento_apartamento
+
             chart_data['investimento']['acoes'].append(acoes)
             chart_data['investimento']['renda_fixa'].append(renda_fixa)
             chart_data['investimento']['previdencia_privada'].append(previdencia_privada)
             chart_data['investimento']['cripto'].append(cripto)
             chart_data['investimento']['financiamento_apartamento'].append(financiamento_apartamento)
+            chart_data['investimento']['total'].append(total_investimentos)
         
         return {
             'success': True,
