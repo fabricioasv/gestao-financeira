@@ -378,6 +378,7 @@ def process_excel_data(file_path):
                 'renda_fixa': [],
                 'previdencia_privada': [],
                 'cripto': [],
+                'tdIpca791': [],
                 'financiamento_apartamento': [],
                 'total': []
             }
@@ -452,7 +453,8 @@ def process_excel_data(file_path):
             acoes = 0
             renda_fixa = 0
             previdencia_privada = 0
-            cripto = 0
+            cripto = 0,
+            tdIpca791 = 0,
             financiamento_apartamento = 0
 
             for row in table_data:
@@ -463,6 +465,8 @@ def process_excel_data(file_path):
                     renda_fixa = abs(value) if value < 0 else value
                 elif 'Investimento' in row['alias'] and 'Cripto' in row['alias']:
                     cripto = abs(value) if value < 0 else value
+                elif 'TD IPCA+7.91%' in row['alias']:
+                    tdIpca791 = abs(value) if value < 0 else value
                 elif 'Previdência Privada' in row['alias']:
                     previdencia_privada = abs(value) if value < 0 else value
                 elif row['alias'] == 'Apartamento':
@@ -470,12 +474,13 @@ def process_excel_data(file_path):
                     financiamento_apartamento = value
 
             # Calcular total dos investimentos
-            total_investimentos = acoes + renda_fixa + previdencia_privada + cripto + financiamento_apartamento
+            total_investimentos = acoes + renda_fixa + previdencia_privada + cripto + tdIpca791 + financiamento_apartamento
 
             chart_data['investimento']['acoes'].append(acoes)
             chart_data['investimento']['renda_fixa'].append(renda_fixa)
             chart_data['investimento']['previdencia_privada'].append(previdencia_privada)
             chart_data['investimento']['cripto'].append(cripto)
+            chart_data['investimento']['tdIpca791'].append(tdIpca791)
             chart_data['investimento']['financiamento_apartamento'].append(financiamento_apartamento)
             chart_data['investimento']['total'].append(total_investimentos)
         

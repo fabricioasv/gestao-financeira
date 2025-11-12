@@ -66,6 +66,13 @@ export function createInvestimentoChart(chartData) {
                     borderWidth: 1
                 },
                 {
+                    label: 'TD IPCA+7.91%',
+                    data: chartData.investimento.tdIpca791,
+                    backgroundColor: 'rgba(170, 167, 159, 0.8)',
+                    borderColor: 'rgba(170, 167, 159, 1)',
+                    borderWidth: 1
+                },
+                {
                     label: 'Financiamento Apartamento',
                     data: chartData.investimento.financiamento_apartamento,
                     backgroundColor: 'rgba(153, 102, 255, 0.8)',
