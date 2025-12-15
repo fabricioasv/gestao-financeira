@@ -45,7 +45,7 @@ function CartaoChart({ entries = [] }) {
     const [monthKey, setMonthKey] = useState('todos');
     const [selectedGroup, setSelectedGroup] = useState('todos');
 
-    const { labels, groups, datasets, totals } = useMemo(() => {
+    const { labels, groups, datasets, totals, filteredByGroup } = useMemo(() => {
         const filtered =
             monthKey === 'todos'
                 ? entries
@@ -108,7 +108,6 @@ function CartaoChart({ entries = [] }) {
             },
         ];
 
-        return { labels: labelsArr, groups: groupsArr, datasets, totals };
         return { labels: labelsArr, groups: groupsArr, datasets, totals, filteredByGroup };
     }, [entries, monthKey, selectedGroup]);
 
@@ -142,12 +141,7 @@ function CartaoChart({ entries = [] }) {
         setSelectedGroup((prev) => (prev === ds.label ? 'todos' : ds.label));
     };
 
-    const filteredTable = useMemo(() => {
-        // Tabela exibe todos os registros do Excel, filtrando apenas pelo grupo clicado (se houver)
-        return selectedGroup === 'todos'
-            ? entries
-            : entries.filter((e) => e.grupo === selectedGroup);
-    }, [entries, selectedGroup]);
+    const filteredTable = filteredByGroup || [];
 
     const options = {
         responsive: true,
