@@ -5,6 +5,7 @@ import { SummaryCards } from './components/SummaryCards.jsx';
 import { DataTable } from './components/DataTable.jsx';
 import { StatusBanner } from './components/StatusBanner.jsx';
 import { InvestmentChart } from './components/InvestmentChart.jsx';
+import { FinancialChart } from './components/FinancialChart.jsx';
 import { parseWorkbook } from './utils/parsing.js';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
 
@@ -15,6 +16,12 @@ function App() {
     const [months, setMonths] = useState([]);
     const [totals, setTotals] = useState({});
     const [investments, setInvestments] = useState({ labels: [], series: [] });
+    const [financial, setFinancial] = useState({
+        labels: [],
+        credits: [],
+        debits: [],
+        consolidated: [],
+    });
     const [status, setStatus] = useState({
         type: 'info',
         message: 'Carregando dados padrão...',
@@ -94,6 +101,14 @@ function App() {
         setMonths(parsed.months);
         setTotals(parsed.totals);
         setInvestments(parsed.investments || { labels: [], series: [] });
+        setFinancial(
+            parsed.financial || {
+                labels: [],
+                credits: [],
+                debits: [],
+                consolidated: [],
+            },
+        );
         setLastUpdate({
             source: sourceLabel,
             at: new Date(),
@@ -158,9 +173,15 @@ function App() {
                                         <p className="muted small">Carregando planilha padrão...</p>
                                     )}
                                 </div>
-                            </div>
+                </div>
                         </header>
                         <InvestmentChart labels={investments.labels} series={investments.series} />
+                        <FinancialChart
+                            labels={financial.labels}
+                            credits={financial.credits}
+                            debits={financial.debits}
+                            consolidated={financial.consolidated}
+                        />
                     </div>
                 ) : (
                     <div className="page">

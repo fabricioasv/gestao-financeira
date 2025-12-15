@@ -4,6 +4,15 @@ import { logDebug, logError } from './logging.js';
 const INVESTMENT_START_ROW = 26; // Linhas 27 a 32 (1-based) => índices 26-31
 const INVESTMENT_END_ROW = 32; // slice exclusivo
 
+const normalizeText = (value) => {
+    if (typeof value !== 'string') return '';
+    return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+};
+
 const normalizeNumber = (value) => {
     if (value === null || value === undefined) return 0;
     if (typeof value === 'number') return value;
@@ -54,6 +63,19 @@ function parseWorkbook(buffer) {
             return acc;
         }, {});
 
+        // Série financeira: Créditos Realizados (linha 10), Débitos Realizados (linha 26), [C] Consolidado
+        const findRowValues = (aliasTarget) => {
+            const target = normalizeText(aliasTarget);
+            const row = dataRows.find((r) => normalizeText(r[0]) === target);
+            return monthLabels.map((_, idx) => normalizeNumber(row ? row[idx + 2] : 0));
+        };
+
+        const financialSeries = {
+            credits: findRowValues('Créditos Realizado'),
+            debits: findRowValues('Débitos Realizado'),
+            consolidated: findRowValues('[C] Consolidado'),
+        };
+
         // Dados de investimentos (linhas 27 a 32, 1-based)
         const investmentRows = matrix.slice(INVESTMENT_START_ROW, INVESTMENT_END_ROW);
         const investmentSeries = investmentRows
@@ -76,6 +98,10 @@ function parseWorkbook(buffer) {
             investments: {
                 labels: monthLabels,
                 series: investmentSeries,
+            },
+            financial: {
+                labels: monthLabels,
+                ...financialSeries,
             },
         };
     } catch (error) {
