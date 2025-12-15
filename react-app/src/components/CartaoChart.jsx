@@ -143,12 +143,11 @@ function CartaoChart({ entries = [] }) {
     };
 
     const filteredTable = useMemo(() => {
-        const byMonth =
-            monthKey === 'todos' ? entries : entries.filter((e) => e.monthKey === monthKey);
+        // Tabela exibe todos os registros do Excel, filtrando apenas pelo grupo clicado (se houver)
         return selectedGroup === 'todos'
-            ? byMonth
-            : byMonth.filter((e) => e.grupo === selectedGroup);
-    }, [entries, monthKey, selectedGroup]);
+            ? entries
+            : entries.filter((e) => e.grupo === selectedGroup);
+    }, [entries, selectedGroup]);
 
     const options = {
         responsive: true,
