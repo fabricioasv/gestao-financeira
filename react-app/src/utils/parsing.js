@@ -28,15 +28,15 @@ function parseWorkbook(buffer) {
 
     try {
         const workbook = XLSX.read(buffer, { type: 'array' });
-        const sheet =
+        const consolidadoSheet =
             workbook.Sheets.Consolidado || workbook.Sheets[workbook.SheetNames?.[0] || ''];
 
-        if (!sheet) {
+        if (!consolidadoSheet) {
             throw new Error('Aba Consolidado não encontrada na planilha.');
         }
 
         // Matriz bruta para capturar cabeçalho e linhas específicas
-        const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
+        const matrix = XLSX.utils.sheet_to_json(consolidadoSheet, { header: 1, defval: null });
         if (!Array.isArray(matrix) || matrix.length === 0) {
             throw new Error('Planilha vazia ou sem dados legíveis.');
         }
@@ -91,6 +91,73 @@ function parseWorkbook(buffer) {
             investimentos: investmentSeries.length,
         });
 
+        // ============================
+        // Ações-Carteira (nome pode vir com encoding diferente)
+        // ============================
+        const carteiraSheetName =
+            workbook.SheetNames.find((name) => normalizeText(name).includes('carteira')) || null;
+        const carteiraSheet = carteiraSheetName ? workbook.Sheets[carteiraSheetName] : null;
+
+        let acoesCarteira = { headers: [], rows: [] };
+        if (carteiraSheet) {
+            const carteiraMatrix = XLSX.utils.sheet_to_json(carteiraSheet, {
+                header: 1,
+                defval: '',
+            });
+            if (Array.isArray(carteiraMatrix) && carteiraMatrix.length > 1) {
+                const headers = carteiraMatrix[0].map((h) => (h ? String(h).trim() : ''));
+                const dataRows = carteiraMatrix.slice(1).filter((row) =>
+                    row.some((cell) => cell !== ''),
+                );
+                const rows = dataRows.map((row) => {
+                    const obj = {};
+                    headers.forEach((h, idx) => {
+                        obj[h || `col_${idx}`] = row[idx];
+                    });
+                    return obj;
+                });
+                acoesCarteira = { headers, rows };
+            }
+        }
+
+        // ============================
+        // Proventos (gráfico com filtro)
+        // ============================
+        const proventosSheet = workbook.Sheets.Proventos;
+        let proventos = { years: [], months: [], valuesByYear: {} };
+        if (proventosSheet) {
+            const provMatrix = XLSX.utils.sheet_to_json(proventosSheet, {
+                header: 1,
+                defval: 0,
+            });
+            if (Array.isArray(provMatrix) && provMatrix.length > 1) {
+                const header = provMatrix[0];
+                const monthLabels = header
+                    .slice(1, 13)
+                    .map((val) => {
+                        const d = XLSX.SSF.parse_date_code(val, { date1904: false });
+                        if (d) {
+                            const date = new Date(Date.UTC(d.y, d.m - 1, d.d));
+                            return date.toLocaleDateString('pt-BR', { month: 'short' });
+                        }
+                        if (typeof val === 'string') return val;
+                        return String(val ?? '');
+                    })
+                    .map((m) => m.replace('.', '').slice(0, 3));
+
+                const years = [];
+                const valuesByYear = {};
+                provMatrix.slice(1).forEach((row) => {
+                    const year = row[0];
+                    if (!year) return;
+                    years.push(year);
+                    valuesByYear[year] = monthLabels.map((_, idx) => normalizeNumber(row[idx + 1]));
+                });
+
+                proventos = { years, months: monthLabels, valuesByYear };
+            }
+        }
+
         return {
             rows: parsedRows,
             months: monthLabels,
@@ -103,6 +170,8 @@ function parseWorkbook(buffer) {
                 labels: monthLabels,
                 ...financialSeries,
             },
+            stocks: acoesCarteira,
+            proventos,
         };
     } catch (error) {
         logError('❌ Falha ao interpretar a planilha', error);

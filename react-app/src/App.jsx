@@ -6,6 +6,8 @@ import { DataTable } from './components/DataTable.jsx';
 import { StatusBanner } from './components/StatusBanner.jsx';
 import { InvestmentChart } from './components/InvestmentChart.jsx';
 import { FinancialChart } from './components/FinancialChart.jsx';
+import { ActionsTable } from './components/ActionsTable.jsx';
+import { ProventosChart } from './components/ProventosChart.jsx';
 import { parseWorkbook } from './utils/parsing.js';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
 
@@ -22,6 +24,8 @@ function App() {
         debits: [],
         consolidated: [],
     });
+    const [stocks, setStocks] = useState({ headers: [], rows: [] });
+    const [proventos, setProventos] = useState({ years: [], months: [], valuesByYear: {} });
     const [status, setStatus] = useState({
         type: 'info',
         message: 'Carregando dados padrão...',
@@ -109,6 +113,8 @@ function App() {
                 consolidated: [],
             },
         );
+        setStocks(parsed.stocks || { headers: [], rows: [] });
+        setProventos(parsed.proventos || { years: [], months: [], valuesByYear: {} });
         setLastUpdate({
             source: sourceLabel,
             at: new Date(),
@@ -139,6 +145,13 @@ function App() {
                         onClick={() => setActiveMenu('demais')}
                     >
                         Demais
+                    </button>
+                    <button
+                        type="button"
+                        className={`nav-item ${activeMenu === 'investimentos' ? 'active' : ''}`}
+                        onClick={() => setActiveMenu('investimentos')}
+                    >
+                        Investimentos
                     </button>
                 </nav>
             </aside>
@@ -181,6 +194,38 @@ function App() {
                             credits={financial.credits}
                             debits={financial.debits}
                             consolidated={financial.consolidated}
+                        />
+                    </div>
+                ) : activeMenu === 'investimentos' ? (
+                    <div className="page">
+                        <header className="hero">
+                            <div className="hero-text">
+                                <p className="eyebrow">Investimentos</p>
+                                <h1>Ações e Proventos</h1>
+                                <p className="muted">
+                                    Consulte a tabela da aba Ações-Carteira e o gráfico filtrável da aba
+                                    Proventos.
+                                </p>
+                            </div>
+                            <div className="hero-meta">
+                                <div className="meta-card">
+                                    <p className="eyebrow">Atualização</p>
+                                    {lastUpdate ? (
+                                        <p className="muted small">
+                                            {lastUpdate.source} em {lastUpdate.at.toLocaleString('pt-BR')}
+                                        </p>
+                                    ) : (
+                                        <p className="muted small">Aguardando planilha...</p>
+                                    )}
+                                </div>
+                            </div>
+                        </header>
+
+                        <ActionsTable headers={stocks.headers} rows={stocks.rows} />
+                        <ProventosChart
+                            years={proventos.years}
+                            months={proventos.months}
+                            valuesByYear={proventos.valuesByYear}
                         />
                     </div>
                 ) : (
