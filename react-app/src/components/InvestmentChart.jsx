@@ -3,6 +3,8 @@ import {
     BarElement,
     CategoryScale,
     LinearScale,
+    PointElement,
+    LineElement,
     Legend,
     Tooltip,
     Title,
@@ -10,7 +12,16 @@ import {
 import { Bar } from 'react-chartjs-2';
 import { formatNumber } from '../utils/formatting.js';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Legend, Tooltip, Title);
+ChartJS.register(
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Legend,
+    Tooltip,
+    Title,
+);
 
 const COLORS = [
     '#2563eb',
@@ -28,6 +39,22 @@ function getColor(index) {
 }
 
 function InvestmentChart({ labels = [], series = [] }) {
+    const lineOnTopPlugin = {
+        id: 'lineOnTop',
+        afterDatasetsDraw(chart) {
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                if (dataset.type === 'line') {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    meta.controller.draw();
+                }
+            });
+        },
+    };
+
+    const totalsByMonth = labels.map((_, idx) =>
+        series.reduce((sum, item) => sum + (item.values[idx] ?? 0), 0),
+    );
+
     if (!labels.length || !series.length) {
         return (
             <div className="panel">
@@ -44,18 +71,47 @@ function InvestmentChart({ labels = [], series = [] }) {
 
     const data = {
         labels,
-        datasets: series.map((item, idx) => ({
-            label: item.label,
-            data: item.values,
-            backgroundColor: getColor(idx),
-            borderRadius: 6,
-            barThickness: 'flex',
-        })),
+        datasets: [
+            ...series.map((item, idx) => ({
+                label: item.label,
+                data: item.values,
+                backgroundColor: getColor(idx),
+                borderRadius: 6,
+                barThickness: 'flex',
+                order: 1,
+                stack: 'invest',
+            })),
+            {
+                type: 'line',
+                label: 'Total (linha)',
+                data: totalsByMonth,
+                borderColor: '#111827',
+                backgroundColor: 'rgba(17, 24, 39, 0.4)',
+                borderWidth: 3,
+                tension: 0.25,
+                pointRadius: 4,
+                pointHoverRadius: 5,
+                pointBackgroundColor: '#111827',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 1,
+                yAxisID: 'y',
+                fill: false,
+                order: 99,
+            },
+        ],
     };
 
     const options = {
         responsive: true,
         maintainAspectRatio: false,
+        datasets: {
+            bar: {
+                order: 1,
+            },
+            line: {
+                order: 999,
+            },
+        },
         plugins: {
             legend: {
                 position: 'bottom',
@@ -65,6 +121,11 @@ function InvestmentChart({ labels = [], series = [] }) {
                     label: (ctx) => {
                         const value = ctx.parsed.y ?? 0;
                         return `${ctx.dataset.label}: ${formatNumber(value)}`;
+                    },
+                    footer: (items) => {
+                        if (!items?.length) return '';
+                        const monthIndex = items[0].dataIndex;
+                        return `Total: ${formatNumber(totalsByMonth[monthIndex])}`;
                     },
                 },
             },
@@ -99,7 +160,7 @@ function InvestmentChart({ labels = [], series = [] }) {
                 </div>
             </div>
             <div className="chart-wrapper">
-                <Bar data={data} options={options} />
+                <Bar data={data} options={options} plugins={[lineOnTopPlugin]} />
             </div>
         </div>
     );
