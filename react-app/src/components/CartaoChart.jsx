@@ -43,6 +43,7 @@ function getColor(idx) {
 
 function CartaoChart({ entries = [] }) {
     const [monthKey, setMonthKey] = useState('todos');
+    const [selectedGroup, setSelectedGroup] = useState('todos');
 
     const { labels, groups, datasets, totals } = useMemo(() => {
         const filtered =
@@ -50,7 +51,12 @@ function CartaoChart({ entries = [] }) {
                 ? entries
                 : entries.filter((e) => e.monthKey === monthKey);
 
-        const labelsSet = new Set(filtered.map((e) => e.fatura));
+        const filteredByGroup =
+            selectedGroup === 'todos'
+                ? filtered
+                : filtered.filter((e) => e.grupo === selectedGroup);
+
+        const labelsSet = new Set(filteredByGroup.map((e) => e.fatura));
         const labelsArr = Array.from(labelsSet).sort((a, b) => {
             const [da, ma, ya] = a.split('/').map(Number);
             const [db, mb, yb] = b.split('/').map(Number);
@@ -61,14 +67,14 @@ function CartaoChart({ entries = [] }) {
 
         const groupData = groupsArr.map((g) =>
             labelsArr.map((label) =>
-                filtered
+                filteredByGroup
                     .filter((e) => e.fatura === label && e.grupo === g)
                     .reduce((sum, e) => sum + (e.valor ?? 0), 0),
             ),
         );
 
         const totals = labelsArr.map((label) =>
-            filtered
+            filteredByGroup
                 .filter((e) => e.fatura === label)
                 .reduce((sum, e) => sum + (e.valor ?? 0), 0),
         );
@@ -103,7 +109,8 @@ function CartaoChart({ entries = [] }) {
         ];
 
         return { labels: labelsArr, groups: groupsArr, datasets, totals };
-    }, [entries, monthKey]);
+        return { labels: labelsArr, groups: groupsArr, datasets, totals, filteredByGroup };
+    }, [entries, monthKey, selectedGroup]);
 
     const lineOnTopPlugin = {
         id: 'lineOnTopCartao',
@@ -126,6 +133,22 @@ function CartaoChart({ entries = [] }) {
         const arr = Array.from(set).sort();
         return ['todos', ...arr];
     }, [entries]);
+
+    const handleClick = (evt, elements, chart) => {
+        if (!elements?.length) return;
+        const { datasetIndex } = elements[0];
+        const ds = chart.data.datasets[datasetIndex];
+        if (ds.type === 'line') return;
+        setSelectedGroup((prev) => (prev === ds.label ? 'todos' : ds.label));
+    };
+
+    const filteredTable = useMemo(() => {
+        const byMonth =
+            monthKey === 'todos' ? entries : entries.filter((e) => e.monthKey === monthKey);
+        return selectedGroup === 'todos'
+            ? byMonth
+            : byMonth.filter((e) => e.grupo === selectedGroup);
+    }, [entries, monthKey, selectedGroup]);
 
     const options = {
         responsive: true,
@@ -156,6 +179,7 @@ function CartaoChart({ entries = [] }) {
                 ticks: { callback: (value) => formatNumber(value) },
             },
         },
+        onClick: handleClick,
     };
 
     const hasData = labels.length > 0 && groups.length > 0;
@@ -189,6 +213,58 @@ function CartaoChart({ entries = [] }) {
                 ) : (
                     <p className="muted">Nenhum dado encontrado. Envie a planilha.</p>
                 )}
+            </div>
+            <div className="panel">
+                <div className="panel-header">
+                    <div>
+                        <p className="eyebrow">Cartão</p>
+                        <h3>Detalhamento da fatura</h3>
+                        <p className="muted small">
+                            Clique em uma categoria no gráfico para filtrar; use o filtro de mês para refinar.
+                        </p>
+                    </div>
+                    <div className="filter-row">
+                        <span className="pill neutral">
+                            {selectedGroup === 'todos' ? 'Todos os grupos' : `Grupo: ${selectedGroup}`}
+                        </span>
+                        {selectedGroup !== 'todos' && (
+                            <button className="btn" onClick={() => setSelectedGroup('todos')}>
+                                Limpar filtro
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div className="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fatura</th>
+                                <th>Data</th>
+                                <th>Estabelecimento</th>
+                                <th>Grupo</th>
+                                <th>Cartão</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredTable.map((row, idx) => {
+                                const dataFmt = row.data
+                                    ? new Date(row.data).toLocaleDateString('pt-BR')
+                                    : '';
+                                return (
+                                    <tr key={idx}>
+                                        <td>{row.fatura}</td>
+                                        <td>{dataFmt}</td>
+                                        <td>{row.estabelecimento || '-'}</td>
+                                        <td>{row.grupo}</td>
+                                        <td>{row.cartao}</td>
+                                        <td>{formatNumber(row.valor)}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

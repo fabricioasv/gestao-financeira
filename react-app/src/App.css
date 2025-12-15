@@ -289,6 +289,12 @@ tbody tr:hover {
     color: #ffffff;
 }
 
+.btn.outline {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+
 .pill {
     display: inline-flex;
     align-items: center;

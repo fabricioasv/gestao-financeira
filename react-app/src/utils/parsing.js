@@ -197,12 +197,16 @@ function parseWorkbook(buffer) {
             if (Array.isArray(detalheMatrix) && detalheMatrix.length > 1) {
                 const header = detalheMatrix[0].map((h) => normalizeText(h));
                 const faturaIdx = header.findIndex((h) => h.includes('fatura'));
+                const dataIdx = header.findIndex((h) => h === 'data');
+                const estabIdx = header.findIndex((h) => h.startsWith('estabelecimento') && !h.includes('fmt'));
                 const valorIdx = header.findIndex((h) => h.includes('valor'));
                 const grupoIdx = header.findIndex((h) => h.includes('grupo'));
                 const cartaoIdx = header.findIndex((h) => h.includes('cart'));
 
                 const entries = detalheMatrix.slice(1).reduce((acc, row) => {
                     const faturaRaw = row[faturaIdx];
+                    const dataRaw = dataIdx >= 0 ? row[dataIdx] : null;
+                    const estabelecimento = estabIdx >= 0 ? row[estabIdx] : '';
                     const valor = normalizeNumber(row[valorIdx]);
                     const grupo = row[grupoIdx] ?? 'Outros';
                     const cartao = row[cartaoIdx] ?? 'Cartão';
@@ -212,6 +216,7 @@ function parseWorkbook(buffer) {
                     }
 
                     const faturaDate = parseExcelDate(faturaRaw);
+                    const dataCompra = parseExcelDate(dataRaw) || faturaDate;
                     if (!faturaDate) return acc;
 
                     const label = `${String(faturaDate.getDate()).padStart(2, '0')}/${String(faturaDate.getMonth() + 1).padStart(2, '0')}/${faturaDate.getFullYear()}`;
@@ -220,7 +225,9 @@ function parseWorkbook(buffer) {
                     acc.push({
                         fatura: label,
                         faturaDate: faturaDate.toISOString(),
+                        data: dataCompra ? dataCompra.toISOString() : null,
                         monthKey,
+                        estabelecimento: estabelecimento ? String(estabelecimento) : '',
                         grupo: String(grupo),
                         valor,
                         cartao: String(cartao),
