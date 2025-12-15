@@ -13,6 +13,33 @@ const normalizeText = (value) => {
         .trim();
 };
 
+const parseExcelDate = (value) => {
+    if (value instanceof Date) return value;
+    if (typeof value === 'number') {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        if (parsed) {
+            return new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d || 1));
+        }
+    }
+    if (typeof value === 'string') {
+        const v = value.trim();
+        const dmY = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+        if (dmY) {
+            const day = Number(dmY[1]);
+            const month = Number(dmY[2]) - 1;
+            let year = Number(dmY[3]);
+            if (year < 100) year = 2000 + year; // assumir século atual
+            const d = new Date(Date.UTC(year, month, day));
+            if (!Number.isNaN(d.getTime())) return d;
+        }
+        const d = new Date(v);
+        if (!Number.isNaN(d.getTime())) {
+            return d;
+        }
+    }
+    return null;
+};
+
 const normalizeNumber = (value) => {
     if (value === null || value === undefined) return 0;
     if (typeof value === 'number') return value;
@@ -158,6 +185,53 @@ function parseWorkbook(buffer) {
             }
         }
 
+        // ============================
+        // Cartão-Detalhe (despesas por fatura)
+        // ============================
+        const detalheSheetName =
+            workbook.SheetNames.find((name) => normalizeText(name).includes('detalhe')) || null;
+        const detalheSheet = detalheSheetName ? workbook.Sheets[detalheSheetName] : null;
+        let cartaoDetalhe = { entries: [] };
+        if (detalheSheet) {
+            const detalheMatrix = XLSX.utils.sheet_to_json(detalheSheet, { header: 1, defval: null });
+            if (Array.isArray(detalheMatrix) && detalheMatrix.length > 1) {
+                const header = detalheMatrix[0].map((h) => normalizeText(h));
+                const faturaIdx = header.findIndex((h) => h.includes('fatura'));
+                const valorIdx = header.findIndex((h) => h.includes('valor'));
+                const grupoIdx = header.findIndex((h) => h.includes('grupo'));
+                const cartaoIdx = header.findIndex((h) => h.includes('cart'));
+
+                const entries = detalheMatrix.slice(1).reduce((acc, row) => {
+                    const faturaRaw = row[faturaIdx];
+                    const valor = normalizeNumber(row[valorIdx]);
+                    const grupo = row[grupoIdx] ?? 'Outros';
+                    const cartao = row[cartaoIdx] ?? 'Cartão';
+
+                    if (!faturaRaw || Number.isNaN(valor)) {
+                        return acc;
+                    }
+
+                    const faturaDate = parseExcelDate(faturaRaw);
+                    if (!faturaDate) return acc;
+
+                    const label = `${String(faturaDate.getDate()).padStart(2, '0')}/${String(faturaDate.getMonth() + 1).padStart(2, '0')}/${faturaDate.getFullYear()}`;
+                    const monthKey = `${faturaDate.getFullYear()}-${String(faturaDate.getMonth() + 1).padStart(2, '0')}`;
+
+                    acc.push({
+                        fatura: label,
+                        faturaDate: faturaDate.toISOString(),
+                        monthKey,
+                        grupo: String(grupo),
+                        valor,
+                        cartao: String(cartao),
+                    });
+                    return acc;
+                }, []);
+
+                cartaoDetalhe = { entries };
+            }
+        }
+
         return {
             rows: parsedRows,
             months: monthLabels,
@@ -172,6 +246,7 @@ function parseWorkbook(buffer) {
             },
             stocks: acoesCarteira,
             proventos,
+            cartaoDetalhe,
         };
     } catch (error) {
         logError('❌ Falha ao interpretar a planilha', error);

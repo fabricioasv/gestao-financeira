@@ -8,6 +8,7 @@ import { InvestmentChart } from './components/InvestmentChart.jsx';
 import { FinancialChart } from './components/FinancialChart.jsx';
 import { ActionsTable } from './components/ActionsTable.jsx';
 import { ProventosChart } from './components/ProventosChart.jsx';
+import { CartaoChart } from './components/CartaoChart.jsx';
 import { parseWorkbook } from './utils/parsing.js';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
 
@@ -26,6 +27,7 @@ function App() {
     });
     const [stocks, setStocks] = useState({ headers: [], rows: [] });
     const [proventos, setProventos] = useState({ years: [], months: [], valuesByYear: {} });
+    const [cartaoDetalhe, setCartaoDetalhe] = useState({ entries: [] });
     const [status, setStatus] = useState({
         type: 'info',
         message: 'Carregando dados padrão...',
@@ -115,6 +117,7 @@ function App() {
         );
         setStocks(parsed.stocks || { headers: [], rows: [] });
         setProventos(parsed.proventos || { years: [], months: [], valuesByYear: {} });
+        setCartaoDetalhe(parsed.cartaoDetalhe || { entries: [] });
         setLastUpdate({
             source: sourceLabel,
             at: new Date(),
@@ -152,6 +155,13 @@ function App() {
                         onClick={() => setActiveMenu('investimentos')}
                     >
                         Investimentos
+                    </button>
+                    <button
+                        type="button"
+                        className={`nav-item ${activeMenu === 'cartao' ? 'active' : ''}`}
+                        onClick={() => setActiveMenu('cartao')}
+                    >
+                        Cartão
                     </button>
                 </nav>
             </aside>
@@ -227,6 +237,32 @@ function App() {
                             months={proventos.months}
                             valuesByYear={proventos.valuesByYear}
                         />
+                    </div>
+                ) : activeMenu === 'cartao' ? (
+                    <div className="page">
+                        <header className="hero">
+                            <div className="hero-text">
+                                <p className="eyebrow">Cartão</p>
+                                <h1>Detalhe por fatura</h1>
+                                <p className="muted">
+                                    Gráfico de barras empilhadas por grupo com linha de total, usando a aba
+                                    Cartão-Detalhe.
+                                </p>
+                            </div>
+                            <div className="hero-meta">
+                                <div className="meta-card">
+                                    <p className="eyebrow">Atualização</p>
+                                    {lastUpdate ? (
+                                        <p className="muted small">
+                                            {lastUpdate.source} em {lastUpdate.at.toLocaleString('pt-BR')}
+                                        </p>
+                                    ) : (
+                                        <p className="muted small">Aguardando planilha...</p>
+                                    )}
+                                </div>
+                            </div>
+                        </header>
+                        <CartaoChart entries={cartaoDetalhe.entries} />
                     </div>
                 ) : (
                     <div className="page">

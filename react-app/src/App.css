@@ -247,6 +247,12 @@
     font-weight: 600;
 }
 
+.filter-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
