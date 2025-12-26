@@ -24,22 +24,22 @@ https://script.google.com/macros/s/AKfycbxORyepLXzHsosNCN5KK8LedK70_VZQkwlAtPbNx
 - [x] Adicionar pacotes NuGet necessários
 - [x] Configurar `local.settings.json` com URL do Apps Script
 
-### **Etapa 2: Criar HTTP Trigger Principal** ⬜
-- [ ] Criar função `GetFinancialData` - endpoint GET
-- [ ] Implementar `HttpClient` para buscar dados do Google Apps Script
-- [ ] Criar models/DTOs para os dados financeiros
-- [ ] Configurar CORS para permitir requisições do frontend
-- [ ] Adicionar tratamento de erros
+### **Etapa 2: Criar HTTP Trigger Principal** ✅
+- [x] Criar função `GetFinancialData` - endpoint GET
+- [x] Implementar `HttpClient` para buscar dados do Google Apps Script
+- [x] Criar models/DTOs para os dados financeiros
+- [x] Configurar CORS para permitir requisições do frontend
+- [x] Adicionar tratamento de erros
 
-### **Etapa 3: Configurar Swagger/OpenAPI** ⬜
-- [ ] Instalar pacote `Microsoft.Azure.Functions.Worker.Extensions.OpenApi`
-- [ ] Configurar OpenAPI no `Program.cs`
-- [ ] Adicionar atributos de documentação nos endpoints
-- [ ] Testar Swagger UI em `/api/swagger/ui`
+### **Etapa 3: Configurar Swagger/OpenAPI** ✅
+- [x] Instalar pacote `Microsoft.Azure.Functions.Worker.Extensions.OpenApi`
+- [x] Configurar OpenAPI no `Program.cs`
+- [x] Adicionar atributos de documentação nos endpoints
+- [x] Testar Swagger UI em `/api/swagger/ui`
 
-### **Etapa 4: Endpoints Adicionais** ⬜
-- [ ] `GET /api/dados` - Retorna todos os dados financeiros
-- [ ] `GET /api/health` - Health check da API
+### **Etapa 4: Endpoints Adicionais** ✅
+- [x] `GET /api/dados` - Retorna todos os dados financeiros
+- [x] `GET /api/health` - Health check da API
 
 ### **Etapa 5: Testes Locais** ⬜
 - [ ] Executar com `func start` ou F5 no Visual Studio
@@ -111,9 +111,9 @@ gestao-financeira/
 | Etapa | Status | Data |
 |-------|--------|------|
 | Etapa 1: Setup Inicial | ✅ Concluído | 26/12/2024 |
-| Etapa 2: HTTP Trigger | ⬜ Pendente | - |
-| Etapa 3: Swagger | ⬜ Pendente | - |
-| Etapa 4: Endpoints | ⬜ Pendente | - |
+| Etapa 2: HTTP Trigger | ✅ Concluído | 26/12/2024 |
+| Etapa 3: Swagger | ✅ Concluído | 26/12/2024 |
+| Etapa 4: Endpoints | ✅ Concluído | 26/12/2024 |
 | Etapa 5: Testes | ⬜ Pendente | - |
 | Etapa 6: Cache | ⬜ Pendente | - |
 | Etapa 7: Integração | ⬜ Pendente | - |
