@@ -2,6 +2,7 @@ namespace GestaoFinanceira.Functions.Services;
 
 public interface IGoogleAppsScriptService
 {
-    Task<string> GetFinancialDataAsync();
+    Task<string> GetSheetDataAsync(string sheetName);
+    Task<Dictionary<string, object>> GetAllSheetsDataAsync();
 }
 

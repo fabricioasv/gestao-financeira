@@ -38,8 +38,19 @@ https://script.google.com/macros/s/AKfycbxORyepLXzHsosNCN5KK8LedK70_VZQkwlAtPbNx
 - [x] Testar Swagger UI em `/api/swagger/ui`
 
 ### **Etapa 4: Endpoints Adicionais** ✅
-- [x] `GET /api/dados` - Retorna todos os dados financeiros
 - [x] `GET /api/health` - Health check da API
+- [x] `GET /api/sheets` - Retorna todas as abas
+- [x] `GET /api/sheets-list` - Lista abas disponíveis
+- [x] `GET /api/sheets/consolidado` - Aba Consolidado
+- [x] `GET /api/sheets/proventos` - Aba Proventos
+- [x] `GET /api/sheets/cartao-previsao` - Aba Cartão-Previsão
+- [x] `GET /api/sheets/cartao-detalhe` - Aba Cartão-Detalhe
+- [x] `GET /api/sheets/cartao-forecast` - Aba Cartão-Forecast
+- [x] `GET /api/sheets/acoes-carteira` - Aba Ações-Carteira
+- [x] `GET /api/sheets/renda-projetiva` - Aba Renda-Projetiva
+- [x] `GET /api/sheets/proventos-recebidos` - Aba Proventos-Recebidos
+- [x] `GET /api/sheets/proventos-a-receber` - Aba Proventos-A-Receber
+- [x] `GET /api/sheets/{sheetName}` - Endpoint genérico por nome
 
 ### **Etapa 5: Testes Locais** ⬜
 - [ ] Executar com `func start` ou F5 no Visual Studio

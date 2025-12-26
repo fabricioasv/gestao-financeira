@@ -3,7 +3,7 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-    "GoogleAppsScriptUrl": "https://script.google.com/macros/s/AKfycbxORyepLXzHsosNCN5KK8LedK70_VZQkwlAtPbNxGCHyzYihfRjWMRpcburWU7PBEkm/exec"
+    "GoogleAppsScriptUrl": "https://script.google.com/macros/s/AKfycbwYeaaYN_RhSkQwd2dDBW7o1wU4A3BIba9UU7lewTy3aGcQaBJyP-047k1UUKioxMLt/exec"
   },
   "Host": {
     "CORS": "*",
