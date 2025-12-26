@@ -11,6 +11,8 @@ import { ProventosChart } from './components/ProventosChart.jsx';
 import { CartaoChart } from './components/CartaoChart.jsx';
 import { parseWorkbook } from './utils/parsing.js';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
+import { fetchConsolidado } from './services/api.js';
+import { transformConsolidado } from './services/transformers.js';
 
 const DEFAULT_DATA_URL = `${import.meta.env.BASE_URL}dados.xlsx`;
 
@@ -48,26 +50,43 @@ function App() {
         console.log('🚀 loadDefaultData INICIADA');
         setLoading(true);
         try {
-            const response = await fetch(DEFAULT_DATA_URL);
-            if (!response.ok) {
-                throw new Error(`Falha ao baixar dados padrão (HTTP ${response.status})`);
-            }
+            // Tentar carregar da API primeiro
+            console.log('📡 Tentando carregar dados da API...');
+            const apiData = await fetchConsolidado();
+            const parsed = transformConsolidado(apiData);
 
-            const buffer = await response.arrayBuffer();
-            const parsed = parseWorkbook(buffer);
-
-            handleParsedData(parsed, 'dados.xlsx');
+            handleParsedData(parsed, 'API Azure Function');
             setStatus({
                 type: 'success',
-                message: 'Dados padrão carregados de dados.xlsx. Envie uma nova planilha para atualizar.',
+                message: 'Dados carregados da API. Conectado ao Google Sheets em tempo real.',
             });
-            logSuccess('✅ Dados padrão carregados');
-        } catch (error) {
-            logError('❌ Erro ao carregar dados padrão', error);
-            setStatus({
-                type: 'warning',
-                message: 'Não foi possível carregar os dados padrão. Envie uma planilha para começar.',
-            });
+            logSuccess('✅ Dados carregados da API');
+        } catch (apiError) {
+            console.warn('⚠️ API indisponível, tentando arquivo local:', apiError.message);
+            
+            // Fallback para arquivo Excel local
+            try {
+                const response = await fetch(DEFAULT_DATA_URL);
+                if (!response.ok) {
+                    throw new Error(`Falha ao baixar dados padrão (HTTP ${response.status})`);
+                }
+
+                const buffer = await response.arrayBuffer();
+                const parsed = parseWorkbook(buffer);
+
+                handleParsedData(parsed, 'dados.xlsx (offline)');
+                setStatus({
+                    type: 'warning',
+                    message: 'API indisponível. Dados carregados do arquivo local.',
+                });
+                logSuccess('✅ Dados padrão carregados (fallback)');
+            } catch (error) {
+                logError('❌ Erro ao carregar dados', error);
+                setStatus({
+                    type: 'error',
+                    message: 'Não foi possível carregar os dados. Verifique se a API está rodando.',
+                });
+            }
         } finally {
             setLoading(false);
         }

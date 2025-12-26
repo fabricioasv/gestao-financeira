@@ -53,9 +53,9 @@ https://script.google.com/macros/s/AKfycbxORyepLXzHsosNCN5KK8LedK70_VZQkwlAtPbNx
 - [x] `GET /api/sheets/{sheetName}` - Endpoint genérico por nome
 
 ### **Etapa 5: Testes Locais** ⬜
-- [ ] Executar com `func start` ou F5 no Visual Studio
-- [ ] Validar integração com o Google Apps Script
-- [ ] Testar Swagger UI
+- [x] Executar com `func start` ou F5 no Visual Studio
+- [x] Validar integração com o Google Apps Script
+- [x] Testar Swagger UI
 - [ ] Testar chamada do frontend
 
 ### **Etapa 6: Implementar Cache** ⬜
@@ -63,9 +63,15 @@ https://script.google.com/macros/s/AKfycbxORyepLXzHsosNCN5KK8LedK70_VZQkwlAtPbNx
 - [ ] Configurar tempo de expiração do cache
 - [ ] Evitar chamadas excessivas ao Google Apps Script
 
-### **Etapa 7: Integração com Frontend** ⬜
-- [ ] Atualizar React App para usar a nova API
-- [ ] Substituir leitura do Excel local pela chamada à API
+### **Etapa 7: Integração com Frontend** 🔄
+- [x] Criar serviço de API no frontend (`src/services/api.js`)
+- [x] Criar transformadores de dados (`src/services/transformers.js`)
+- [x] Integrar aba **Consolidado** (Dashboard + Investimentos + Financeiro)
+- [ ] Integrar aba **Proventos** (Gráfico de proventos)
+- [ ] Integrar aba **Cartão-Detalhe** (Gráfico de cartão)
+- [ ] Integrar aba **Ações-Carteira** (Tabela de ações)
+- [ ] Integrar abas restantes (Cartão-Previsão, Cartão-Forecast, etc.)
+- [ ] Remover dependência do arquivo Excel local
 - [ ] Testar fluxo completo
 
 ---
