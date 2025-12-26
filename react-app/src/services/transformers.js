@@ -115,7 +115,8 @@ export function transformConsolidado(data) {
 
 /**
  * Transforma dados da aba Proventos para o formato do frontend
- * @param {Array<Array<any>>} data - Dados brutos da API (matriz)
+ * A API retorna objetos com: { "": ano, "Wed Jan 01...": valor, ... , "Total": x, "Média": y }
+ * @param {Array<Object>} data - Dados da API (array de objetos)
  * @returns {Object} Dados transformados
  */
 export function transformProventos(data) {
@@ -125,24 +126,48 @@ export function transformProventos(data) {
         return { years: [], months: [], valuesByYear: {} };
     }
 
-    const header = data[0];
+    // Extrair as chaves que são datas (excluir "", "Total", "Média", "~ Mensal (Ano)", "Variação")
+    const excludeKeys = ['', 'Total', 'Média', '~ Mensal (Ano)', 'Variação'];
+    const firstRow = data[0];
     
-    // Meses do cabeçalho (colunas 1 a 12)
-    const monthLabels = header.slice(1, 13).map((val) => {
-        if (typeof val === 'string') {
-            return val.replace('.', '').slice(0, 3);
+    // Filtrar apenas as chaves que são datas de meses
+    const monthKeys = Object.keys(firstRow)
+        .filter((key) => !excludeKeys.includes(key))
+        .sort((a, b) => {
+            // Ordenar por mês (extrair o mês da string de data)
+            const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const getMonthIndex = (dateStr) => {
+                for (let i = 0; i < monthOrder.length; i++) {
+                    if (dateStr.includes(monthOrder[i])) return i;
+                }
+                return -1;
+            };
+            return getMonthIndex(a) - getMonthIndex(b);
+        });
+
+    // Converter nomes das chaves para labels curtos de mês
+    const monthLabels = monthKeys.map((key) => {
+        const monthMap = {
+            'Jan': 'jan', 'Feb': 'fev', 'Mar': 'mar', 'Apr': 'abr',
+            'May': 'mai', 'Jun': 'jun', 'Jul': 'jul', 'Aug': 'ago',
+            'Sep': 'set', 'Oct': 'out', 'Nov': 'nov', 'Dec': 'dez'
+        };
+        for (const [eng, pt] of Object.entries(monthMap)) {
+            if (key.includes(eng)) return pt;
         }
-        return String(val ?? '').slice(0, 3);
+        return key.slice(0, 3);
     });
+
+    console.log('📅 Meses de proventos:', monthLabels);
 
     const years = [];
     const valuesByYear = {};
 
-    data.slice(1).forEach((row) => {
-        const year = row[0];
+    data.forEach((row) => {
+        const year = row[''];
         if (!year) return;
         years.push(year);
-        valuesByYear[year] = monthLabels.map((_, idx) => normalizeNumber(row[idx + 1]));
+        valuesByYear[year] = monthKeys.map((monthKey) => normalizeNumber(row[monthKey]));
     });
 
     console.log('✅ Proventos transformado:', { years: years.length, months: monthLabels.length });

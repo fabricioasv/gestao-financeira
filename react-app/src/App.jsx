@@ -11,8 +11,8 @@ import { ProventosChart } from './components/ProventosChart.jsx';
 import { CartaoChart } from './components/CartaoChart.jsx';
 import { parseWorkbook } from './utils/parsing.js';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
-import { fetchConsolidado } from './services/api.js';
-import { transformConsolidado } from './services/transformers.js';
+import { fetchConsolidado, fetchProventos } from './services/api.js';
+import { transformConsolidado, transformProventos } from './services/transformers.js';
 
 const DEFAULT_DATA_URL = `${import.meta.env.BASE_URL}dados.xlsx`;
 
@@ -52,8 +52,21 @@ function App() {
         try {
             // Tentar carregar da API primeiro
             console.log('📡 Tentando carregar dados da API...');
-            const apiData = await fetchConsolidado();
-            const parsed = transformConsolidado(apiData);
+            
+            // Carregar Consolidado e Proventos em paralelo
+            const [consolidadoData, proventosData] = await Promise.all([
+                fetchConsolidado(),
+                fetchProventos(),
+            ]);
+
+            const parsedConsolidado = transformConsolidado(consolidadoData);
+            const parsedProventos = transformProventos(proventosData);
+
+            // Combinar dados
+            const parsed = {
+                ...parsedConsolidado,
+                proventos: parsedProventos,
+            };
 
             handleParsedData(parsed, 'API Azure Function');
             setStatus({
