@@ -63,16 +63,16 @@ https://script.google.com/macros/s/AKfycbxORyepLXzHsosNCN5KK8LedK70_VZQkwlAtPbNx
 - [ ] Configurar tempo de expiração do cache
 - [ ] Evitar chamadas excessivas ao Google Apps Script
 
-### **Etapa 7: Integração com Frontend** 🔄
+### **Etapa 7: Integração com Frontend** ✅
 - [x] Criar serviço de API no frontend (`src/services/api.js`)
 - [x] Criar transformadores de dados (`src/services/transformers.js`)
 - [x] Integrar aba **Consolidado** (Dashboard + Investimentos + Financeiro)
 - [x] Integrar aba **Proventos** (Gráfico de proventos)
 - [x] Integrar aba **Cartão-Detalhe** (Gráfico de cartão)
 - [x] Integrar aba **Ações-Carteira** (Tabela de ações)
-- [ ] Integrar abas restantes (Cartão-Previsão, Cartão-Forecast, etc.)
-- [ ] Remover dependência do arquivo Excel local
-- [ ] Testar fluxo completo
+- [x] ~~Integrar abas restantes~~ (não utilizadas pelo frontend)
+- [x] Remover dependência do arquivo Excel local
+- [x] Testar fluxo completo
 
 ---
 
@@ -133,7 +133,7 @@ gestao-financeira/
 | Etapa 4: Endpoints | ✅ Concluído | 26/12/2024 |
 | Etapa 5: Testes | ⬜ Pendente | - |
 | Etapa 6: Cache | ⬜ Pendente | - |
-| Etapa 7: Integração | ⬜ Pendente | - |
+| Etapa 7: Integração | ✅ Concluído | 26/12/2024 |
 
 ---
 

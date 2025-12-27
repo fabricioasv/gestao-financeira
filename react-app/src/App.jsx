@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import './App.css';
-import { UploadArea } from './components/UploadArea.jsx';
 import { SummaryCards } from './components/SummaryCards.jsx';
 import { DataTable } from './components/DataTable.jsx';
 import { StatusBanner } from './components/StatusBanner.jsx';
@@ -9,12 +8,9 @@ import { FinancialChart } from './components/FinancialChart.jsx';
 import { ActionsTable } from './components/ActionsTable.jsx';
 import { ProventosChart } from './components/ProventosChart.jsx';
 import { CartaoChart } from './components/CartaoChart.jsx';
-import { parseWorkbook } from './utils/parsing.js';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
 import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira } from './services/api.js';
 import { transformConsolidado, transformProventos, transformCartaoDetalhe, transformAcoesCarteira } from './services/transformers.js';
-
-const DEFAULT_DATA_URL = `${import.meta.env.BASE_URL}dados.xlsx`;
 
 function App() {
     const [rows, setRows] = useState([]);
@@ -50,8 +46,7 @@ function App() {
         console.log('🚀 loadDefaultData INICIADA');
         setLoading(true);
         try {
-            // Tentar carregar da API primeiro
-            console.log('📡 Tentando carregar dados da API...');
+            console.log('📡 Carregando dados da API...');
             
             // Carregar todas as abas em paralelo
             const [consolidadoData, proventosData, cartaoDetalheData, acoesCarteiraData] = await Promise.all([
@@ -80,59 +75,11 @@ function App() {
                 message: 'Dados carregados da API. Conectado ao Google Sheets em tempo real.',
             });
             logSuccess('✅ Dados carregados da API');
-        } catch (apiError) {
-            console.warn('⚠️ API indisponível, tentando arquivo local:', apiError.message);
-            
-            // Fallback para arquivo Excel local
-            try {
-                const response = await fetch(DEFAULT_DATA_URL);
-                if (!response.ok) {
-                    throw new Error(`Falha ao baixar dados padrão (HTTP ${response.status})`);
-                }
-
-                const buffer = await response.arrayBuffer();
-                const parsed = parseWorkbook(buffer);
-
-                handleParsedData(parsed, 'dados.xlsx (offline)');
-                setStatus({
-                    type: 'warning',
-                    message: 'API indisponível. Dados carregados do arquivo local.',
-                });
-                logSuccess('✅ Dados padrão carregados (fallback)');
-            } catch (error) {
-                logError('❌ Erro ao carregar dados', error);
-                setStatus({
-                    type: 'error',
-                    message: 'Não foi possível carregar os dados. Verifique se a API está rodando.',
-                });
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleFile = async (file) => {
-        console.log('🚀 handleFile INICIADA');
-        setStatus({
-            type: 'info',
-            message: `Processando ${file.name}...`,
-        });
-        setLoading(true);
-
-        try {
-            const buffer = await file.arrayBuffer();
-            const parsed = parseWorkbook(buffer);
-            handleParsedData(parsed, file.name);
-            setStatus({
-                type: 'success',
-                message: `Arquivo ${file.name} processado com sucesso.`,
-            });
-            logSuccess('✅ Upload concluído', { name: file.name });
         } catch (error) {
-            logError('❌ Erro ao processar arquivo', error);
+            logError('❌ Erro ao carregar dados da API', error);
             setStatus({
                 type: 'error',
-                message: 'Não foi possível processar o arquivo. Confirme se é um Excel válido.',
+                message: `Erro ao carregar dados: ${error.message}. Verifique se a API está rodando.`,
             });
         } finally {
             setLoading(false);
@@ -140,7 +87,7 @@ function App() {
     };
 
     const handleParsedData = (parsed, sourceLabel) => {
-        logDebug('🔍 Atualizando estado com dados da planilha', parsed);
+        logDebug('🔍 Atualizando estado com dados da API', parsed);
         setRows(parsed.rows);
         setMonths(parsed.months);
         setTotals(parsed.totals);
@@ -231,7 +178,7 @@ function App() {
                                             {lastUpdate.at.toLocaleString('pt-BR')}
                                         </p>
                                     ) : (
-                                        <p className="muted small">Carregando planilha padrão...</p>
+                                        <p className="muted small">Carregando dados...</p>
                                     )}
                                 </div>
                 </div>
@@ -263,7 +210,7 @@ function App() {
                                             {lastUpdate.source} em {lastUpdate.at.toLocaleString('pt-BR')}
                                         </p>
                                     ) : (
-                                        <p className="muted small">Aguardando planilha...</p>
+                                        <p className="muted small">Aguardando dados...</p>
                                     )}
                                 </div>
                             </div>
@@ -295,7 +242,7 @@ function App() {
                                             {lastUpdate.source} em {lastUpdate.at.toLocaleString('pt-BR')}
                                         </p>
                                     ) : (
-                                        <p className="muted small">Aguardando planilha...</p>
+                                        <p className="muted small">Aguardando dados...</p>
                                     )}
                                 </div>
                             </div>
@@ -307,16 +254,15 @@ function App() {
                         <header className="hero">
                             <div className="hero-text">
                                 <p className="eyebrow">Gestão Financeira</p>
-                                <h1>Nova interface React para a sua planilha</h1>
+                                <h1>Dashboard Financeiro</h1>
                                 <p className="muted">
-                                    Faça upload do Excel (dados.xlsx) para interpretar os dados e visualizá-los
-                                    rapidamente. Os valores são calculados no navegador, sem depender do backend.
+                                    Dados carregados em tempo real do Google Sheets via API Azure Function.
                                 </p>
                                 <div className="hero-badges">
-                                    <span className="pill">Upload Excel</span>
-                                    <span className="pill secondary">Processamento local</span>
+                                    <span className="pill">Google Sheets</span>
+                                    <span className="pill secondary">API em tempo real</span>
                                     <span className="pill neutral">
-                                        {lastUpdate ? 'Dados prontos' : 'Aguardando planilha'}
+                                        {lastUpdate ? 'Dados prontos' : 'Carregando...'}
                                     </span>
                                 </div>
                             </div>
@@ -335,15 +281,13 @@ function App() {
                                             {lastUpdate.at.toLocaleString('pt-BR')}
                                         </p>
                                     ) : (
-                                        <p className="muted small">Carregando planilha padrão...</p>
+                                        <p className="muted small">Carregando dados...</p>
                                     )}
                                 </div>
                             </div>
                         </header>
 
                         <StatusBanner status={status} loading={loading} lastUpdate={lastUpdate} />
-
-                        <UploadArea onFileSelected={handleFile} loading={loading} />
 
                         <SummaryCards totals={totals} months={months} rowCount={rows.length} />
 
