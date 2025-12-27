@@ -82,9 +82,9 @@ export function transformConsolidado(data) {
         consolidated: findRowValues('[C] Consolidado'),
     };
 
-    // Investimentos (linhas 27 a 32, índices 26-31)
-    const INVESTMENT_START_ROW = 26;
-    const INVESTMENT_END_ROW = 32;
+    // Investimentos (linhas 27 a 32 do Excel = índices 25-30 na API, pois API não inclui header)
+    const INVESTMENT_START_ROW = 25;
+    const INVESTMENT_END_ROW = 31;
     const investmentRows = data.slice(INVESTMENT_START_ROW, INVESTMENT_END_ROW);
     const investmentSeries = investmentRows
         .filter((row) => row && row.Alias)
