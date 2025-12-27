@@ -69,7 +69,7 @@ https://script.google.com/macros/s/AKfycbxORyepLXzHsosNCN5KK8LedK70_VZQkwlAtPbNx
 - [x] Integrar aba **Consolidado** (Dashboard + Investimentos + Financeiro)
 - [x] Integrar aba **Proventos** (Gráfico de proventos)
 - [x] Integrar aba **Cartão-Detalhe** (Gráfico de cartão)
-- [ ] Integrar aba **Ações-Carteira** (Tabela de ações)
+- [x] Integrar aba **Ações-Carteira** (Tabela de ações)
 - [ ] Integrar abas restantes (Cartão-Previsão, Cartão-Forecast, etc.)
 - [ ] Remover dependência do arquivo Excel local
 - [ ] Testar fluxo completo

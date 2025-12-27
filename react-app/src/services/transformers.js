@@ -177,7 +177,8 @@ export function transformProventos(data) {
 
 /**
  * Transforma dados da aba Ações-Carteira para o formato do frontend
- * @param {Array<Array<any>>} data - Dados brutos da API (matriz)
+ * A API retorna objetos com: { Ticker, Amount, "Average Price", ... }
+ * @param {Array<Object>} data - Dados da API (array de objetos)
  * @returns {Object} Dados transformados
  */
 export function transformAcoesCarteira(data) {
@@ -187,16 +188,11 @@ export function transformAcoesCarteira(data) {
         return { headers: [], rows: [] };
     }
 
-    const headers = data[0].map((h) => (h ? String(h).trim() : ''));
-    const dataRows = data.slice(1).filter((row) => row && row.some((cell) => cell !== '' && cell !== null));
+    // Extrair headers das chaves do primeiro objeto
+    const headers = Object.keys(data[0]);
 
-    const rows = dataRows.map((row) => {
-        const obj = {};
-        headers.forEach((h, idx) => {
-            obj[h || `col_${idx}`] = row[idx];
-        });
-        return obj;
-    });
+    // Filtrar linhas vazias (sem Ticker)
+    const rows = data.filter((row) => row.Ticker && row.Ticker !== '');
 
     console.log('✅ Ações-Carteira transformado:', { headers: headers.length, rows: rows.length });
 
