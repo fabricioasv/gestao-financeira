@@ -205,7 +205,8 @@ export function transformAcoesCarteira(data) {
 
 /**
  * Transforma dados da aba Cartão-Detalhe para o formato do frontend
- * @param {Array<Array<any>>} data - Dados brutos da API (matriz)
+ * A API retorna objetos com: { Fatura, Mês, Estabelecimento, Valor, Cartão, "Estabelecimento Fmt", Grupo }
+ * @param {Array<Object>} data - Dados da API (array de objetos)
  * @returns {Object} Dados transformados
  */
 export function transformCartaoDetalhe(data) {
@@ -214,14 +215,6 @@ export function transformCartaoDetalhe(data) {
     if (!Array.isArray(data) || data.length === 0) {
         return { entries: [] };
     }
-
-    const header = data[0].map((h) => normalizeText(h));
-    const faturaIdx = header.findIndex((h) => h.includes('fatura'));
-    const dataIdx = header.findIndex((h) => h === 'data');
-    const estabIdx = header.findIndex((h) => h.startsWith('estabelecimento') && !h.includes('fmt'));
-    const valorIdx = header.findIndex((h) => h.includes('valor'));
-    const grupoIdx = header.findIndex((h) => h.includes('grupo'));
-    const cartaoIdx = header.findIndex((h) => h.includes('cart'));
 
     const parseDate = (value) => {
         if (!value) return null;
@@ -233,22 +226,15 @@ export function transformCartaoDetalhe(data) {
         return null;
     };
 
-    const entries = data.slice(1).reduce((acc, row) => {
-        const faturaRaw = row[faturaIdx];
-        const dataRaw = dataIdx >= 0 ? row[dataIdx] : null;
-        const estabelecimento = estabIdx >= 0 ? row[estabIdx] : '';
-        const valor = normalizeNumber(row[valorIdx]);
-        const grupo = row[grupoIdx] ?? 'Outros';
-        const cartao = row[cartaoIdx] ?? 'Cartão';
+    const entries = data.reduce((acc, row) => {
+        // Pular linhas sem fatura
+        if (!row.Fatura) return acc;
 
-        if (!faturaRaw || Number.isNaN(valor)) {
-            return acc;
-        }
+        const faturaDate = parseDate(row.Fatura);
+        const dataCompra = parseDate(row['Mês']) || faturaDate;
+        const valor = normalizeNumber(row.Valor);
 
-        const faturaDate = parseDate(faturaRaw);
-        const dataCompra = parseDate(dataRaw) || faturaDate;
-
-        if (!faturaDate) return acc;
+        if (!faturaDate || isNaN(valor)) return acc;
 
         const label = `${String(faturaDate.getDate()).padStart(2, '0')}/${String(faturaDate.getMonth() + 1).padStart(2, '0')}/${faturaDate.getFullYear()}`;
         const monthKey = `${faturaDate.getFullYear()}-${String(faturaDate.getMonth() + 1).padStart(2, '0')}`;
@@ -258,10 +244,10 @@ export function transformCartaoDetalhe(data) {
             faturaDate: faturaDate.toISOString(),
             data: dataCompra ? dataCompra.toISOString() : null,
             monthKey,
-            estabelecimento: estabelecimento ? String(estabelecimento) : '',
-            grupo: String(grupo),
+            estabelecimento: row.Estabelecimento ? String(row.Estabelecimento) : '',
+            grupo: row.Grupo ? String(row.Grupo) : 'Outros',
             valor,
-            cartao: String(cartao),
+            cartao: row['Cartão'] ? String(row['Cartão']) : 'Cartão',
         });
         return acc;
     }, []);
