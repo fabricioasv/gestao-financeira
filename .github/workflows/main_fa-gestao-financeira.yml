@@ -50,4 +50,11 @@ jobs:
           app-name: 'fa-gestao-financeira'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+
+      - name: Cleanup build output
+        if: always()
+        shell: bash
+        run: |
+          echo "Cleaning build output: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output"
+          rm -rf "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output"
           

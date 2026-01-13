@@ -63,4 +63,11 @@ jobs:
           app-name: 'wa-gestao-financeira'
           slot-name: 'Production'
           package: './node-app'
+      
+      - name: Cleanup downloaded artifact
+        if: always()
+        shell: bash
+        run: |
+          echo "Cleaning downloaded artifact: ./node-app"
+          rm -rf ./node-app
           
