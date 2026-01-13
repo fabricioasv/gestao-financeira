@@ -33,13 +33,13 @@ public class OpenApiConfigurationOptions : DefaultOpenApiConfigurationOptions
             {
                 return new List<OpenApiServer>
                 {
-                    new OpenApiServer { Url = $"https://{hostname}", Description = "Servidor (Azure)" }
+                    new OpenApiServer { Url = $"https://{hostname}/api", Description = "Servidor (Azure)" }
                 };
             }
 
             return new List<OpenApiServer>
             {
-                new OpenApiServer { Url = "http://localhost:7071", Description = "Servidor Local" }
+                new OpenApiServer { Url = "http://localhost:7071/api", Description = "Servidor Local" }
             };
         }
         set { }
