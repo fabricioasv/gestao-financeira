@@ -12,6 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -24,6 +25,8 @@ jobs:
           node-version: '22.x'
 
       - name: npm install, build, and test
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
         run: |
           cd react-app
           npm install
