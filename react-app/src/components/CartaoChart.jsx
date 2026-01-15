@@ -1,10 +1,12 @@
 import {
     Chart as ChartJS,
     BarElement,
+    BarController,
     CategoryScale,
     LinearScale,
     PointElement,
     LineElement,
+    LineController,
     Legend,
     Tooltip,
     Title,
@@ -15,10 +17,12 @@ import { formatNumber } from '../utils/formatting.js';
 
 ChartJS.register(
     BarElement,
+    BarController,
     CategoryScale,
     LinearScale,
     PointElement,
     LineElement,
+    LineController,
     Legend,
     Tooltip,
     Title,
