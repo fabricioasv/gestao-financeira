@@ -1,0 +1,18 @@
+const express = require('express');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 8080;
+
+// Servir arquivos estáticos da pasta dist
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Para rotas do React Router (SPA), sempre retornar index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+

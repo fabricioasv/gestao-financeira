@@ -30,6 +30,23 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
+      - name: Prepare production files
+        run: |
+          cd react-app
+          cp server.js dist/
+          cat > dist/package.json << 'EOF'
+          {
+            "name": "gestao-financeira",
+            "version": "1.0.0",
+            "scripts": {
+              "start": "node server.js"
+            },
+            "dependencies": {
+              "express": "^4.21.2"
+            }
+          }
+          EOF
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
