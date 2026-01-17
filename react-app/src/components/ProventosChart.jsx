@@ -55,9 +55,7 @@ function ProventosChart({ years = [], months = [], valuesByYear = {}, rendaAnual
                 datasets.push({
                     label: 'Renda Anual Esperada (restante)',
                     data: rendaEsperadaData,
-                    backgroundColor: 'rgba(34, 197, 94, 0.4)', // Verde com transparência
-                    borderColor: 'rgba(34, 197, 94, 0.8)',
-                    borderWidth: 1,
+                    backgroundColor: 'rgba(37, 99, 235, 0.5)', // Azul com 50% transparência
                     borderRadius: 6,
                     stack: 'stack1',
                 });
