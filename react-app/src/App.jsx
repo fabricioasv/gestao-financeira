@@ -9,7 +9,7 @@ import { ActionsTable } from './components/ActionsTable.jsx';
 import { ProventosChart } from './components/ProventosChart.jsx';
 import { CartaoChart } from './components/CartaoChart.jsx';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
-import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira } from './services/api.js';
+import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira, fetchRendaProjetiva } from './services/api.js';
 import { transformConsolidado, transformProventos, transformCartaoDetalhe, transformAcoesCarteira } from './services/transformers.js';
 
 function App() {
@@ -26,6 +26,7 @@ function App() {
     const [stocks, setStocks] = useState({ headers: [], rows: [] });
     const [proventos, setProventos] = useState({ years: [], months: [], valuesByYear: {} });
     const [cartaoDetalhe, setCartaoDetalhe] = useState({ entries: [] });
+    const [rendaAnualEsperada, setRendaAnualEsperada] = useState(null);
     const [status, setStatus] = useState({
         type: 'info',
         message: 'Carregando dados padrão...',
@@ -49,11 +50,12 @@ function App() {
             console.log('📡 Carregando dados da API...');
             
             // Carregar todas as abas em paralelo
-            const [consolidadoData, proventosData, cartaoDetalheData, acoesCarteiraData] = await Promise.all([
+            const [consolidadoData, proventosData, cartaoDetalheData, acoesCarteiraData, rendaProjetivaData] = await Promise.all([
                 fetchConsolidado(),
                 fetchProventos(),
                 fetchCartaoDetalhe(),
                 fetchAcoesCarteira(),
+                fetchRendaProjetiva(),
             ]);
 
             const parsedConsolidado = transformConsolidado(consolidadoData);
@@ -61,12 +63,19 @@ function App() {
             const parsedCartaoDetalhe = transformCartaoDetalhe(cartaoDetalheData);
             const parsedAcoesCarteira = transformAcoesCarteira(acoesCarteiraData);
 
+            // Extrair renda anual esperada da renda projetiva
+            const rendaAnualRow = rendaProjetivaData?.find(
+                (row) => row['Dividendo por ação'] === 'Renda anual esperada'
+            );
+            const rendaAnual = rendaAnualRow?.['Renda anual esperada'] ?? null;
+
             // Combinar dados
             const parsed = {
                 ...parsedConsolidado,
                 proventos: parsedProventos,
                 cartaoDetalhe: parsedCartaoDetalhe,
                 stocks: parsedAcoesCarteira,
+                rendaAnualEsperada: rendaAnual,
             };
 
             handleParsedData(parsed, 'API Azure Function');
@@ -103,6 +112,7 @@ function App() {
         setStocks(parsed.stocks || { headers: [], rows: [] });
         setProventos(parsed.proventos || { years: [], months: [], valuesByYear: {} });
         setCartaoDetalhe(parsed.cartaoDetalhe || { entries: [] });
+        setRendaAnualEsperada(parsed.rendaAnualEsperada ?? null);
         setLastUpdate({
             source: sourceLabel,
             at: new Date(),
@@ -221,6 +231,7 @@ function App() {
                             years={proventos.years}
                             months={proventos.months}
                             valuesByYear={proventos.valuesByYear}
+                            rendaAnualEsperada={rendaAnualEsperada}
                         />
                     </div>
                 ) : activeMenu === 'cartao' ? (

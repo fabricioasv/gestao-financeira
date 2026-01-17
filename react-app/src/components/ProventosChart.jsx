@@ -13,10 +13,13 @@ import { formatNumber } from '../utils/formatting.js';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Legend, Tooltip, Title);
 
-function ProventosChart({ years = [], months = [], valuesByYear = {} }) {
+function ProventosChart({ years = [], months = [], valuesByYear = {}, rendaAnualEsperada = null }) {
     const [selectedYear, setSelectedYear] = useState(() =>
         years.length ? String(years[years.length - 1]) : 'agrupado',
     );
+
+    // Ano corrente para plotar a renda anual esperada
+    const currentYear = new Date().getFullYear();
 
     const data = useMemo(() => {
         const isGrouped = selectedYear === 'agrupado';
@@ -24,16 +27,45 @@ function ProventosChart({ years = [], months = [], valuesByYear = {} }) {
             const annualTotals = years.map((year) =>
                 (valuesByYear[year] || []).reduce((sum, val) => sum + (val ?? 0), 0),
             );
+
+            // Dataset de proventos recebidos
+            const datasets = [
+                {
+                    label: 'Proventos Recebidos',
+                    data: annualTotals,
+                    backgroundColor: '#2563eb',
+                    borderRadius: 6,
+                    stack: 'stack1',
+                },
+            ];
+
+            // Se tiver renda anual esperada, adicionar como stacked no ano corrente
+            if (rendaAnualEsperada && rendaAnualEsperada > 0) {
+                const currentYearIndex = years.findIndex((y) => Number(y) === currentYear);
+                const rendaEsperadaData = years.map((year, idx) => {
+                    if (idx === currentYearIndex) {
+                        // Calcular quanto falta para atingir a renda esperada
+                        const proventosRecebidos = annualTotals[idx] || 0;
+                        const faltante = rendaAnualEsperada - proventosRecebidos;
+                        return faltante > 0 ? faltante : 0;
+                    }
+                    return 0;
+                });
+
+                datasets.push({
+                    label: 'Renda Anual Esperada (restante)',
+                    data: rendaEsperadaData,
+                    backgroundColor: 'rgba(34, 197, 94, 0.4)', // Verde com transparência
+                    borderColor: 'rgba(34, 197, 94, 0.8)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    stack: 'stack1',
+                });
+            }
+
             return {
                 labels: years.map(String),
-                datasets: [
-                    {
-                        label: 'Proventos Anual (Agrupado)',
-                        data: annualTotals,
-                        backgroundColor: '#2563eb',
-                        borderRadius: 6,
-                    },
-                ],
+                datasets,
             };
         }
 
@@ -42,14 +74,14 @@ function ProventosChart({ years = [], months = [], valuesByYear = {} }) {
             labels: months,
             datasets: [
                 {
-                    label: isGrouped ? 'Proventos (Agrupado)' : `Proventos ${selectedYear || ''}`,
+                    label: `Proventos ${selectedYear || ''}`,
                     data: values,
                     backgroundColor: '#2563eb',
                     borderRadius: 6,
                 },
             ],
         };
-    }, [months, selectedYear, valuesByYear, years]);
+    }, [months, selectedYear, valuesByYear, years, rendaAnualEsperada, currentYear]);
 
     if (!months.length && selectedYear !== 'agrupado') {
         return (
@@ -80,11 +112,12 @@ function ProventosChart({ years = [], months = [], valuesByYear = {} }) {
         scales: {
             y: {
                 beginAtZero: true,
+                stacked: isGrouped,
                 ticks: { callback: (value) => formatNumber(value) },
                 title: { display: false },
             },
             x: {
-                stacked: false,
+                stacked: isGrouped,
                 ticks: isGrouped
                     ? {
                           autoSkip: false,
