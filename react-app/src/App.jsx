@@ -285,28 +285,53 @@ function App() {
                                 <span className="pill">{netoInvest.rows.length} registros</span>
                             </div>
                             {netoInvest.rows.length > 0 ? (
-                                <div className="table-wrapper">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                {netoInvest.headers.map((h) => (
-                                                    <th key={h || 'col'}>{h || '-'}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {netoInvest.rows.map((row, idx) => (
-                                                <tr key={idx}>
-                                                    {netoInvest.headers.map((h, colIdx) => (
-                                                        <td key={`${idx}-${colIdx}`}>
-                                                            {row[h] !== undefined ? String(row[h]) : '-'}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                (() => {
+                                    // Tickers em carteira
+                                    const tickersEmCarteira = new Set(stocks.rows.map(r => r['Ticker']));
+                                    
+                                    // Ordenar por "Margem de segurança" (maior para menor)
+                                    const sortedRows = [...netoInvest.rows].sort((a, b) => {
+                                        const margemA = parseFloat(a['Margem de segurança']) || 0;
+                                        const margemB = parseFloat(b['Margem de segurança']) || 0;
+                                        return margemB - margemA; // Decrescente
+                                    });
+
+                                    return (
+                                        <div className="table-wrapper">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        {netoInvest.headers.map((h) => (
+                                                            <th key={h || 'col'}>{h || '-'}</th>
+                                                        ))}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {sortedRows.map((row, idx) => {
+                                                        // Na Neto-Invest a coluna é "Código", na carteira é "Ticker"
+                                                        const codigo = row['Código'];
+                                                        const emCarteira = tickersEmCarteira.has(codigo);
+                                                        return (
+                                                            <tr 
+                                                                key={idx}
+                                                                style={emCarteira ? { 
+                                                                    backgroundColor: 'rgba(29, 78, 216, 0.15)',
+                                                                    borderLeft: '3px solid #1d4ed8'
+                                                                } : {}}
+                                                            >
+                                                                {netoInvest.headers.map((h, colIdx) => (
+                                                                    <td key={`${idx}-${colIdx}`}>
+                                                                        {row[h] !== undefined ? String(row[h]) : '-'}
+                                                                    </td>
+                                                                ))}
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    );
+                                })()
                             ) : (
                                 <p className="muted small" style={{ padding: '1rem' }}>
                                     Nenhum dado encontrado. Verifique a aba Neto-Invest na planilha.
