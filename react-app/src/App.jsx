@@ -9,7 +9,7 @@ import { ActionsTable } from './components/ActionsTable.jsx';
 import { ProventosChart } from './components/ProventosChart.jsx';
 import { CartaoChart } from './components/CartaoChart.jsx';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
-import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira, fetchRendaProjetiva } from './services/api.js';
+import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira, fetchRendaProjetiva, fetchNetoInvest } from './services/api.js';
 import { transformConsolidado, transformProventos, transformCartaoDetalhe, transformAcoesCarteira } from './services/transformers.js';
 
 function App() {
@@ -27,6 +27,7 @@ function App() {
     const [proventos, setProventos] = useState({ years: [], months: [], valuesByYear: {} });
     const [cartaoDetalhe, setCartaoDetalhe] = useState({ entries: [] });
     const [rendaAnualEsperada, setRendaAnualEsperada] = useState(null);
+    const [netoInvest, setNetoInvest] = useState({ headers: [], rows: [] });
     const [status, setStatus] = useState({
         type: 'info',
         message: 'Carregando dados padrão...',
@@ -50,12 +51,13 @@ function App() {
             console.log('📡 Carregando dados da API...');
             
             // Carregar todas as abas em paralelo
-            const [consolidadoData, proventosData, cartaoDetalheData, acoesCarteiraData, rendaProjetivaData] = await Promise.all([
+            const [consolidadoData, proventosData, cartaoDetalheData, acoesCarteiraData, rendaProjetivaData, netoInvestData] = await Promise.all([
                 fetchConsolidado(),
                 fetchProventos(),
                 fetchCartaoDetalhe(),
                 fetchAcoesCarteira(),
                 fetchRendaProjetiva(),
+                fetchNetoInvest(),
             ]);
 
             const parsedConsolidado = transformConsolidado(consolidadoData);
@@ -69,6 +71,12 @@ function App() {
             );
             const rendaAnual = rendaAnualRow?.['Renda anual esperada'] ?? null;
 
+            // Transformar Neto-Invest (similar ao Ações-Carteira)
+            const parsedNetoInvest = {
+                headers: netoInvestData?.length > 0 ? Object.keys(netoInvestData[0]) : [],
+                rows: netoInvestData || [],
+            };
+
             // Combinar dados
             const parsed = {
                 ...parsedConsolidado,
@@ -76,6 +84,7 @@ function App() {
                 cartaoDetalhe: parsedCartaoDetalhe,
                 stocks: parsedAcoesCarteira,
                 rendaAnualEsperada: rendaAnual,
+                netoInvest: parsedNetoInvest,
             };
 
             handleParsedData(parsed, 'API Azure Function');
@@ -113,6 +122,7 @@ function App() {
         setProventos(parsed.proventos || { years: [], months: [], valuesByYear: {} });
         setCartaoDetalhe(parsed.cartaoDetalhe || { entries: [] });
         setRendaAnualEsperada(parsed.rendaAnualEsperada ?? null);
+        setNetoInvest(parsed.netoInvest || { headers: [], rows: [] });
         setLastUpdate({
             source: sourceLabel,
             at: new Date(),
@@ -150,6 +160,13 @@ function App() {
                         onClick={() => setActiveMenu('investimentos')}
                     >
                         Investimentos
+                    </button>
+                    <button
+                        type="button"
+                        className={`nav-item ${activeMenu === 'neto-invest' ? 'active' : ''}`}
+                        onClick={() => setActiveMenu('neto-invest')}
+                    >
+                        Neto Invest
                     </button>
                     <button
                         type="button"
@@ -233,6 +250,69 @@ function App() {
                             valuesByYear={proventos.valuesByYear}
                             rendaAnualEsperada={rendaAnualEsperada}
                         />
+                    </div>
+                ) : activeMenu === 'neto-invest' ? (
+                    <div className="page">
+                        <header className="hero">
+                            <div className="hero-text">
+                                <p className="eyebrow">Neto Invest</p>
+                                <h1>Dados de Investimento Líquido</h1>
+                                <p className="muted">
+                                    Dados da aba Neto-Invest do Google Sheets.
+                                </p>
+                            </div>
+                            <div className="hero-meta">
+                                <div className="meta-card">
+                                    <p className="eyebrow">Atualização</p>
+                                    {lastUpdate ? (
+                                        <p className="muted small">
+                                            {lastUpdate.source} em {lastUpdate.at.toLocaleString('pt-BR')}
+                                        </p>
+                                    ) : (
+                                        <p className="muted small">Aguardando dados...</p>
+                                    )}
+                                </div>
+                            </div>
+                        </header>
+
+                        <div className="panel">
+                            <div className="panel-header">
+                                <div>
+                                    <p className="eyebrow">Neto Invest</p>
+                                    <h3>Tabela de Dados</h3>
+                                    <p className="muted small">Dados da aba Neto-Invest.</p>
+                                </div>
+                                <span className="pill">{netoInvest.rows.length} registros</span>
+                            </div>
+                            {netoInvest.rows.length > 0 ? (
+                                <div className="table-wrapper">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                {netoInvest.headers.map((h) => (
+                                                    <th key={h || 'col'}>{h || '-'}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {netoInvest.rows.map((row, idx) => (
+                                                <tr key={idx}>
+                                                    {netoInvest.headers.map((h, colIdx) => (
+                                                        <td key={`${idx}-${colIdx}`}>
+                                                            {row[h] !== undefined ? String(row[h]) : '-'}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <p className="muted small" style={{ padding: '1rem' }}>
+                                    Nenhum dado encontrado. Verifique a aba Neto-Invest na planilha.
+                                </p>
+                            )}
+                        </div>
                     </div>
                 ) : activeMenu === 'cartao' ? (
                     <div className="page">
