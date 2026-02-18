@@ -144,6 +144,16 @@ public class SheetsEndpoints
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "sheets/neto-invest")] HttpRequestData req)
         => GetSheetData(req, "Neto-Invest");
 
+    [Function("GetFollowUp")]
+    [OpenApiOperation(operationId: "GetFollowUp", tags: new[] { "Sheets" },
+        Summary = "Obtém dados do Follow-Up",
+        Description = "Retorna os dados da aba Follow-Up")]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json",
+        bodyType: typeof(object), Description = "Dados obtidos com sucesso")]
+    public Task<HttpResponseData> GetFollowUp(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "sheets/follow-up")] HttpRequestData req)
+        => GetSheetData(req, "Follow-Up");
+
     #endregion
 
     #region Endpoint Genérico

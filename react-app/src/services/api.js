@@ -88,4 +88,5 @@ export const fetchRendaProjetiva = () => fetchSheet('renda-projetiva');
 export const fetchProventosRecebidos = () => fetchSheet('proventos-recebidos');
 export const fetchProventosAReceber = () => fetchSheet('proventos-a-receber');
 export const fetchNetoInvest = () => fetchSheet('neto-invest');
+export const fetchFollowUp = () => fetchSheet('follow-up');
 
