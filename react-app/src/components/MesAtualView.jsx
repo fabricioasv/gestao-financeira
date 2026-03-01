@@ -6,22 +6,29 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 export function MesAtualView({ data }) {
     // Separar os dados por TIPO e calcular totais
-    const { consolidado, credito, debito, totais, creditoPendente, debitoPendente } = useMemo(() => {
+    const { consolidado, credito, debito, saldoAtual, saldoProjetado, totalCredito, totalDebito, creditoQuitado, debitoQuitado, creditoPendente, debitoPendente, totalDisponivelConsolidado } = useMemo(() => {
         if (!data || data.length === 0) {
             return { 
                 consolidado: [], 
                 credito: [], 
                 debito: [], 
-                totais: { consolidado: 0, credito: 0, debito: 0, creditoQuitado: 0, debitoQuitado: 0 },
+                saldoAtual: 0,
+                saldoProjetado: 0,
+                totalCredito: 0,
+                totalDebito: 0,
+                creditoQuitado: 0,
+                debitoQuitado: 0,
                 creditoPendente: 0,
-                debitoPendente: 0
+                debitoPendente: 0,
+                totalDisponivelConsolidado: 0
             };
         }
 
         const consolidado = [];
         const credito = [];
         const debito = [];
-        let totalConsolidado = 0;
+        let contaCorrente = 0;
+        let totalDisponivelConsolidado = 0;
         let totalCredito = 0;
         let totalDebito = 0;
         let totalCreditoQuitado = 0;
@@ -29,13 +36,23 @@ export function MesAtualView({ data }) {
 
         data.forEach((row) => {
             const tipo = row['Tipo']?.trim().toLowerCase();
+            const descricao = row['Descrição']?.trim() || '';
             const valor = parseFloat(row['Valor']) || 0;
             const quitadoStr = row['Quitado'];
             const quitado = quitadoStr && quitadoStr !== '-' ? parseFloat(quitadoStr) : 0;
             
             if (tipo === 'consolidado') {
                 consolidado.push(row);
-                totalConsolidado += valor;
+                
+                // Saldo Atual = Consolidado - Conta Corrente
+                if (descricao.toLowerCase().includes('conta corrente')) {
+                    contaCorrente = valor;
+                }
+                
+                // Saldo Projetado = Consolidado - Total disponível
+                if (descricao.toLowerCase().includes('total disponível')) {
+                    totalDisponivelConsolidado = valor;
+                }
             } else if (tipo === 'crédito') {
                 credito.push(row);
                 totalCredito += valor;
@@ -54,15 +71,15 @@ export function MesAtualView({ data }) {
             consolidado, 
             credito, 
             debito,
-            totais: {
-                consolidado: totalConsolidado,
-                credito: totalCredito,
-                debito: totalDebito,
-                creditoQuitado: totalCreditoQuitado,
-                debitoQuitado: totalDebitoQuitado
-            },
+            saldoAtual: contaCorrente,
+            saldoProjetado: totalDisponivelConsolidado,
+            totalCredito,
+            totalDebito,
+            creditoQuitado: totalCreditoQuitado,
+            debitoQuitado: totalDebitoQuitado,
             creditoPendente,
-            debitoPendente
+            debitoPendente,
+            totalDisponivelConsolidado
         };
     }, [data]);
 
@@ -83,9 +100,9 @@ export function MesAtualView({ data }) {
         datasets: [
             {
                 data: [
-                    totais.creditoQuitado,
+                    creditoQuitado,
                     creditoPendente,
-                    totais.debitoQuitado,
+                    debitoQuitado,
                     debitoPendente
                 ],
                 backgroundColor: [
@@ -111,7 +128,7 @@ export function MesAtualView({ data }) {
         datasets: [
             {
                 label: 'Recebido/Pago',
-                data: [totais.creditoQuitado, totais.debitoQuitado],
+                data: [creditoQuitado, debitoQuitado],
                 backgroundColor: 'rgba(34, 197, 94, 0.8)',
                 borderColor: 'rgba(34, 197, 94, 1)',
                 borderWidth: 2,
@@ -174,9 +191,6 @@ export function MesAtualView({ data }) {
         }
     };
 
-    // Calcular saldo projetado
-    const saldoProjetado = totais.consolidado + totais.credito - totais.debito;
-
     // Encontrar item "Mês Ant." no crédito
     const mesAnterior = credito.find(row => row['Descrição']?.includes('Mês Ant.'));
 
@@ -189,7 +203,7 @@ export function MesAtualView({ data }) {
                 gap: '1.5rem',
                 marginBottom: '2rem'
             }}>
-                {/* Card Consolidado */}
+                {/* Card Saldo Atual */}
                 <div style={{
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     borderRadius: '12px',
@@ -198,9 +212,9 @@ export function MesAtualView({ data }) {
                     boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                 }}>
                     <p style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.5rem' }}>💰 Saldo Atual</p>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{formatCurrency(totais.consolidado)}</p>
+                    <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{formatCurrency(saldoAtual)}</p>
                     <p style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.5rem' }}>
-                        {consolidado.length} {consolidado.length === 1 ? 'conta' : 'contas'}
+                        Conta Corrente
                     </p>
                 </div>
 
@@ -213,9 +227,9 @@ export function MesAtualView({ data }) {
                     boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                 }}>
                     <p style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.5rem' }}>📈 Crédito Total</p>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{formatCurrency(totais.credito)}</p>
+                    <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{formatCurrency(totalCredito)}</p>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.9 }}>
-                        <span>✅ Recebido: {formatCurrency(totais.creditoQuitado)}</span>
+                        <span>✅ Recebido: {formatCurrency(creditoQuitado)}</span>
                         <span>⏳ Pendente: {formatCurrency(creditoPendente)}</span>
                     </div>
                 </div>
@@ -229,9 +243,9 @@ export function MesAtualView({ data }) {
                     boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                 }}>
                     <p style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.5rem' }}>📉 Débito Total</p>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{formatCurrency(totais.debito)}</p>
+                    <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{formatCurrency(totalDebito)}</p>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.75rem', opacity: 0.9 }}>
-                        <span>✅ Pago: {formatCurrency(totais.debitoQuitado)}</span>
+                        <span>✅ Pago: {formatCurrency(debitoQuitado)}</span>
                         <span>⏳ Pendente: {formatCurrency(debitoPendente)}</span>
                     </div>
                 </div>
