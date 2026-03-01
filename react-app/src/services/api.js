@@ -89,4 +89,5 @@ export const fetchProventosRecebidos = () => fetchSheet('proventos-recebidos');
 export const fetchProventosAReceber = () => fetchSheet('proventos-a-receber');
 export const fetchNetoInvest = () => fetchSheet('neto-invest');
 export const fetchFollowUp = () => fetchSheet('follow-up');
+export const fetchAtual = () => fetchSheet('atual');
 

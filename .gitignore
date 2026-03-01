@@ -62,6 +62,12 @@ bld/
 # Azure Functions
 local.settings.json
 
+# Azurite (Azure Storage Emulator)
+__blobstorage__/
+__queuestorage__/
+__tablestorage__/
+__azurite_db_*.json
+
 # Rider
 .idea/
 *.sln.iml

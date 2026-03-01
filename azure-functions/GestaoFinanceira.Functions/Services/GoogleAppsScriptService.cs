@@ -23,7 +23,8 @@ public class GoogleAppsScriptService : IGoogleAppsScriptService
         "Proventos-Recebidos",
         "Proventos-A-Receber",
         "Neto-Invest",
-        "Follow-Up"
+        "Follow-Up",
+        "Atual"
     };
 
     public GoogleAppsScriptService(

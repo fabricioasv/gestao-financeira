@@ -154,6 +154,16 @@ public class SheetsEndpoints
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "sheets/follow-up")] HttpRequestData req)
         => GetSheetData(req, "Follow-Up");
 
+    [Function("GetAtual")]
+    [OpenApiOperation(operationId: "GetAtual", tags: new[] { "Sheets" },
+        Summary = "Obtém dados do Atual",
+        Description = "Retorna os dados da aba Atual")]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json",
+        bodyType: typeof(object), Description = "Dados obtidos com sucesso")]
+    public Task<HttpResponseData> GetAtual(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "sheets/atual")] HttpRequestData req)
+        => GetSheetData(req, "Atual");
+
     #endregion
 
     #region Endpoint Genérico

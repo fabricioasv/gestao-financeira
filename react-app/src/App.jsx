@@ -9,8 +9,9 @@ import { ActionsTable } from './components/ActionsTable.jsx';
 import { ProventosChart } from './components/ProventosChart.jsx';
 import { CartaoChart } from './components/CartaoChart.jsx';
 import { FollowUpChart } from './components/FollowUpChart.jsx';
+import { MesAtualView } from './components/MesAtualView.jsx';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
-import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira, fetchRendaProjetiva, fetchNetoInvest, fetchFollowUp } from './services/api.js';
+import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira, fetchRendaProjetiva, fetchNetoInvest, fetchFollowUp, fetchAtual } from './services/api.js';
 import { transformConsolidado, transformProventos, transformCartaoDetalhe, transformAcoesCarteira } from './services/transformers.js';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
     const [rendaAnualEsperada, setRendaAnualEsperada] = useState(null);
     const [netoInvest, setNetoInvest] = useState({ headers: [], rows: [] });
     const [followUp, setFollowUp] = useState([]);
+    const [atual, setAtual] = useState([]);
     const [status, setStatus] = useState({
         type: 'info',
         message: 'Carregando dados padrão...',
@@ -53,7 +55,7 @@ function App() {
             console.log('📡 Carregando dados da API...');
             
             // Carregar todas as abas em paralelo
-            const [consolidadoData, proventosData, cartaoDetalheData, acoesCarteiraData, rendaProjetivaData, netoInvestData, followUpData] = await Promise.all([
+            const [consolidadoData, proventosData, cartaoDetalheData, acoesCarteiraData, rendaProjetivaData, netoInvestData, followUpData, atualData] = await Promise.all([
                 fetchConsolidado(),
                 fetchProventos(),
                 fetchCartaoDetalhe(),
@@ -61,6 +63,7 @@ function App() {
                 fetchRendaProjetiva(),
                 fetchNetoInvest(),
                 fetchFollowUp(),
+                fetchAtual(),
             ]);
 
             const parsedConsolidado = transformConsolidado(consolidadoData);
@@ -89,6 +92,7 @@ function App() {
                 rendaAnualEsperada: rendaAnual,
                 netoInvest: parsedNetoInvest,
                 followUp: followUpData || [],
+                atual: atualData || [],
             };
 
             handleParsedData(parsed, 'API Azure Function');
@@ -128,6 +132,7 @@ function App() {
         setRendaAnualEsperada(parsed.rendaAnualEsperada ?? null);
         setNetoInvest(parsed.netoInvest || { headers: [], rows: [] });
         setFollowUp(parsed.followUp || []);
+        setAtual(parsed.atual || []);
         setLastUpdate({
             source: sourceLabel,
             at: new Date(),
@@ -179,6 +184,13 @@ function App() {
                         onClick={() => setActiveMenu('follow-up')}
                     >
                         Follow Up
+                    </button>
+                    <button
+                        type="button"
+                        className={`nav-item ${activeMenu === 'mes-atual' ? 'active' : ''}`}
+                        onClick={() => setActiveMenu('mes-atual')}
+                    >
+                        Mês atual
                     </button>
                     <button
                         type="button"
@@ -376,6 +388,32 @@ function App() {
                         </header>
 
                         <FollowUpChart data={followUp} />
+                    </div>
+                ) : activeMenu === 'mes-atual' ? (
+                    <div className="page">
+                        <header className="hero">
+                            <div className="hero-text">
+                                <p className="eyebrow">Mês Atual</p>
+                                <h1>Controle do mês</h1>
+                                <p className="muted">
+                                    Informações consolidadas, créditos e débitos do mês atual.
+                                </p>
+                            </div>
+                            <div className="hero-meta">
+                                <div className="meta-card">
+                                    <p className="eyebrow">Atualização</p>
+                                    {lastUpdate ? (
+                                        <p className="muted small">
+                                            {lastUpdate.source} em {lastUpdate.at.toLocaleString('pt-BR')}
+                                        </p>
+                                    ) : (
+                                        <p className="muted small">Aguardando dados...</p>
+                                    )}
+                                </div>
+                            </div>
+                        </header>
+
+                        <MesAtualView data={atual} />
                     </div>
                 ) : activeMenu === 'cartao' ? (
                     <div className="page">
