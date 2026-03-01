@@ -106,9 +106,9 @@ export function MesAtualView({ data }) {
                     debitoPendente
                 ],
                 backgroundColor: [
-                    'rgba(34, 197, 94, 0.8)',   // Verde - Crédito Recebido
+                    'rgba(34, 197, 94, 0.8)',   // Verde escuro - Crédito Recebido
                     'rgba(34, 197, 94, 0.3)',   // Verde claro - Crédito Pendente
-                    'rgba(239, 68, 68, 0.8)',   // Vermelho - Débito Pago
+                    'rgba(239, 68, 68, 0.8)',   // Vermelho escuro - Débito Pago
                     'rgba(239, 68, 68, 0.3)',   // Vermelho claro - Débito Pendente
                 ],
                 borderColor: [
@@ -136,8 +136,8 @@ export function MesAtualView({ data }) {
             {
                 label: 'Pendente',
                 data: [creditoPendente, debitoPendente],
-                backgroundColor: 'rgba(251, 191, 36, 0.8)',
-                borderColor: 'rgba(251, 191, 36, 1)',
+                backgroundColor: 'rgba(239, 68, 68, 0.3)',
+                borderColor: 'rgba(239, 68, 68, 0.5)',
                 borderWidth: 2,
             },
         ],
@@ -201,6 +201,7 @@ export function MesAtualView({ data }) {
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
                 gap: '1.5rem',
+                marginTop: '2rem',
                 marginBottom: '2rem'
             }}>
                 {/* Card Saldo Atual */}
@@ -396,8 +397,13 @@ export function MesAtualView({ data }) {
                         </thead>
                         <tbody>
                             {credito.map((row, idx) => {
-                                const isQuitado = row['Quitado'] && row['Quitado'] !== '' && row['Quitado'] !== '-';
+                                const valor = parseFloat(row['Valor']) || 0;
+                                const quitadoStr = row['Quitado'];
+                                const quitado = quitadoStr && quitadoStr !== '-' ? parseFloat(quitadoStr) : 0;
+                                const isQuitado = quitado > 0;
+                                const isParcial = isQuitado && quitado < valor;
                                 const isMesAnt = row['Descrição']?.includes('Mês Ant.');
+                                
                                 return (
                                     <tr 
                                         key={idx} 
@@ -415,7 +421,7 @@ export function MesAtualView({ data }) {
                                             {formatCurrency(row['Quitado'])}
                                         </td>
                                         <td style={{ padding: '0.75rem', fontSize: '0.875rem', textAlign: 'center' }}>
-                                            {isMesAnt ? '⚠️ Mês Ant.' : isQuitado ? '✅ Recebido' : '⏳ Pendente'}
+                                            {isMesAnt ? '⚠️ Mês Ant.' : isParcial ? '◐ Parcial' : isQuitado ? '✅ Recebido' : '⏳ Pendente'}
                                         </td>
                                     </tr>
                                 );
@@ -453,7 +459,12 @@ export function MesAtualView({ data }) {
                         </thead>
                         <tbody>
                             {debito.map((row, idx) => {
-                                const isQuitado = row['Quitado'] && row['Quitado'] !== '' && row['Quitado'] !== '-';
+                                const valor = parseFloat(row['Valor']) || 0;
+                                const quitadoStr = row['Quitado'];
+                                const quitado = quitadoStr && quitadoStr !== '-' ? parseFloat(quitadoStr) : 0;
+                                const isQuitado = quitado > 0;
+                                const isParcial = isQuitado && quitado < valor;
+                                
                                 return (
                                     <tr 
                                         key={idx} 
@@ -471,7 +482,7 @@ export function MesAtualView({ data }) {
                                             {formatCurrency(row['Quitado'])}
                                         </td>
                                         <td style={{ padding: '0.75rem', fontSize: '0.875rem', textAlign: 'center' }}>
-                                            {isQuitado ? '✅ Pago' : '⏳ Pendente'}
+                                            {isParcial ? '◐ Parcial' : isQuitado ? '✅ Pago' : '⏳ Pendente'}
                                         </td>
                                     </tr>
                                 );
