@@ -159,10 +159,17 @@ function App() {
                     </button>
                     <button
                         type="button"
-                        className={`nav-item ${activeMenu === 'demais' ? 'active' : ''}`}
-                        onClick={() => setActiveMenu('demais')}
+                        className={`nav-item ${activeMenu === 'mes-atual' ? 'active' : ''}`}
+                        onClick={() => setActiveMenu('mes-atual')}
                     >
-                        Demais
+                        Mês atual
+                    </button>
+                    <button
+                        type="button"
+                        className={`nav-item ${activeMenu === 'cartao' ? 'active' : ''}`}
+                        onClick={() => setActiveMenu('cartao')}
+                    >
+                        Cartão
                     </button>
                     <button
                         type="button"
@@ -187,17 +194,10 @@ function App() {
                     </button>
                     <button
                         type="button"
-                        className={`nav-item ${activeMenu === 'mes-atual' ? 'active' : ''}`}
-                        onClick={() => setActiveMenu('mes-atual')}
+                        className={`nav-item ${activeMenu === 'demais' ? 'active' : ''}`}
+                        onClick={() => setActiveMenu('demais')}
                     >
-                        Mês atual
-                    </button>
-                    <button
-                        type="button"
-                        className={`nav-item ${activeMenu === 'cartao' ? 'active' : ''}`}
-                        onClick={() => setActiveMenu('cartao')}
-                    >
-                        Cartão
+                        Demais
                     </button>
                 </nav>
             </aside>
