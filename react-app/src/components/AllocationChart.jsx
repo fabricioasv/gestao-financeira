@@ -193,26 +193,38 @@ export function AllocationChart({ labels, series }) {
             <div style={{ height: '400px', padding: '1rem' }}>
                 <Chart type="doughnut" data={chartData} options={options} />
             </div>
-            <div style={{ padding: '1rem', borderTop: '1px solid #1e293b' }}>
+            <div style={{ padding: '1.5rem', borderTop: '1px solid #1e293b' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
                     {currentMonthData.data.map((item, idx) => (
                         <div
                             key={idx}
                             style={{
-                                padding: '0.75rem',
-                                backgroundColor: 'rgba(30, 41, 59, 0.5)',
-                                borderRadius: '8px',
-                                borderLeft: '3px solid',
+                                padding: '1rem',
+                                background: `linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)`,
+                                borderRadius: '12px',
+                                border: '1px solid rgba(51, 65, 85, 0.6)',
+                                borderLeft: '4px solid',
                                 borderLeftColor: chartData.datasets[0].backgroundColor[idx],
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
+                                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                cursor: 'default',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)';
                             }}
                         >
-                            <p className="eyebrow" style={{ marginBottom: '0.25rem' }}>
+                            <p className="eyebrow" style={{ marginBottom: '0.5rem', color: '#94a3b8' }}>
                                 {item.label}
                             </p>
-                            <p style={{ fontSize: '1.25rem', fontWeight: '600', color: '#f1f5f9', marginBottom: '0.25rem' }}>
+                            <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f1f5f9', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
                                 {item.percentage.toFixed(2)}%
                             </p>
-                            <p className="muted small">
+                            <p className="muted small" style={{ fontSize: '0.875rem', color: '#cbd5e1' }}>
                                 R${' '}
                                 {item.value.toLocaleString('pt-BR', {
                                     minimumFractionDigits: 2,
