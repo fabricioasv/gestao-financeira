@@ -1,0 +1,228 @@
+import { useMemo } from 'react';
+import { Chart } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    ArcElement,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+/**
+ * Componente para exibir gráfico de alocação de investimentos (pizza/donut)
+ * @param {Object} props
+ * @param {Array} props.labels - Meses disponíveis
+ * @param {Array} props.series - Séries de investimentos com label e values
+ */
+export function AllocationChart({ labels, series }) {
+    const currentMonthData = useMemo(() => {
+        console.log('🔍 AllocationChart - labels:', labels);
+        console.log('🔍 AllocationChart - series:', series);
+        
+        if (!labels || labels.length === 0 || !series || series.length === 0) {
+            console.log('⚠️ AllocationChart - Sem labels ou series');
+            return null;
+        }
+
+        // Obter o mês atual no formato YY-MM (ex: 26-03 para março de 2026)
+        const now = new Date();
+        const year = String(now.getFullYear()).slice(-2); // Últimos 2 dígitos do ano
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // Mês com 2 dígitos
+        const currentMonthKey = `${year}-${month}`;
+        
+        console.log('📅 AllocationChart - Mês atual do sistema:', currentMonthKey);
+        
+        // Procurar o índice do mês corrente
+        const currentMonthIndex = labels.indexOf(currentMonthKey);
+        
+        if (currentMonthIndex === -1) {
+            console.log(`⚠️ AllocationChart - Mês ${currentMonthKey} não encontrado nos labels`);
+            return null;
+        }
+        
+        console.log('📅 AllocationChart - Mês corrente encontrado:', currentMonthKey, 'índice:', currentMonthIndex);
+
+        // Extrair valores do mês corrente e garantir que são números
+        // Filtrar apenas valores positivos (ativos) para o gráfico de alocação
+        const data = series
+            .map((s) => {
+                const rawValue = s.values[currentMonthIndex];
+                const numericValue = typeof rawValue === 'number' ? rawValue : parseFloat(rawValue) || 0;
+                console.log(`💰 ${s.label}: ${rawValue} -> ${numericValue}`);
+                return {
+                    label: s.label,
+                    value: numericValue,
+                };
+            })
+            .filter((item) => item.value > 0); // Apenas valores positivos
+
+        // Calcular total (apenas valores positivos)
+        const total = data.reduce((sum, item) => sum + item.value, 0);
+        
+        console.log('📊 AllocationChart - Total (apenas positivos):', total);
+        console.log('📊 AllocationChart - Data (apenas positivos):', data);
+
+        // Se total é zero ou muito pequeno, não há dados
+        if (total <= 0.01) {
+            console.log('⚠️ AllocationChart - Total é zero ou muito pequeno para o mês corrente');
+            return null;
+        }
+
+        // Calcular porcentagens
+        const dataWithPercentages = data.map((item) => ({
+            ...item,
+            percentage: (item.value / total) * 100,
+        }));
+
+        console.log('✅ AllocationChart - Dados processados com sucesso');
+
+        return {
+            month: currentMonthKey,
+            data: dataWithPercentages,
+            total,
+        };
+    }, [labels, series]);
+
+    const chartData = useMemo(() => {
+        if (!currentMonthData) return null;
+
+        return {
+            labels: currentMonthData.data.map((d) => d.label),
+            datasets: [
+                {
+                    data: currentMonthData.data.map((d) => d.value),
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',  // Azul
+                        'rgba(16, 185, 129, 0.8)',  // Verde
+                        'rgba(245, 158, 11, 0.8)',  // Amarelo
+                        'rgba(239, 68, 68, 0.8)',   // Vermelho
+                        'rgba(168, 85, 247, 0.8)',  // Roxo
+                        'rgba(236, 72, 153, 0.8)',  // Rosa
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(168, 85, 247, 1)',
+                        'rgba(236, 72, 153, 1)',
+                    ],
+                    borderWidth: 2,
+                },
+            ],
+        };
+    }, [currentMonthData]);
+
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    color: '#94a3b8',
+                    font: {
+                        size: 12,
+                        family: "'Inter', sans-serif",
+                    },
+                    padding: 15,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                },
+            },
+            tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleColor: '#f1f5f9',
+                bodyColor: '#cbd5e1',
+                borderColor: '#334155',
+                borderWidth: 1,
+                padding: 12,
+                displayColors: true,
+                callbacks: {
+                    label: function (context) {
+                        const label = context.label || '';
+                        const value = context.parsed || 0;
+                        const percentage = ((value / currentMonthData.total) * 100).toFixed(2);
+                        const formattedValue = value.toLocaleString('pt-BR', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                        });
+                        return `${label}: R$ ${formattedValue} (${percentage}%)`;
+                    },
+                },
+            },
+        },
+    };
+
+    if (!currentMonthData) {
+        return (
+            <div className="panel">
+                <div className="panel-header">
+                    <div>
+                        <p className="eyebrow">Alocação</p>
+                        <h3>Distribuição de Investimentos</h3>
+                        <p className="muted small">Porcentagem de alocação no mês corrente</p>
+                    </div>
+                </div>
+                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                    <p className="muted">Não há dados de investimentos para o mês corrente.</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="panel">
+            <div className="panel-header">
+                <div>
+                    <p className="eyebrow">Alocação</p>
+                    <h3>Distribuição de Investimentos</h3>
+                    <p className="muted small">
+                        Porcentagem de alocação no mês corrente ({currentMonthData.month})
+                    </p>
+                </div>
+                <span className="pill">
+                    Total: R${' '}
+                    {currentMonthData.total.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    })}
+                </span>
+            </div>
+            <div style={{ height: '400px', padding: '1rem' }}>
+                <Chart type="doughnut" data={chartData} options={options} />
+            </div>
+            <div style={{ padding: '1rem', borderTop: '1px solid #1e293b' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                    {currentMonthData.data.map((item, idx) => (
+                        <div
+                            key={idx}
+                            style={{
+                                padding: '0.75rem',
+                                backgroundColor: 'rgba(30, 41, 59, 0.5)',
+                                borderRadius: '8px',
+                                borderLeft: '3px solid',
+                                borderLeftColor: chartData.datasets[0].backgroundColor[idx],
+                            }}
+                        >
+                            <p className="eyebrow" style={{ marginBottom: '0.25rem' }}>
+                                {item.label}
+                            </p>
+                            <p style={{ fontSize: '1.25rem', fontWeight: '600', color: '#f1f5f9', marginBottom: '0.25rem' }}>
+                                {item.percentage.toFixed(2)}%
+                            </p>
+                            <p className="muted small">
+                                R${' '}
+                                {item.value.toLocaleString('pt-BR', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                })}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}

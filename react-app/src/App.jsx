@@ -10,6 +10,7 @@ import { ProventosChart } from './components/ProventosChart.jsx';
 import { CartaoChart } from './components/CartaoChart.jsx';
 import { FollowUpChart } from './components/FollowUpChart.jsx';
 import { MesAtualView } from './components/MesAtualView.jsx';
+import { AllocationChart } from './components/AllocationChart.jsx';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
 import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira, fetchRendaProjetiva, fetchNetoInvest, fetchFollowUp, fetchAtual } from './services/api.js';
 import { transformConsolidado, transformProventos, transformCartaoDetalhe, transformAcoesCarteira } from './services/transformers.js';
@@ -267,6 +268,7 @@ function App() {
                             </div>
                         </header>
 
+                        <AllocationChart labels={investments.labels} series={investments.series} />
                         <ActionsTable headers={stocks.headers} rows={stocks.rows} />
                         <ProventosChart
                             years={proventos.years}
