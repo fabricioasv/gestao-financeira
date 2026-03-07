@@ -11,6 +11,7 @@ import { CartaoChart } from './components/CartaoChart.jsx';
 import { FollowUpChart } from './components/FollowUpChart.jsx';
 import { MesAtualView } from './components/MesAtualView.jsx';
 import { AllocationChart } from './components/AllocationChart.jsx';
+import { RendaProjetivaView } from './components/RendaProjetivaView.jsx';
 import { logDebug, logError, logSuccess } from './utils/logging.js';
 import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira, fetchRendaProjetiva, fetchNetoInvest, fetchFollowUp, fetchAtual } from './services/api.js';
 import { transformConsolidado, transformProventos, transformCartaoDetalhe, transformAcoesCarteira } from './services/transformers.js';
@@ -30,6 +31,7 @@ function App() {
     const [proventos, setProventos] = useState({ years: [], months: [], valuesByYear: {} });
     const [cartaoDetalhe, setCartaoDetalhe] = useState({ entries: [] });
     const [rendaAnualEsperada, setRendaAnualEsperada] = useState(null);
+    const [rendaProjetiva, setRendaProjetiva] = useState([]);
     const [netoInvest, setNetoInvest] = useState({ headers: [], rows: [] });
     const [followUp, setFollowUp] = useState([]);
     const [atual, setAtual] = useState([]);
@@ -77,6 +79,9 @@ function App() {
                 (row) => row['Dividendo por ação'] === 'Renda anual esperada'
             );
             const rendaAnual = rendaAnualRow?.['Renda anual esperada'] ?? null;
+            
+            // Guardar todos os dados de renda projetiva
+            const parsedRendaProjetiva = rendaProjetivaData || [];
 
             // Transformar Neto-Invest (similar ao Ações-Carteira)
             const parsedNetoInvest = {
@@ -91,6 +96,7 @@ function App() {
                 cartaoDetalhe: parsedCartaoDetalhe,
                 stocks: parsedAcoesCarteira,
                 rendaAnualEsperada: rendaAnual,
+                rendaProjetiva: parsedRendaProjetiva,
                 netoInvest: parsedNetoInvest,
                 followUp: followUpData || [],
                 atual: atualData || [],
@@ -131,6 +137,7 @@ function App() {
         setProventos(parsed.proventos || { years: [], months: [], valuesByYear: {} });
         setCartaoDetalhe(parsed.cartaoDetalhe || { entries: [] });
         setRendaAnualEsperada(parsed.rendaAnualEsperada ?? null);
+        setRendaProjetiva(parsed.rendaProjetiva || []);
         setNetoInvest(parsed.netoInvest || { headers: [], rows: [] });
         setFollowUp(parsed.followUp || []);
         setAtual(parsed.atual || []);
@@ -276,6 +283,7 @@ function App() {
                             valuesByYear={proventos.valuesByYear}
                             rendaAnualEsperada={rendaAnualEsperada}
                         />
+                        <RendaProjetivaView data={rendaProjetiva} />
                     </div>
                 ) : activeMenu === 'neto-invest' ? (
                     <div className="page">
