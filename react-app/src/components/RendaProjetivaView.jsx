@@ -43,34 +43,38 @@ export function RendaProjetivaView({ data }) {
         const consolidadoData = {};
         const evolucaoData = [];
 
-        data.forEach((row, idx) => {
-            // PRIORIDADE 1: Verificar se tem Ticker (campo correto para ações)
+        // SEPARAR COMPLETAMENTE AS LÓGICAS
+        
+        // 1. BUSCAR AÇÕES: linhas com Ticker preenchido E Qtd. de ações preenchido
+        data.forEach((row) => {
             const ticker = row['Ticker'];
-            const tickerStr = ticker != null ? String(ticker) : '';
+            const qtdAcoes = row['Qtd. de ações'];
             
-            // Se tem ticker válido, é uma ação
-            if (tickerStr.trim() !== '') {
+            if (ticker && String(ticker).trim() !== '' && qtdAcoes != null && qtdAcoes !== '') {
                 acoesData.push(row);
-                return;
             }
+        });
+        
+        // 2. BUSCAR EVOLUÇÃO: linhas com Ano preenchido E Renda Anual preenchido
+        data.forEach((row) => {
+            const ano = row['Ano'];
+            const rendaAnual = row['Renda Anual'];
             
-            // PRIORIDADE 2: Verificar se é um consolidado pelo campo "Dividendo por ação"
+            if (ano != null && ano !== '' && rendaAnual != null && rendaAnual !== '') {
+                const anoStr = String(ano);
+                if (!consolidadoKeys.includes(anoStr)) {
+                    evolucaoData.push(row);
+                }
+            }
+        });
+        
+        // 3. BUSCAR CONSOLIDADOS: linhas onde "Dividendo por ação" está nos consolidadoKeys
+        data.forEach((row) => {
             const dividendoField = row['Dividendo por ação'];
             const dividendoStr = dividendoField != null ? String(dividendoField) : '';
             
             if (consolidadoKeys.includes(dividendoStr)) {
                 consolidadoData[dividendoStr] = row;
-                return;
-            }
-            
-            // PRIORIDADE 3: Verificar se é uma linha de evolução (tem campo "Ano")
-            if (row['Ano'] != null && row['Ano'] !== '') {
-                const ano = String(row['Ano']);
-                // Ignorar se for um dos consolidados
-                if (!consolidadoKeys.includes(ano)) {
-                    evolucaoData.push(row);
-                }
-                return;
             }
         });
 
@@ -79,6 +83,7 @@ export function RendaProjetivaView({ data }) {
             consolidado: Object.keys(consolidadoData).length,
             evolucao: evolucaoData.length
         });
+        console.log('📊 Dados de evolução:', evolucaoData);
         
         return { acoes: acoesData, consolidado: consolidadoData, evolucao: evolucaoData };
     }, [data]);
@@ -104,6 +109,8 @@ export function RendaProjetivaView({ data }) {
     console.log('   - acoes.length:', acoes.length);
     console.log('   - consolidado:', consolidado);
     console.log('   - Object.keys(consolidado).length:', consolidado ? Object.keys(consolidado).length : 0);
+    console.log('   - evolucao.length:', evolucao.length);
+    console.log('   - evolucao:', evolucao);
 
     return (
         <div className="panel">
@@ -222,12 +229,122 @@ export function RendaProjetivaView({ data }) {
                         ) : null}
                     </div>
                 </div>
-            ) : (
-                <>
-                    {console.log('⚠️ Condição dos cards é FALSE - não renderizando')}
-                </>
-            )}
+            ) : null}
 
+            {evolucao.length > 0 && (
+                <div style={{ marginTop: '2rem', marginBottom: '2rem' }}>
+                    <div className="panel-header" style={{ marginBottom: '1rem' }}>
+                        <div>
+                            <p className="eyebrow">Projeção Futura</p>
+                            <h3>Evolução da Renda Anual</h3>
+                            <p className="muted small">Projeção de crescimento da renda de proventos ano a ano</p>
+                        </div>
+                    </div>
+                    <div style={{ height: '400px', padding: '1rem' }}>
+                        <Line
+                            data={{
+                                labels: evolucao.map(row => String(row['Ano'])),
+                                datasets: [
+                                    {
+                                        label: 'Renda Anual',
+                                        data: evolucao.map(row => parseFloat(row['Renda Anual'] || 0)),
+                                        borderColor: 'rgba(16, 185, 129, 1)',
+                                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                        borderWidth: 3,
+                                        tension: 0.4,
+                                        fill: true,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                                        pointBorderColor: '#0f172a',
+                                        pointBorderWidth: 2,
+                                    },
+                                    {
+                                        label: 'Renda Mensal',
+                                        data: evolucao.map(row => parseFloat(row['Renda Mensal'] || 0)),
+                                        borderColor: 'rgba(59, 130, 246, 1)',
+                                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                        borderWidth: 3,
+                                        tension: 0.4,
+                                        fill: true,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                                        pointBorderColor: '#0f172a',
+                                        pointBorderWidth: 2,
+                                    }
+                                ]
+                            }}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: {
+                                            color: '#94a3b8',
+                                            font: {
+                                                size: 12,
+                                                family: "'Inter', sans-serif",
+                                            },
+                                            padding: 15,
+                                            usePointStyle: true,
+                                        },
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                        titleColor: '#f1f5f9',
+                                        bodyColor: '#cbd5e1',
+                                        borderColor: '#334155',
+                                        borderWidth: 1,
+                                        padding: 12,
+                                        displayColors: true,
+                                        callbacks: {
+                                            label: function (context) {
+                                                const label = context.dataset.label || '';
+                                                const value = context.parsed.y || 0;
+                                                return `${label}: R$ ${value.toLocaleString('pt-BR', {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                })}`;
+                                            },
+                                        },
+                                    },
+                                },
+                                scales: {
+                                    x: {
+                                        grid: {
+                                            color: 'rgba(51, 65, 85, 0.3)',
+                                            drawBorder: false,
+                                        },
+                                        ticks: {
+                                            color: '#94a3b8',
+                                            font: {
+                                                size: 11,
+                                            },
+                                        },
+                                    },
+                                    y: {
+                                        grid: {
+                                            color: 'rgba(51, 65, 85, 0.3)',
+                                            drawBorder: false,
+                                        },
+                                        ticks: {
+                                            color: '#94a3b8',
+                                            font: {
+                                                size: 11,
+                                            },
+                                            callback: function (value) {
+                                                return 'R$ ' + value.toLocaleString('pt-BR');
+                                            },
+                                        },
+                                    },
+                                },
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
 
             {acoes.length > 0 && (
                 <div className="table-wrapper">
