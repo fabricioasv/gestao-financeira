@@ -20,18 +20,11 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
  * @param {Array} props.data - Dados da renda projetiva
  */
 export function RendaProjetivaView({ data }) {
-    console.log('🎯 RendaProjetivaView renderizado! data:', data);
-    
     const { acoes, consolidado, evolucao } = useMemo(() => {
-        console.log('🎯 useMemo executado! data.length:', data?.length);
-        
         if (!data || data.length === 0) {
-            console.log('⚠️ Sem dados!');
             return { acoes: [], consolidado: null, evolucao: [] };
         }
 
-
-        // Separar ações dos dados consolidados e evolução
         const consolidadoKeys = [
             'Renda anual esperada',
             'Renda média mensal',
@@ -43,9 +36,6 @@ export function RendaProjetivaView({ data }) {
         const consolidadoData = {};
         const evolucaoData = [];
 
-        // SEPARAR COMPLETAMENTE AS LÓGICAS
-        
-        // 1. BUSCAR AÇÕES: linhas com Ticker preenchido E Qtd. de ações preenchido
         data.forEach((row) => {
             const ticker = row['Ticker'];
             const qtdAcoes = row['Qtd. de ações'];
@@ -55,7 +45,6 @@ export function RendaProjetivaView({ data }) {
             }
         });
         
-        // 2. BUSCAR EVOLUÇÃO: linhas com Ano preenchido E Renda Anual preenchido
         data.forEach((row) => {
             const ano = row['Ano'];
             const rendaAnual = row['Renda Anual'];
@@ -68,7 +57,6 @@ export function RendaProjetivaView({ data }) {
             }
         });
         
-        // 3. BUSCAR CONSOLIDADOS: linhas onde "Dividendo por ação" está nos consolidadoKeys
         data.forEach((row) => {
             const dividendoField = row['Dividendo por ação'];
             const dividendoStr = dividendoField != null ? String(dividendoField) : '';
@@ -78,13 +66,6 @@ export function RendaProjetivaView({ data }) {
             }
         });
 
-        console.log('✅ Resultado do useMemo:', {
-            acoes: acoesData.length,
-            consolidado: Object.keys(consolidadoData).length,
-            evolucao: evolucaoData.length
-        });
-        console.log('📊 Dados de evolução:', evolucaoData);
-        
         return { acoes: acoesData, consolidado: consolidadoData, evolucao: evolucaoData };
     }, [data]);
 
@@ -105,13 +86,6 @@ export function RendaProjetivaView({ data }) {
         );
     }
 
-    console.log('🎨 Renderizando componente final');
-    console.log('   - acoes.length:', acoes.length);
-    console.log('   - consolidado:', consolidado);
-    console.log('   - Object.keys(consolidado).length:', consolidado ? Object.keys(consolidado).length : 0);
-    console.log('   - evolucao.length:', evolucao.length);
-    console.log('   - evolucao:', evolucao);
-
     return (
         <div className="panel">
             <div className="panel-header">
@@ -123,14 +97,11 @@ export function RendaProjetivaView({ data }) {
                 <span className="pill">{acoes.length} ações</span>
             </div>
 
-            {consolidado && Object.keys(consolidado).length > 0 ? (
+            {consolidado && Object.keys(consolidado).length > 0 && (
                 <div style={{ padding: '1.5rem', borderBottom: '1px solid #1e293b' }}>
-                    {console.log('✅ Renderizando DIV dos cards!')}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                        {consolidado['Renda anual esperada'] ? (
-                            <>
-                                {console.log('✅ Renderizando card Renda anual esperada')}
-                                <div
+                        {consolidado['Renda anual esperada'] && (
+                            <div
                                     style={{
                                         padding: '1.25rem',
                                         background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)',
@@ -149,13 +120,11 @@ export function RendaProjetivaView({ data }) {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
                                         })}
-                                    </p>
-                                </div>
-                            </>
-                        ) : null}
+                                </p>
+                            </div>
+                        )}
 
-                        {consolidado['Renda média mensal'] ? (
-                            <>
+                        {consolidado['Renda média mensal'] && (
                             <div
                                 style={{
                                     padding: '1.25rem',
@@ -177,11 +146,9 @@ export function RendaProjetivaView({ data }) {
                                     })}
                                 </p>
                             </div>
-                            </>
-                        ) : null}
+                        )}
 
-                        {consolidado['Patrimônio'] ? (
-                            <>
+                        {consolidado['Patrimônio'] && (
                             <div
                                 style={{
                                     padding: '1.25rem',
@@ -203,11 +170,9 @@ export function RendaProjetivaView({ data }) {
                                     })}
                                 </p>
                             </div>
-                            </>
-                        ) : null}
+                        )}
 
-                        {consolidado['Dividend Yield esperado'] ? (
-                            <>
+                        {consolidado['Dividend Yield esperado'] && (
                             <div
                                 style={{
                                     padding: '1.25rem',
@@ -225,11 +190,10 @@ export function RendaProjetivaView({ data }) {
                                     {parseFloat(consolidado['Dividend Yield esperado']['Renda anual esperada'] || 0).toFixed(2)}%
                                 </p>
                             </div>
-                            </>
-                        ) : null}
+                        )}
                     </div>
                 </div>
-            ) : null}
+            )}
 
             {evolucao.length > 0 && (
                 <div style={{ marginTop: '2rem', marginBottom: '2rem' }}>

@@ -12,7 +12,7 @@ import { FollowUpChart } from './components/FollowUpChart.jsx';
 import { MesAtualView } from './components/MesAtualView.jsx';
 import { AllocationChart } from './components/AllocationChart.jsx';
 import { RendaProjetivaView } from './components/RendaProjetivaView.jsx';
-import { logDebug, logError, logSuccess } from './utils/logging.js';
+import { logError } from './utils/logging.js';
 import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira, fetchRendaProjetiva, fetchNetoInvest, fetchFollowUp, fetchAtual } from './services/api.js';
 import { transformConsolidado, transformProventos, transformCartaoDetalhe, transformAcoesCarteira } from './services/transformers.js';
 
@@ -52,11 +52,8 @@ function App() {
     }, [months, totals]);
 
     const loadDefaultData = async () => {
-        console.log('🚀 loadDefaultData INICIADA');
         setLoading(true);
         try {
-            console.log('📡 Carregando dados da API...');
-            
             // Carregar todas as abas em paralelo
             const [consolidadoData, proventosData, cartaoDetalheData, acoesCarteiraData, rendaProjetivaData, netoInvestData, followUpData, atualData] = await Promise.all([
                 fetchConsolidado(),
@@ -107,7 +104,6 @@ function App() {
                 type: 'success',
                 message: 'Dados carregados da API. Conectado ao Google Sheets em tempo real.',
             });
-            logSuccess('✅ Dados carregados da API');
         } catch (error) {
             logError('❌ Erro ao carregar dados da API', error);
             setStatus({
@@ -120,7 +116,6 @@ function App() {
     };
 
     const handleParsedData = (parsed, sourceLabel) => {
-        logDebug('🔍 Atualizando estado com dados da API', parsed);
         setRows(parsed.rows);
         setMonths(parsed.months);
         setTotals(parsed.totals);

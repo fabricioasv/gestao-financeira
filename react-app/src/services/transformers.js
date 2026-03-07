@@ -28,10 +28,7 @@ const normalizeNumber = (value) => {
  * @returns {Object} Dados transformados
  */
 export function transformConsolidado(data) {
-    console.log('🔄 Transformando dados do Consolidado:', data);
-
     if (!Array.isArray(data) || data.length === 0) {
-        console.warn('⚠️ Dados do Consolidado vazios ou inválidos');
         return {
             rows: [],
             months: [],
@@ -41,13 +38,10 @@ export function transformConsolidado(data) {
         };
     }
 
-    // Extrair os meses das chaves do primeiro objeto (exceto Alias e Id)
     const firstRow = data[0];
     const monthLabels = Object.keys(firstRow)
         .filter((key) => key !== 'Alias' && key !== 'Id')
-        .sort(); // Ordenar para garantir ordem cronológica
-
-    console.log('📅 Meses encontrados:', monthLabels);
+        .sort();
 
     // Converter objetos para o formato esperado pelo frontend
     const parsedRows = data.map((row) => {
@@ -98,12 +92,6 @@ export function transformConsolidado(data) {
         series: investmentSeries,
     };
 
-    console.log('✅ Consolidado transformado:', {
-        rows: parsedRows.length,
-        months: monthLabels.length,
-        investments: investmentSeries.length,
-    });
-
     return {
         rows: parsedRows,
         months: monthLabels,
@@ -120,21 +108,16 @@ export function transformConsolidado(data) {
  * @returns {Object} Dados transformados
  */
 export function transformProventos(data) {
-    console.log('🔄 Transformando dados de Proventos:', data);
-
     if (!Array.isArray(data) || data.length === 0) {
         return { years: [], months: [], valuesByYear: {} };
     }
 
-    // Extrair as chaves que são datas (excluir "", "Total", "Média", "~ Mensal (Ano)", "Variação")
     const excludeKeys = ['', 'Total', 'Média', '~ Mensal (Ano)', 'Variação'];
     const firstRow = data[0];
     
-    // Filtrar apenas as chaves que são datas de meses
     const monthKeys = Object.keys(firstRow)
         .filter((key) => !excludeKeys.includes(key))
         .sort((a, b) => {
-            // Ordenar por mês (extrair o mês da string de data)
             const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const getMonthIndex = (dateStr) => {
                 for (let i = 0; i < monthOrder.length; i++) {
@@ -145,7 +128,6 @@ export function transformProventos(data) {
             return getMonthIndex(a) - getMonthIndex(b);
         });
 
-    // Converter nomes das chaves para labels curtos de mês
     const monthLabels = monthKeys.map((key) => {
         const monthMap = {
             'Jan': 'jan', 'Feb': 'fev', 'Mar': 'mar', 'Apr': 'abr',
@@ -158,8 +140,6 @@ export function transformProventos(data) {
         return key.slice(0, 3);
     });
 
-    console.log('📅 Meses de proventos:', monthLabels);
-
     const years = [];
     const valuesByYear = {};
 
@@ -169,8 +149,6 @@ export function transformProventos(data) {
         years.push(year);
         valuesByYear[year] = monthKeys.map((monthKey) => normalizeNumber(row[monthKey]));
     });
-
-    console.log('✅ Proventos transformado:', { years: years.length, months: monthLabels.length });
 
     return { years, months: monthLabels, valuesByYear };
 }
@@ -182,19 +160,13 @@ export function transformProventos(data) {
  * @returns {Object} Dados transformados
  */
 export function transformAcoesCarteira(data) {
-    console.log('🔄 Transformando dados de Ações-Carteira:', data);
-
     if (!Array.isArray(data) || data.length === 0) {
         return { headers: [], rows: [] };
     }
 
-    // Extrair headers das chaves do primeiro objeto
     const headers = Object.keys(data[0]);
 
-    // Filtrar linhas vazias (sem Ticker)
     const rows = data.filter((row) => row.Ticker && row.Ticker !== '');
-
-    console.log('✅ Ações-Carteira transformado:', { headers: headers.length, rows: rows.length });
 
     return { headers, rows };
 }
@@ -206,8 +178,6 @@ export function transformAcoesCarteira(data) {
  * @returns {Object} Dados transformados
  */
 export function transformCartaoDetalhe(data) {
-    console.log('🔄 Transformando dados de Cartão-Detalhe:', data);
-
     if (!Array.isArray(data) || data.length === 0) {
         return { entries: [] };
     }
@@ -247,8 +217,6 @@ export function transformCartaoDetalhe(data) {
         });
         return acc;
     }, []);
-
-    console.log('✅ Cartão-Detalhe transformado:', { entries: entries.length });
 
     return { entries };
 }

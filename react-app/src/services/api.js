@@ -11,7 +11,6 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7071/api'
  */
 export async function fetchSheet(sheetName) {
     const url = `${API_BASE_URL}/sheets/${sheetName}`;
-    console.log(`📡 Buscando dados: ${url}`);
     
     const response = await fetch(url);
     
@@ -20,7 +19,6 @@ export async function fetchSheet(sheetName) {
     }
     
     const data = await response.json();
-    console.log(`✅ Dados de ${sheetName} recebidos:`, data);
     
     return data;
 }
@@ -31,7 +29,6 @@ export async function fetchSheet(sheetName) {
  */
 export async function fetchAllSheets() {
     const url = `${API_BASE_URL}/sheets`;
-    console.log(`📡 Buscando todas as abas: ${url}`);
     
     const response = await fetch(url);
     
@@ -40,7 +37,6 @@ export async function fetchAllSheets() {
     }
     
     const data = await response.json();
-    console.log('✅ Todas as abas recebidas:', Object.keys(data));
     
     return data;
 }

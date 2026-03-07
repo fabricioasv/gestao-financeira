@@ -17,65 +17,42 @@ ChartJS.register(ArcElement, Tooltip, Legend);
  */
 export function AllocationChart({ labels, series }) {
     const currentMonthData = useMemo(() => {
-        console.log('🔍 AllocationChart - labels:', labels);
-        console.log('🔍 AllocationChart - series:', series);
-        
         if (!labels || labels.length === 0 || !series || series.length === 0) {
-            console.log('⚠️ AllocationChart - Sem labels ou series');
             return null;
         }
 
-        // Obter o mês atual no formato YY-MM (ex: 26-03 para março de 2026)
         const now = new Date();
-        const year = String(now.getFullYear()).slice(-2); // Últimos 2 dígitos do ano
-        const month = String(now.getMonth() + 1).padStart(2, '0'); // Mês com 2 dígitos
+        const year = String(now.getFullYear()).slice(-2);
+        const month = String(now.getMonth() + 1).padStart(2, '0');
         const currentMonthKey = `${year}-${month}`;
         
-        console.log('📅 AllocationChart - Mês atual do sistema:', currentMonthKey);
-        
-        // Procurar o índice do mês corrente
         const currentMonthIndex = labels.indexOf(currentMonthKey);
         
         if (currentMonthIndex === -1) {
-            console.log(`⚠️ AllocationChart - Mês ${currentMonthKey} não encontrado nos labels`);
             return null;
         }
-        
-        console.log('📅 AllocationChart - Mês corrente encontrado:', currentMonthKey, 'índice:', currentMonthIndex);
 
-        // Extrair valores do mês corrente e garantir que são números
-        // Filtrar apenas valores positivos (ativos) para o gráfico de alocação
         const data = series
             .map((s) => {
                 const rawValue = s.values[currentMonthIndex];
                 const numericValue = typeof rawValue === 'number' ? rawValue : parseFloat(rawValue) || 0;
-                console.log(`💰 ${s.label}: ${rawValue} -> ${numericValue}`);
                 return {
                     label: s.label,
                     value: numericValue,
                 };
             })
-            .filter((item) => item.value > 0); // Apenas valores positivos
+            .filter((item) => item.value > 0);
 
-        // Calcular total (apenas valores positivos)
         const total = data.reduce((sum, item) => sum + item.value, 0);
-        
-        console.log('📊 AllocationChart - Total (apenas positivos):', total);
-        console.log('📊 AllocationChart - Data (apenas positivos):', data);
 
-        // Se total é zero ou muito pequeno, não há dados
         if (total <= 0.01) {
-            console.log('⚠️ AllocationChart - Total é zero ou muito pequeno para o mês corrente');
             return null;
         }
 
-        // Calcular porcentagens
         const dataWithPercentages = data.map((item) => ({
             ...item,
             percentage: (item.value / total) * 100,
         }));
-
-        console.log('✅ AllocationChart - Dados processados com sucesso');
 
         return {
             month: currentMonthKey,
