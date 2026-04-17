@@ -48,8 +48,17 @@ function App() {
     }, []);
 
     const totalGeral = useMemo(() => {
-        return months.reduce((acc, month) => acc + (totals[month] ?? 0), 0);
-    }, [months, totals]);
+        const now = new Date();
+        const currentMonth = `${String(now.getFullYear()).slice(-2)}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const currentMonthIndex = investments.labels.indexOf(currentMonth);
+
+        if (currentMonthIndex === -1) return 0;
+
+        return investments.series.reduce(
+            (sum, item) => sum + (item.values[currentMonthIndex] ?? 0),
+            0,
+        );
+    }, [investments]);
 
     const loadDefaultData = async () => {
         setLoading(true);
