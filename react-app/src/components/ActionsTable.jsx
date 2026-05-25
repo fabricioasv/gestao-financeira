@@ -7,6 +7,7 @@ const VISIBLE_COLUMNS = [
     'Margem',
     '% Div. Proj.',   // API: "% Div. Proj."
     'Div. Proj.',
+    'Luc. x Cotação',
     'DY Pago',
     'DY a Pagar',
     'DY em Aberto',
@@ -21,6 +22,7 @@ const DISPLAY_NAMES = {
 
 // Colunas que precisam ser multiplicadas por 100 (são %)
 const PERCENTAGE_COLUMNS = ['Margem', '% Div. Proj.', '% Div. Pend.'];
+const DECIMAL_COLUMNS = ['Average Price', 'Div. Proj.', 'Luc. x Cotação'];
 
 // Normaliza o nome da coluna (remove quebras de linha e espaços extras)
 const normalize = (name) => name?.replace(/\s+/g, ' ').trim() || '';
@@ -42,6 +44,13 @@ const formatCellValue = (value, header) => {
         const num = typeof value === 'number' ? value : parseFloat(String(value).replace(',', '.'));
         if (!isNaN(num)) {
             return (num * 100).toFixed(2);
+        }
+    }
+
+    if (DECIMAL_COLUMNS.includes(normalized)) {
+        const num = typeof value === 'number' ? value : parseFloat(String(value).replace(',', '.'));
+        if (!isNaN(num)) {
+            return num.toFixed(2);
         }
     }
     

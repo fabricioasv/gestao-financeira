@@ -290,7 +290,8 @@ public class SheetsEndpoints
             "R$ Alvo 12%",
             "R$ Base p/ PT",
             "Desvio PL Proj.",
-            "Div. Proj."
+            "Div. Proj.",
+            "Luc. x Cotação"
         };
 
         // Colunas de data que devem mostrar apenas dd/mm/yy
