@@ -99,11 +99,19 @@ function ProventosChart({ years = [], months = [], valuesByYear = {}, rendaAnual
     const options = {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
         plugins: {
             legend: { position: 'bottom' },
             tooltip: {
                 callbacks: {
                     label: (ctx) => `${ctx.dataset.label}: ${formatNumber(ctx.parsed.y ?? 0)}`,
+                    footer: (items) => {
+                        const total = items.reduce((sum, item) => sum + (item.parsed.y ?? 0), 0);
+                        return `Total: ${formatNumber(total)}`;
+                    },
                 },
             },
         },

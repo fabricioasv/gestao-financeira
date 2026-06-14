@@ -3,6 +3,7 @@
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7071/api';
+const BCB_CDI_URL = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.4391/dados?formato=json';
 
 /**
  * Busca dados de uma aba específica
@@ -86,4 +87,14 @@ export const fetchProventosAReceber = () => fetchSheet('proventos-a-receber');
 export const fetchNetoInvest = () => fetchSheet('neto-invest');
 export const fetchFollowUp = () => fetchSheet('follow-up');
 export const fetchAtual = () => fetchSheet('atual');
+
+export async function fetchCdiMensal() {
+    const response = await fetch(BCB_CDI_URL);
+
+    if (!response.ok) {
+        throw new Error(`Erro ao buscar CDI mensal: HTTP ${response.status}`);
+    }
+
+    return response.json();
+}
 

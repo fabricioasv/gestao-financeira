@@ -11,6 +11,7 @@ import { CartaoChart } from './components/CartaoChart.jsx';
 import { FollowUpChart } from './components/FollowUpChart.jsx';
 import { MesAtualView } from './components/MesAtualView.jsx';
 import { AllocationChart } from './components/AllocationChart.jsx';
+import { InvestmentBenchmarkChart } from './components/InvestmentBenchmarkChart.jsx';
 import { RendaProjetivaView } from './components/RendaProjetivaView.jsx';
 import { logError } from './utils/logging.js';
 import { fetchConsolidado, fetchProventos, fetchCartaoDetalhe, fetchAcoesCarteira, fetchRendaProjetiva, fetchNetoInvest, fetchFollowUp, fetchAtual } from './services/api.js';
@@ -20,7 +21,7 @@ function App() {
     const [rows, setRows] = useState([]);
     const [months, setMonths] = useState([]);
     const [totals, setTotals] = useState({});
-    const [investments, setInvestments] = useState({ labels: [], series: [] });
+    const [investments, setInvestments] = useState({ labels: [], series: [], cashFlows: null });
     const [financial, setFinancial] = useState({
         labels: [],
         credits: [],
@@ -45,6 +46,7 @@ function App() {
 
     useEffect(() => {
         loadDefaultData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const totalGeral = useMemo(() => {
@@ -128,7 +130,7 @@ function App() {
         setRows(parsed.rows);
         setMonths(parsed.months);
         setTotals(parsed.totals);
-        setInvestments(parsed.investments || { labels: [], series: [] });
+        setInvestments(parsed.investments || { labels: [], series: [], cashFlows: null });
         setFinancial(
             parsed.financial || {
                 labels: [],
@@ -246,7 +248,11 @@ function App() {
                                 </div>
                 </div>
                         </header>
-                        <InvestmentChart labels={investments.labels} series={investments.series} />
+                        <InvestmentChart
+                            labels={investments.labels}
+                            series={investments.series}
+                            title="Consolidado"
+                        />
                         <FinancialChart
                             labels={financial.labels}
                             credits={financial.credits}
@@ -279,7 +285,16 @@ function App() {
                             </div>
                         </header>
 
-                        <AllocationChart labels={investments.labels} series={investments.series} />
+                        <AllocationChart
+                            labels={investments.labels}
+                            series={investments.series}
+                            excludeLabels={['Apartamento']}
+                        />
+                        <InvestmentBenchmarkChart
+                            labels={investments.labels}
+                            series={investments.series}
+                            cashFlows={investments.cashFlows}
+                        />
                         <ActionsTable headers={stocks.headers} rows={stocks.rows} />
                         <ProventosChart
                             years={proventos.years}

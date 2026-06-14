@@ -33,7 +33,7 @@ export function transformConsolidado(data) {
             rows: [],
             months: [],
             totals: {},
-            investments: { labels: [], series: [] },
+            investments: { labels: [], series: [], cashFlows: null },
             financial: { labels: [], credits: [], debits: [], consolidated: [] },
         };
     }
@@ -87,9 +87,32 @@ export function transformConsolidado(data) {
             values: monthLabels.map((month) => normalizeNumber(row[month])),
         }));
 
+    const flowRows = data
+        .filter((row) => {
+            const alias = normalizeText(row.Alias || '');
+            return (
+                alias.includes('aporte') ||
+                alias.includes('retirada') ||
+                alias.includes('fluxo') ||
+                alias.includes('movimentacao')
+            );
+        })
+        .map((row) => {
+            const alias = normalizeText(row.Alias || '');
+            const sign = alias.includes('retirada') && !alias.includes('aporte') ? -1 : 1;
+            return monthLabels.map((month) => normalizeNumber(row[month]) * sign);
+        });
+
+    const cashFlows = flowRows.length
+        ? monthLabels.map((_, monthIndex) =>
+              flowRows.reduce((sum, values) => sum + (values[monthIndex] ?? 0), 0),
+          )
+        : null;
+
     const investments = {
         labels: monthLabels,
         series: investmentSeries,
+        cashFlows,
     };
 
     return {

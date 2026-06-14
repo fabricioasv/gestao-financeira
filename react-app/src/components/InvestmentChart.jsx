@@ -42,7 +42,13 @@ function getColor(index) {
     return COLORS[index % COLORS.length];
 }
 
-function InvestmentChart({ labels = [], series = [] }) {
+function InvestmentChart({
+    labels = [],
+    series = [],
+    eyebrow = 'Dashboard',
+    title = 'Consolidado',
+    excludeLabels = [],
+}) {
     const lineOnTopPlugin = {
         id: 'lineOnTop',
         afterDatasetsDraw(chart) {
@@ -55,17 +61,21 @@ function InvestmentChart({ labels = [], series = [] }) {
         },
     };
 
-    const totalsByMonth = labels.map((_, idx) =>
-        series.reduce((sum, item) => sum + (item.values[idx] ?? 0), 0),
+    const filteredSeries = series.filter(
+        (item) => !excludeLabels.some((label) => item.label?.toLowerCase().includes(label.toLowerCase())),
     );
 
-    if (!labels.length || !series.length) {
+    const totalsByMonth = labels.map((_, idx) =>
+        filteredSeries.reduce((sum, item) => sum + (item.values[idx] ?? 0), 0),
+    );
+
+    if (!labels.length || !filteredSeries.length) {
         return (
             <div className="panel">
                 <div className="panel-header">
                     <div>
-                        <p className="eyebrow">Dashboard</p>
-                        <h3>Investimentos</h3>
+                        <p className="eyebrow">{eyebrow}</p>
+                        <h3>{title}</h3>
                         <p className="muted small">Nenhum dado encontrado. Envie a planilha para continuar.</p>
                     </div>
                 </div>
@@ -76,7 +86,7 @@ function InvestmentChart({ labels = [], series = [] }) {
     const data = {
         labels,
         datasets: [
-            ...series.map((item, idx) => ({
+            ...filteredSeries.map((item, idx) => ({
                 label: item.label,
                 data: item.values,
                 backgroundColor: getColor(idx),
@@ -155,8 +165,8 @@ function InvestmentChart({ labels = [], series = [] }) {
         <div className="panel chart-panel">
             <div className="panel-header">
                 <div>
-                    <p className="eyebrow">Dashboard</p>
-                    <h3>Investimentos</h3>
+                    <p className="eyebrow">{eyebrow}</p>
+                    <h3>{title}</h3>
                     <p className="muted small">
                         Barras empilhadas das linhas 27-32 (aba Consolidado): Ações, Renda Fixa, Previdência,
                         Cripto, TD IPCA+7.91% e Apartamento.

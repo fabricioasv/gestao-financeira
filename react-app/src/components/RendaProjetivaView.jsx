@@ -14,6 +14,29 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
+function parsePercentValue(value) {
+    if (value === null || value === undefined || value === '') return null;
+    if (typeof value === 'number') return value;
+
+    const raw = String(value).trim();
+    const normalized = raw.includes(',')
+        ? raw.replace('%', '').replace(/\./g, '').replace(',', '.')
+        : raw.replace('%', '');
+    const parsed = Number(normalized);
+    return Number.isNaN(parsed) ? null : parsed;
+}
+
+function formatPercentValue(value) {
+    const parsed = parsePercentValue(value);
+    if (parsed === null) return '-';
+    const percent = Math.abs(parsed) <= 1 ? parsed * 100 : parsed;
+
+    return `${percent.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    })}%`;
+}
+
 /**
  * Componente para exibir dados de renda projetiva
  * @param {Object} props
@@ -187,7 +210,7 @@ export function RendaProjetivaView({ data }) {
                                     Dividend Yield Esperado
                                 </p>
                                 <p style={{ fontSize: '1.75rem', fontWeight: '700', color: '#a855f7', marginBottom: '0.25rem', letterSpacing: '-0.02em' }}>
-                                    {parseFloat(consolidado['Dividend Yield esperado']['Renda anual esperada'] || 0).toFixed(2)}%
+                                    {formatPercentValue(consolidado['Dividend Yield esperado']['Renda anual esperada'])}
                                 </p>
                             </div>
                         )}
@@ -330,7 +353,7 @@ export function RendaProjetivaView({ data }) {
                                 const dividendoPorAcao = parseFloat(row['Dividendo por ação'] || 0);
                                 const rendaAnual = parseFloat(row['Renda anual esperada'] || 0);
                                 const capitalAlocado = parseFloat(row['Capital alocado'] || 0);
-                                const dividendYield = row['Dividend Yield'] || '';
+                                const dividendYield = row['Dividend Yield'];
 
                                 return (
                                     <tr key={idx}>
@@ -362,7 +385,7 @@ export function RendaProjetivaView({ data }) {
                                                 maximumFractionDigits: 2,
                                             })}
                                         </td>
-                                        <td style={{ textAlign: 'right' }}>{dividendYield}</td>
+                                        <td style={{ textAlign: 'right' }}>{formatPercentValue(dividendYield)}</td>
                                     </tr>
                                 );
                             })}

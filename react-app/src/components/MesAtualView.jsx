@@ -6,7 +6,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 export function MesAtualView({ data }) {
     // Separar os dados por TIPO e calcular totais
-    const { consolidado, credito, debito, saldoAtual, saldoProjetado, totalCredito, totalDebito, creditoQuitado, debitoQuitado, creditoPendente, debitoPendente, totalDisponivelConsolidado } = useMemo(() => {
+    const { consolidado, credito, debito, saldoAtual, saldoProjetado, totalCredito, totalDebito, creditoQuitado, debitoQuitado, creditoPendente, debitoPendente } = useMemo(() => {
         if (!data || data.length === 0) {
             return { 
                 consolidado: [], 
@@ -54,10 +54,12 @@ export function MesAtualView({ data }) {
                     totalDisponivelConsolidado = valor;
                 }
             } else if (tipo === 'crédito') {
+                if (descricao === '-') return;
                 credito.push(row);
                 totalCredito += valor;
                 totalCreditoQuitado += quitado;
             } else if (tipo === 'débito') {
+                if (descricao === '-') return;
                 debito.push(row);
                 totalDebito += valor;
                 totalDebitoQuitado += quitado;

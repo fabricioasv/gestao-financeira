@@ -234,6 +234,31 @@
     height: 360px;
 }
 
+.allocation-bar-wrapper {
+    height: 300px;
+}
+
+.allocation-strip-wrapper {
+    height: 120px;
+    margin-top: 8px;
+}
+
+.benchmark-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.benchmark-warning {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
 .table-wrapper {
     overflow-x: auto;
     margin-top: 12px;

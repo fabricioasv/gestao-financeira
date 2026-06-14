@@ -85,7 +85,7 @@ function parseWorkbook(buffer) {
             };
         });
 
-        const totals = monthLabels.reduce((acc, month, idx) => {
+        const totals = monthLabels.reduce((acc, month) => {
             acc[month] = parsedRows.reduce((sum, row) => sum + (row.months[month] ?? 0), 0);
             return acc;
         }, {});
