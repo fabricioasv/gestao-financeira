@@ -48,23 +48,27 @@ function getColor(idx) {
 function CartaoChart({ entries = [] }) {
     const [monthKey, setMonthKey] = useState('todos');
     const [selectedGroup, setSelectedGroup] = useState('todos');
+    const isMonthlyView = monthKey !== 'todos';
 
     const { labels, groups, datasets, totals, filteredByGroup } = useMemo(() => {
         const filtered =
             monthKey === 'todos'
                 ? entries
-                : entries.filter((e) => e.monthKey === monthKey);
+                : entries.filter((e) => e.consumoMonthKey === monthKey);
 
         const filteredByGroup =
             selectedGroup === 'todos'
                 ? filtered
                 : filtered.filter((e) => e.grupo === selectedGroup);
 
-        const labelsSet = new Set(filteredByGroup.map((e) => e.fatura));
+        const labelForEntry = (entry) => (isMonthlyView ? entry.consumoDayLabel : entry.fatura);
+        const labelsSet = new Set(filteredByGroup.map(labelForEntry));
         const labelsArr = Array.from(labelsSet).sort((a, b) => {
-            const [da, ma, ya] = a.split('/').map(Number);
-            const [db, mb, yb] = b.split('/').map(Number);
-            return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
+            const entryA = filteredByGroup.find((entry) => labelForEntry(entry) === a);
+            const entryB = filteredByGroup.find((entry) => labelForEntry(entry) === b);
+            const dateA = isMonthlyView ? entryA?.consumoDayKey : entryA?.faturaDate;
+            const dateB = isMonthlyView ? entryB?.consumoDayKey : entryB?.faturaDate;
+            return String(dateA).localeCompare(String(dateB));
         });
         const groupsSet = new Set(filtered.map((e) => e.grupo));
         const groupsArr = Array.from(groupsSet).sort();
@@ -72,14 +76,14 @@ function CartaoChart({ entries = [] }) {
         const groupData = groupsArr.map((g) =>
             labelsArr.map((label) =>
                 filteredByGroup
-                    .filter((e) => e.fatura === label && e.grupo === g)
+                    .filter((e) => labelForEntry(e) === label && e.grupo === g)
                     .reduce((sum, e) => sum + (e.valor ?? 0), 0),
             ),
         );
 
         const totals = labelsArr.map((label) =>
             filteredByGroup
-                .filter((e) => e.fatura === label)
+                .filter((e) => labelForEntry(e) === label)
                 .reduce((sum, e) => sum + (e.valor ?? 0), 0),
         );
 
@@ -113,7 +117,7 @@ function CartaoChart({ entries = [] }) {
         ];
 
         return { labels: labelsArr, groups: groupsArr, datasets, totals, filteredByGroup };
-    }, [entries, monthKey, selectedGroup]);
+    }, [entries, isMonthlyView, monthKey, selectedGroup]);
 
     const lineOnTopPlugin = {
         id: 'lineOnTopCartao',
@@ -130,7 +134,7 @@ function CartaoChart({ entries = [] }) {
     const meses = useMemo(() => {
         const set = new Set(
             entries.map((e) => {
-                return e.monthKey || '';
+                return e.consumoMonthKey || '';
             }),
         );
         const arr = Array.from(set).sort();
@@ -159,7 +163,7 @@ function CartaoChart({ entries = [] }) {
                     footer: (items) => {
                         if (!items?.length) return '';
                         const idx = items[0].dataIndex;
-                        return `Total fatura: ${formatNumber(totals[idx])}`;
+                        return `${isMonthlyView ? 'Total do dia' : 'Total fatura'}: ${formatNumber(totals[idx])}`;
                     },
                 },
             },
@@ -168,7 +172,7 @@ function CartaoChart({ entries = [] }) {
             x: {
                 stacked: true,
                 ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 },
-                title: { display: true, text: 'Fatura', font: { weight: '700' } },
+                title: { display: true, text: isMonthlyView ? 'Dia de consumo' : 'Fatura', font: { weight: '700' } },
             },
             y: {
                 stacked: true,
@@ -186,10 +190,14 @@ function CartaoChart({ entries = [] }) {
             <div className="panel-header">
                 <div>
                     <p className="eyebrow">Cartão</p>
-                    <h3>Despesas por fatura (empilhado por Grupo)</h3>
+                    <h3>
+                        {isMonthlyView
+                            ? 'Consumo diário (empilhado por Grupo)'
+                            : 'Despesas por fatura (empilhado por Grupo)'}
+                    </h3>
                     <p className="muted small">
-                        Dados da aba Cartão-Detalhe; eixo X = data da fatura; barras = grupos; linha = total
-                        por fatura.
+                        Dados da aba Cartão-Detalhe; eixo X = {isMonthlyView ? 'dia de consumo' : 'data da fatura'};
+                        barras = grupos; linha = total {isMonthlyView ? 'do dia' : 'por fatura'}.
                     </p>
                 </div>
                 <div className="filter-row">

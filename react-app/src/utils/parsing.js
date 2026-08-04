@@ -221,12 +221,19 @@ function parseWorkbook(buffer) {
 
                     const label = `${String(faturaDate.getDate()).padStart(2, '0')}/${String(faturaDate.getMonth() + 1).padStart(2, '0')}/${faturaDate.getFullYear()}`;
                     const monthKey = `${faturaDate.getFullYear()}-${String(faturaDate.getMonth() + 1).padStart(2, '0')}`;
+                    const consumoDate = dataCompra || faturaDate;
+                    const consumoDayKey = `${consumoDate.getFullYear()}-${String(consumoDate.getMonth() + 1).padStart(2, '0')}-${String(consumoDate.getDate()).padStart(2, '0')}`;
+                    const consumoDayLabel = `${String(consumoDate.getDate()).padStart(2, '0')}/${String(consumoDate.getMonth() + 1).padStart(2, '0')}/${consumoDate.getFullYear()}`;
+                    const consumoMonthKey = consumoDayKey.slice(0, 7);
 
                     acc.push({
                         fatura: label,
                         faturaDate: faturaDate.toISOString(),
                         data: dataCompra ? dataCompra.toISOString() : null,
                         monthKey,
+                        consumoDayKey,
+                        consumoDayLabel,
+                        consumoMonthKey,
                         estabelecimento: estabelecimento ? String(estabelecimento) : '',
                         grupo: String(grupo),
                         valor,
