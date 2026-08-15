@@ -21,6 +21,10 @@ const normalizeNumber = (value) => {
     return 0;
 };
 
+const EXCLUDED_INVESTMENT_ALIASES = new Set(['investimento renda fixa pre']);
+
+const isExcludedInvestment = (alias) => EXCLUDED_INVESTMENT_ALIASES.has(normalizeText(alias));
+
 /**
  * Transforma dados da aba Consolidado para o formato do frontend
  * A API retorna array de objetos com: { Alias, Id, "25-01": valor, "25-02": valor, ... }
@@ -81,7 +85,7 @@ export function transformConsolidado(data) {
     const INVESTMENT_END_ROW = 31;
     const investmentRows = data.slice(INVESTMENT_START_ROW, INVESTMENT_END_ROW);
     const investmentSeries = investmentRows
-        .filter((row) => row && row.Alias)
+        .filter((row) => row && row.Alias && !isExcludedInvestment(row.Alias))
         .map((row) => ({
             label: row.Alias,
             values: monthLabels.map((month) => normalizeNumber(row[month])),

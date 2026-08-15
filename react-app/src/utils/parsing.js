@@ -50,6 +50,10 @@ const normalizeNumber = (value) => {
     return 0;
 };
 
+const EXCLUDED_INVESTMENT_ALIASES = new Set(['investimento renda fixa pre']);
+
+const isExcludedInvestment = (alias) => EXCLUDED_INVESTMENT_ALIASES.has(normalizeText(alias));
+
 function parseWorkbook(buffer) {
     console.log('🚀 parseWorkbook INICIADA');
 
@@ -106,7 +110,7 @@ function parseWorkbook(buffer) {
         // Dados de investimentos (linhas 27 a 32, 1-based)
         const investmentRows = matrix.slice(INVESTMENT_START_ROW, INVESTMENT_END_ROW);
         const investmentSeries = investmentRows
-            .filter((row) => row && row[0])
+            .filter((row) => row && row[0] && !isExcludedInvestment(row[0]))
             .map((row) => ({
                 label: row[0],
                 values: monthLabels.map((_, idx) => normalizeNumber(row[idx + 2])),
