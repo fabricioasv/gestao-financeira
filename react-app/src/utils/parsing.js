@@ -1,8 +1,8 @@
 import * as XLSX from 'xlsx';
 import { logDebug, logError } from './logging.js';
 
-const INVESTMENT_START_ROW = 26; // Linhas 27 a 32 (1-based) => índices 26-31
-const INVESTMENT_END_ROW = 32; // slice exclusivo
+const INVESTMENT_START_ROW = 26; // Linha 27 (1-based) => índice 26
+const INVESTMENT_END_ROW = 33; // Inclui a linha 33; slice exclusivo
 
 const normalizeText = (value) => {
     if (typeof value !== 'string') return '';
@@ -107,7 +107,7 @@ function parseWorkbook(buffer) {
             consolidated: findRowValues('[C] Consolidado'),
         };
 
-        // Dados de investimentos (linhas 27 a 32, 1-based)
+        // Inclui a linha adicional de Renda Fixa Pré, filtrada abaixo, para manter Apartamento na série.
         const investmentRows = matrix.slice(INVESTMENT_START_ROW, INVESTMENT_END_ROW);
         const investmentSeries = investmentRows
             .filter((row) => row && row[0] && !isExcludedInvestment(row[0]))

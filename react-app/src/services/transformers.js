@@ -80,9 +80,10 @@ export function transformConsolidado(data) {
         consolidated: findRowValues('[C] Consolidado'),
     };
 
-    // Investimentos (linhas 27 a 32 do Excel = índices 25-30 na API, pois API não inclui header)
+    // Inclui a linha adicional de Renda Fixa Pré, filtrada abaixo, para manter Apartamento na série.
+    // API não inclui o cabeçalho: linhas 27 a 33 do Excel = índices 25-31.
     const INVESTMENT_START_ROW = 25;
-    const INVESTMENT_END_ROW = 31;
+    const INVESTMENT_END_ROW = 32;
     const investmentRows = data.slice(INVESTMENT_START_ROW, INVESTMENT_END_ROW);
     const investmentSeries = investmentRows
         .filter((row) => row && row.Alias && !isExcludedInvestment(row.Alias))
