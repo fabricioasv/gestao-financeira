@@ -1,8 +1,14 @@
 import * as XLSX from 'xlsx';
 import { logDebug, logError } from './logging.js';
 
-const INVESTMENT_START_ROW = 26; // Linha 27 (1-based) => índice 26
-const INVESTMENT_END_ROW = 33; // Inclui a linha 33; slice exclusivo
+const INVESTMENT_ALIASES = [
+    'investimento acoes',
+    'investimento renda fixa',
+    'previdencia privada',
+    'investimento cripto',
+    'td ipca+7.91%',
+    'apartamento',
+];
 
 const normalizeText = (value) => {
     if (typeof value !== 'string') return '';
@@ -50,10 +56,6 @@ const normalizeNumber = (value) => {
     return 0;
 };
 
-const EXCLUDED_INVESTMENT_ALIASES = new Set(['investimento renda fixa pre']);
-
-const isExcludedInvestment = (alias) => EXCLUDED_INVESTMENT_ALIASES.has(normalizeText(alias));
-
 function parseWorkbook(buffer) {
     console.log('🚀 parseWorkbook INICIADA');
 
@@ -95,22 +97,29 @@ function parseWorkbook(buffer) {
         }, {});
 
         // Série financeira: Créditos Realizados (linha 10), Débitos Realizados (linha 26), [C] Consolidado
-        const findRowValues = (aliasTarget) => {
-            const target = normalizeText(aliasTarget);
-            const row = dataRows.find((r) => normalizeText(r[0]) === target);
+        const findRowValues = (aliasTargets) => {
+            const targets = (Array.isArray(aliasTargets) ? aliasTargets : [aliasTargets]).map(normalizeText);
+            const row = targets
+                .map((target) => dataRows.find((r) => normalizeText(r[0]) === target))
+                .find(Boolean);
             return monthLabels.map((_, idx) => normalizeNumber(row ? row[idx + 2] : 0));
         };
 
         const financialSeries = {
             credits: findRowValues('Créditos Realizado'),
+            redemptionPlanned: findRowValues('Resgate Previsto'),
+            redemptionRealized: findRowValues('Resgate Realizado'),
             debits: findRowValues('Débitos Realizado'),
+            investmentRealized: findRowValues('Investimento Realizado'),
+            investmentPlanned: findRowValues('Investimento Previsto'),
             consolidated: findRowValues('[C] Consolidado'),
         };
 
-        // Inclui a linha adicional de Renda Fixa Pré, filtrada abaixo, para manter Apartamento na série.
-        const investmentRows = matrix.slice(INVESTMENT_START_ROW, INVESTMENT_END_ROW);
+        // Seleção pelo nome mantém as seis categorias corretas após inserções de linhas na planilha.
+        const investmentRows = INVESTMENT_ALIASES.map((alias) =>
+            matrix.find((row) => normalizeText(row?.[0]) === alias),
+        ).filter(Boolean);
         const investmentSeries = investmentRows
-            .filter((row) => row && row[0] && !isExcludedInvestment(row[0]))
             .map((row) => ({
                 label: row[0],
                 values: monthLabels.map((_, idx) => normalizeNumber(row[idx + 2])),

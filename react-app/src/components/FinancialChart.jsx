@@ -29,11 +29,20 @@ ChartJS.register(
 
 const COLORS = {
     credits: '#2563eb',
+    redemptionRealized: '#14b8a6',
     debits: '#f97316',
+    investmentRealized: '#a855f7',
     line: '#111827',
 };
 
-function FinancialChart({ labels = [], credits = [], debits = [], consolidated = [] }) {
+function FinancialChart({
+    labels = [],
+    credits = [],
+    redemptionRealized = [],
+    debits = [],
+    investmentRealized = [],
+    consolidated = [],
+}) {
     const lineOnTopPlugin = {
         id: 'lineOnTopFinancial',
         afterDatasetsDraw(chart) {
@@ -46,8 +55,20 @@ function FinancialChart({ labels = [], credits = [], debits = [], consolidated =
         },
     };
 
-    const signedDebits = debits.map((v) => -Math.abs(v ?? 0));
-    const totalsByMonth = labels.map((_, idx) => (credits[idx] ?? 0) + (signedDebits[idx] ?? 0));
+    const regularCredits = credits.map(
+        (credit, idx) => (credit ?? 0) - (redemptionRealized[idx] ?? 0),
+    );
+    const regularDebits = debits.map(
+        (debit, idx) => -Math.abs((debit ?? 0) - (investmentRealized[idx] ?? 0)),
+    );
+    const signedInvestmentRealized = investmentRealized.map((value) => -Math.abs(value ?? 0));
+    const totalsByMonth = labels.map(
+        (_, idx) =>
+            regularCredits[idx] +
+            (redemptionRealized[idx] ?? 0) +
+            regularDebits[idx] +
+            (signedInvestmentRealized[idx] ?? 0),
+    );
 
     if (!labels.length) {
         return (
@@ -70,7 +91,7 @@ function FinancialChart({ labels = [], credits = [], debits = [], consolidated =
         datasets: [
             {
                 label: 'Créditos Realizados',
-                data: credits,
+                data: regularCredits,
                 backgroundColor: COLORS.credits,
                 borderRadius: 6,
                 barThickness: 'flex',
@@ -78,9 +99,27 @@ function FinancialChart({ labels = [], credits = [], debits = [], consolidated =
                 order: 1,
             },
             {
+                label: 'Resgate Realizado',
+                data: redemptionRealized,
+                backgroundColor: COLORS.redemptionRealized,
+                borderRadius: 6,
+                barThickness: 'flex',
+                stack: 'fin',
+                order: 1,
+            },
+            {
                 label: 'Débitos Realizados',
-                data: signedDebits,
+                data: regularDebits,
                 backgroundColor: COLORS.debits,
+                borderRadius: 6,
+                barThickness: 'flex',
+                stack: 'fin',
+                order: 1,
+            },
+            {
+                label: 'Investimento Realizado',
+                data: signedInvestmentRealized,
+                backgroundColor: COLORS.investmentRealized,
                 borderRadius: 6,
                 barThickness: 'flex',
                 stack: 'fin',
@@ -147,7 +186,8 @@ function FinancialChart({ labels = [], credits = [], debits = [], consolidated =
                     <p className="eyebrow">Dashboard</p>
                     <h3>Créditos x Débitos</h3>
                     <p className="muted small">
-                        Barras empilhadas: Créditos Realizados (linha 10) e Débitos Realizados (linha 26).
+                        Barras empilhadas: Créditos Realizados, Resgate Realizado, Débitos Realizados e
+                        Investimento Realizado.
                         Linha: [C] Consolidado.
                     </p>
                 </div>

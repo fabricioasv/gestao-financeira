@@ -21,9 +21,14 @@ const normalizeNumber = (value) => {
     return 0;
 };
 
-const EXCLUDED_INVESTMENT_ALIASES = new Set(['investimento renda fixa pre']);
-
-const isExcludedInvestment = (alias) => EXCLUDED_INVESTMENT_ALIASES.has(normalizeText(alias));
+const INVESTMENT_ALIASES = [
+    'investimento acoes',
+    'investimento renda fixa',
+    'previdencia privada',
+    'investimento cripto',
+    'td ipca+7.91%',
+    'apartamento',
+];
 
 /**
  * Transforma dados da aba Consolidado para o formato do frontend
@@ -38,7 +43,16 @@ export function transformConsolidado(data) {
             months: [],
             totals: {},
             investments: { labels: [], series: [], cashFlows: null },
-            financial: { labels: [], credits: [], debits: [], consolidated: [] },
+            financial: {
+                labels: [],
+                credits: [],
+                redemptionPlanned: [],
+                redemptionRealized: [],
+                debits: [],
+                investmentRealized: [],
+                investmentPlanned: [],
+                consolidated: [],
+            },
         };
     }
 
@@ -67,26 +81,30 @@ export function transformConsolidado(data) {
     }, {});
 
     // Séries financeiras
-    const findRowValues = (aliasTarget) => {
-        const target = normalizeText(aliasTarget);
-        const row = data.find((r) => normalizeText(r.Alias || '') === target);
+    const findRowValues = (aliasTargets) => {
+        const targets = (Array.isArray(aliasTargets) ? aliasTargets : [aliasTargets]).map(normalizeText);
+        const row = targets
+            .map((target) => data.find((r) => normalizeText(r.Alias || '') === target))
+            .find(Boolean);
         return monthLabels.map((month) => normalizeNumber(row ? row[month] : 0));
     };
 
     const financial = {
         labels: monthLabels,
         credits: findRowValues('Créditos Realizado'),
+        redemptionPlanned: findRowValues('Resgate Previsto'),
+        redemptionRealized: findRowValues('Resgate Realizado'),
         debits: findRowValues('Débitos Realizado'),
+        investmentRealized: findRowValues('Investimento Realizado'),
+        investmentPlanned: findRowValues('Investimento Previsto'),
         consolidated: findRowValues('[C] Consolidado'),
     };
 
-    // Inclui a linha adicional de Renda Fixa Pré, filtrada abaixo, para manter Apartamento na série.
-    // API não inclui o cabeçalho: linhas 27 a 33 do Excel = índices 25-31.
-    const INVESTMENT_START_ROW = 25;
-    const INVESTMENT_END_ROW = 32;
-    const investmentRows = data.slice(INVESTMENT_START_ROW, INVESTMENT_END_ROW);
+    // Seleção pelo nome mantém as seis categorias corretas após inserções de linhas na planilha.
+    const investmentRows = INVESTMENT_ALIASES.map((alias) =>
+        data.find((row) => normalizeText(row.Alias || '') === alias),
+    ).filter(Boolean);
     const investmentSeries = investmentRows
-        .filter((row) => row && row.Alias && !isExcludedInvestment(row.Alias))
         .map((row) => ({
             label: row.Alias,
             values: monthLabels.map((month) => normalizeNumber(row[month])),

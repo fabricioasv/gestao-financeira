@@ -168,7 +168,7 @@ function InvestmentChart({
                     <p className="eyebrow">{eyebrow}</p>
                     <h3>{title}</h3>
                     <p className="muted small">
-                        Barras empilhadas das linhas 27-32 (aba Consolidado): Ações, Renda Fixa, Previdência,
+                        Barras empilhadas das linhas 30-35 (aba Consolidado): Ações, Renda Fixa, Previdência,
                         Cripto, TD IPCA+7.91% e Apartamento.
                     </p>
                 </div>

@@ -11,6 +11,7 @@ import { CartaoChart } from './components/CartaoChart.jsx';
 import { FollowUpChart } from './components/FollowUpChart.jsx';
 import { MesAtualView } from './components/MesAtualView.jsx';
 import { AllocationChart } from './components/AllocationChart.jsx';
+import { InvestmentPlanChart } from './components/InvestmentPlanChart.jsx';
 import { InvestmentBenchmarkChart } from './components/InvestmentBenchmarkChart.jsx';
 import { RendaProjetivaView } from './components/RendaProjetivaView.jsx';
 import { logError } from './utils/logging.js';
@@ -25,7 +26,11 @@ function App() {
     const [financial, setFinancial] = useState({
         labels: [],
         credits: [],
+        redemptionPlanned: [],
+        redemptionRealized: [],
         debits: [],
+        investmentRealized: [],
+        investmentPlanned: [],
         consolidated: [],
     });
     const [stocks, setStocks] = useState({ headers: [], rows: [] });
@@ -135,7 +140,11 @@ function App() {
             parsed.financial || {
                 labels: [],
                 credits: [],
+                redemptionPlanned: [],
+                redemptionRealized: [],
                 debits: [],
+                investmentRealized: [],
+                investmentPlanned: [],
                 consolidated: [],
             },
         );
@@ -224,7 +233,7 @@ function App() {
                                 <p className="eyebrow">Dashboard</p>
                                 <h1>Investimentos (barras empilhadas)</h1>
                                 <p className="muted">
-                                    Linhas 27 a 32 da aba Consolidado: Ações, Renda Fixa, Previdência,
+                                    Linhas 30 a 35 da aba Consolidado: Ações, Renda Fixa, Previdência,
                                     Cripto, TD IPCA+7.91% e Apartamento, por mês.
                                 </p>
                             </div>
@@ -256,7 +265,9 @@ function App() {
                         <FinancialChart
                             labels={financial.labels}
                             credits={financial.credits}
+                            redemptionRealized={financial.redemptionRealized}
                             debits={financial.debits}
+                            investmentRealized={financial.investmentRealized}
                             consolidated={financial.consolidated}
                         />
                     </div>
@@ -289,6 +300,13 @@ function App() {
                             labels={investments.labels}
                             series={investments.series}
                             excludeLabels={['Apartamento']}
+                        />
+                        <InvestmentPlanChart
+                            labels={financial.labels}
+                            investmentPlanned={financial.investmentPlanned}
+                            investmentRealized={financial.investmentRealized}
+                            redemptionPlanned={financial.redemptionPlanned}
+                            redemptionRealized={financial.redemptionRealized}
                         />
                         <InvestmentBenchmarkChart
                             labels={investments.labels}
