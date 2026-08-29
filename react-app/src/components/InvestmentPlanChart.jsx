@@ -4,13 +4,26 @@ import {
     CategoryScale,
     Chart as ChartJS,
     Legend,
+    LineController,
+    LineElement,
     LinearScale,
+    PointElement,
     Tooltip,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { formatNumber } from '../utils/formatting.js';
 
-ChartJS.register(BarElement, BarController, CategoryScale, LinearScale, Tooltip, Legend);
+ChartJS.register(
+    BarElement,
+    BarController,
+    CategoryScale,
+    LineController,
+    LineElement,
+    LinearScale,
+    PointElement,
+    Tooltip,
+    Legend,
+);
 
 const FORECAST_COLORS = {
     investment: 'rgba(37, 99, 235, 0.5)',
@@ -32,6 +45,24 @@ function remainingForecast(planned, realized) {
     );
 }
 
+function netInvestmentByMonth(
+    labels,
+    investmentPlanned,
+    investmentRealized,
+    redemptionPlanned,
+    redemptionRealized,
+) {
+    const now = new Date();
+    const currentMonth = `${String(now.getFullYear()).slice(-2)}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    return labels.map((label, index) => {
+        const usePlanned = String(label) > currentMonth;
+        const investments = usePlanned ? investmentPlanned[index] : investmentRealized[index];
+        const redemptions = usePlanned ? redemptionPlanned[index] : redemptionRealized[index];
+        return (investments ?? 0) - (redemptions ?? 0);
+    });
+}
+
 function InvestmentPlanChart({
     labels = [],
     investmentPlanned = [],
@@ -39,6 +70,17 @@ function InvestmentPlanChart({
     redemptionPlanned = [],
     redemptionRealized = [],
 }) {
+    const lineOnTopPlugin = {
+        id: 'lineOnTopInvestmentPlan',
+        afterDatasetsDraw(chart) {
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                if (dataset.type === 'line') {
+                    chart.getDatasetMeta(datasetIndex).controller.draw();
+                }
+            });
+        },
+    };
+
     const hasData = [investmentPlanned, investmentRealized, redemptionPlanned, redemptionRealized].some((values) =>
         values.some((value) => Number(value) !== 0),
     );
@@ -100,6 +142,27 @@ function InvestmentPlanChart({
                 stack: 'investment-plan',
                 order: 1,
             },
+            {
+                type: 'line',
+                label: 'Saldo (Realizado / Previsto)',
+                data: netInvestmentByMonth(
+                    labels,
+                    investmentPlanned,
+                    investmentRealized,
+                    redemptionPlanned,
+                    redemptionRealized,
+                ),
+                borderColor: '#111827',
+                backgroundColor: '#111827',
+                borderWidth: 3,
+                tension: 0.25,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                pointBackgroundColor: '#111827',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 1,
+                order: 11,
+            },
         ],
     };
 
@@ -137,7 +200,7 @@ function InvestmentPlanChart({
                 </div>
             </div>
             <div className="chart-wrapper">
-                <Bar data={data} options={options} />
+                <Bar data={data} options={options} plugins={[lineOnTopPlugin]} />
             </div>
         </div>
     );
