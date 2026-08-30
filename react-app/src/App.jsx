@@ -320,7 +320,7 @@ function App() {
                             valuesByYear={proventos.valuesByYear}
                             rendaAnualEsperada={rendaAnualEsperada}
                         />
-                        <RendaProjetivaView data={rendaProjetiva} />
+                        <RendaProjetivaView data={rendaProjetiva} acoesCarteira={stocks.rows} />
                     </div>
                 ) : activeMenu === 'neto-invest' ? (
                     <div className="page">

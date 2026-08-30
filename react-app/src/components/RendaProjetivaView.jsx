@@ -37,12 +37,27 @@ function formatPercentValue(value) {
     })}%`;
 }
 
+function parseDecimalValue(value) {
+    if (value === null || value === undefined || value === '') return 0;
+    if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+
+    const raw = String(value).trim();
+    const normalized = raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw;
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function getRowValue(row, names) {
+    const key = Object.keys(row).find((column) => names.includes(column));
+    return key ? row[key] : undefined;
+}
+
 /**
  * Componente para exibir dados de renda projetiva
  * @param {Object} props
  * @param {Array} props.data - Dados da renda projetiva
  */
-export function RendaProjetivaView({ data }) {
+export function RendaProjetivaView({ data, acoesCarteira = [] }) {
     const { acoes, consolidado, evolucao } = useMemo(() => {
         if (!data || data.length === 0) {
             return { acoes: [], consolidado: null, evolucao: [] };
@@ -91,6 +106,12 @@ export function RendaProjetivaView({ data }) {
 
         return { acoes: acoesData, consolidado: consolidadoData, evolucao: evolucaoData };
     }, [data]);
+
+    const acoesCarteiraPorTicker = useMemo(() => {
+        return new Map(
+            acoesCarteira.map((row) => [String(row.Ticker || '').trim().toUpperCase(), row])
+        );
+    }, [acoesCarteira]);
 
     if (!data || data.length === 0) {
         return (
@@ -341,6 +362,21 @@ export function RendaProjetivaView({ data }) {
                                 <th>Ticker</th>
                                 <th style={{ textAlign: 'right' }}>Quantidade</th>
                                 <th style={{ textAlign: 'right' }}>Dividendo por Ação</th>
+                                <th style={{ minWidth: '300px' }}>
+                                    Progresso do Dividendo por Ação (
+                                    {[
+                                        ['Pago', '#22c55e'],
+                                        ['A Pagar', '#eab308'],
+                                        ['Em Aberto', '#3b82f6'],
+                                        ['Restante', '#64748b'],
+                                    ].map(([label, color], index) => (
+                                        <span key={label} style={{ whiteSpace: 'nowrap' }}>
+                                            {index > 0 && ', '}
+                                            <span style={{ color }}>●</span> {label}
+                                        </span>
+                                    ))}
+                                    )
+                                </th>
                                 <th style={{ textAlign: 'right' }}>Renda Anual Esperada</th>
                                 <th style={{ textAlign: 'right' }}>Capital Alocado</th>
                                 <th style={{ textAlign: 'right' }}>Dividend Yield</th>
@@ -354,6 +390,21 @@ export function RendaProjetivaView({ data }) {
                                 const rendaAnual = parseFloat(row['Renda anual esperada'] || 0);
                                 const capitalAlocado = parseFloat(row['Capital alocado'] || 0);
                                 const dividendYield = row['Dividend Yield'];
+                                const dadosAcaoCarteira = acoesCarteiraPorTicker.get(String(ticker).trim().toUpperCase()) || row;
+                                const dividendoProjetado = parseDecimalValue(
+                                    getRowValue(dadosAcaoCarteira, ['Div. Proj.', 'Dividendo por ação'])
+                                );
+                                const dyPago = Math.max(0, parseDecimalValue(dadosAcaoCarteira['DY Pago']));
+                                const dyAPagar = Math.max(0, parseDecimalValue(dadosAcaoCarteira['DY a Pagar']));
+                                const dyEmAberto = Math.max(0, parseDecimalValue(dadosAcaoCarteira['DY em Aberto']));
+                                const totalInformado = dyPago + dyAPagar + dyEmAberto;
+                                const baseProgresso = Math.max(dividendoProjetado, totalInformado);
+                                const progresso = [
+                                    { label: 'DY Pago', value: dyPago, color: '#22c55e' },
+                                    { label: 'DY a Pagar', value: dyAPagar, color: '#eab308' },
+                                    { label: 'DY em Aberto', value: dyEmAberto, color: '#3b82f6' },
+                                    { label: 'Restante projetado', value: Math.max(0, dividendoProjetado - totalInformado), color: '#64748b' },
+                                ];
 
                                 return (
                                     <tr key={idx}>
@@ -370,6 +421,25 @@ export function RendaProjetivaView({ data }) {
                                                 minimumFractionDigits: 2,
                                                 maximumFractionDigits: 2,
                                             })}
+                                        </td>
+                                        <td>
+                                            <div
+                                                aria-label={`Progresso do dividendo por ação de ${ticker}`}
+                                                title={progresso.map(({ label, value }) => `${label}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`).join('\n')}
+                                                style={{ display: 'flex', height: '10px', overflow: 'hidden', borderRadius: '999px', background: '#1e293b', minWidth: '180px' }}
+                                            >
+                                                {baseProgresso > 0 && progresso.map(({ label, value, color }) => (
+                                                    value > 0 && <span key={label} style={{ width: `${(value / baseProgresso) * 100}%`, background: color }} />
+                                                ))}
+                                            </div>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.45rem', fontSize: '0.7rem' }}>
+                                                {progresso.map(({ label, value, color }) => (
+                                                    <span key={label} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: '#94a3b8' }}>
+                                                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: color }} />
+                                                        {value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </td>
                                         <td style={{ textAlign: 'right', fontWeight: '600', color: '#10b981' }}>
                                             R${' '}
