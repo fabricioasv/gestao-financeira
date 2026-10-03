@@ -27,9 +27,22 @@ const WALLET_TABS = [
     { id: 'lancamentos', label: 'Lançamentos' },
 ];
 
+const PATRIMONIO_LABELS = ['acao', 'acoes', 'renda fixa', 'previdencia', 'cripto', 'td ipca'];
+
 function getCell(row, keys) {
     const foundKey = keys.find((key) => Object.prototype.hasOwnProperty.call(row, key));
     return foundKey ? row[foundKey] : undefined;
+}
+
+function normalizeLabel(value) {
+    return String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+}
+
+function formatCurrency(value) {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function App() {
@@ -68,7 +81,7 @@ function App() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const totalGeral = useMemo(() => {
+    const lucroLiquido = useMemo(() => {
         const now = new Date();
         const currentMonth = `${String(now.getFullYear()).slice(-2)}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         const currentMonthIndex = investments.labels.indexOf(currentMonth);
@@ -81,6 +94,20 @@ function App() {
         );
     }, [investments]);
 
+    const patrimonioTotal = useMemo(() => {
+        const now = new Date();
+        const currentMonth = `${String(now.getFullYear()).slice(-2)}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const currentMonthIndex = investments.labels.indexOf(currentMonth);
+
+        if (currentMonthIndex === -1) return 0;
+
+        return investments.series.reduce((sum, item) => {
+            const label = normalizeLabel(item.label);
+            const isPatrimonio = PATRIMONIO_LABELS.some((target) => label.includes(target));
+            return isPatrimonio ? sum + (item.values[currentMonthIndex] ?? 0) : sum;
+        }, 0);
+    }, [investments]);
+
     const carteiraStats = useMemo(() => {
         const ultimoMes = investments.labels.at(-1) || months.at(-1) || '-';
         const ativos = stocks.rows.length;
@@ -88,13 +115,12 @@ function App() {
         const anosProventos = proventos.years.length;
 
         return [
-            { label: 'Patrimônio total', value: totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) },
             { label: 'Ativos em carteira', value: String(ativos) },
             { label: 'Classes acompanhadas', value: String(classes) },
             { label: 'Último período', value: ultimoMes },
             { label: 'Histórico de proventos', value: anosProventos ? `${anosProventos} anos` : '-' },
         ];
-    }, [investments, months, proventos.years.length, stocks.rows.length, totalGeral]);
+    }, [investments, months, proventos.years.length, stocks.rows.length]);
 
     const loadDefaultData = async () => {
         setLoading(true);
@@ -264,14 +290,21 @@ function App() {
                             rentabilidade e lançamentos com dados do Google Sheets.
                         </p>
                     </div>
-                    <div className="wallet-total">
-                        <span>Patrimônio total</span>
-                        <strong>{totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
-                        <small>
-                            {lastUpdate
-                                ? `${lastUpdate.source} em ${lastUpdate.at.toLocaleString('pt-BR')}`
-                                : 'Aguardando dados'}
-                        </small>
+                    <div className="wallet-totals">
+                        <div className="wallet-total">
+                            <span>Patrimônio total</span>
+                            <strong>{formatCurrency(patrimonioTotal)}</strong>
+                            <small>Ações, renda fixa, previdência, cripto e TD IPCA +7.91%</small>
+                        </div>
+                        <div className="wallet-total">
+                            <span>Lucro Líquido</span>
+                            <strong>{formatCurrency(lucroLiquido)}</strong>
+                            <small>
+                                {lastUpdate
+                                    ? `${lastUpdate.source} em ${lastUpdate.at.toLocaleString('pt-BR')}`
+                                    : 'Aguardando dados'}
+                            </small>
+                        </div>
                     </div>
                 </section>
 

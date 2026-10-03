@@ -88,7 +88,7 @@
 
 .wallet-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    grid-template-columns: minmax(0, 1fr) minmax(520px, 680px);
     gap: 18px;
     align-items: stretch;
     margin-bottom: 18px;
@@ -104,6 +104,12 @@
 
 .wallet-hero > div:first-child {
     padding: 22px 24px;
+}
+
+.wallet-totals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
 }
 
 .wallet-hero h1 {
@@ -473,6 +479,10 @@ summary {
         grid-template-columns: 1fr;
     }
 
+    .wallet-totals {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .metric-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -504,6 +514,10 @@ summary {
 
     .wallet-total strong {
         font-size: 24px;
+    }
+
+    .wallet-totals {
+        grid-template-columns: 1fr;
     }
 
     .wallet-tabs {
