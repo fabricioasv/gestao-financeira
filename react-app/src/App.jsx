@@ -7,6 +7,7 @@ import { InvestmentChart } from './components/InvestmentChart.jsx';
 import { FinancialChart } from './components/FinancialChart.jsx';
 import { ActionsTable } from './components/ActionsTable.jsx';
 import { ProventosChart } from './components/ProventosChart.jsx';
+import { DividendCalendar } from './components/DividendCalendar.jsx';
 import { CartaoChart } from './components/CartaoChart.jsx';
 import { FollowUpChart } from './components/FollowUpChart.jsx';
 import { MesAtualView } from './components/MesAtualView.jsx';
@@ -357,6 +358,7 @@ function App() {
                                 valuesByYear={proventos.valuesByYear}
                                 rendaAnualEsperada={rendaAnualEsperada}
                             />
+                            <DividendCalendar rows={stocks.rows} />
                             <RendaProjetivaView data={rendaProjetiva} acoesCarteira={stocks.rows} />
                         </>
                     ) : activeMenu === 'patrimonio' ? (

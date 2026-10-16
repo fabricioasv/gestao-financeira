@@ -539,3 +539,19 @@ summary {
         padding: 14px;
     }
 }
+.dividend-calendar th,
+.dividend-calendar td {
+    white-space: nowrap;
+}
+
+.dividend-calendar th:nth-child(n + 3),
+.dividend-calendar td:nth-child(n + 3) {
+    text-align: center;
+    min-width: 44px;
+}
+
+.dividend-calendar .dividend-month-active {
+    color: #22c55e;
+    background-color: rgba(34, 197, 94, 0.14);
+    font-weight: 700;
+}
