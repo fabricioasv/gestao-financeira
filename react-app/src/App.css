@@ -555,3 +555,11 @@ summary {
     background-color: rgba(34, 197, 94, 0.14);
     font-weight: 700;
 }
+
+.dividend-calendar-summary {
+    font-weight: 700;
+}
+
+.dividend-calendar-summary td:nth-child(n + 3) {
+    color: #14532d;
+}

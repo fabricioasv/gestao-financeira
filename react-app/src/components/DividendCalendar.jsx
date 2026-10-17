@@ -2,6 +2,10 @@ import { DIVIDEND_MONTHS, getStockField, parseDividendMonths } from '../utils/di
 
 export function DividendCalendar({ rows = [] }) {
     const stocks = rows.filter((row) => String(getStockField(row, 'Ticker')).trim());
+    const monthsByStock = stocks.map((row) => parseDividendMonths(getStockField(row, 'Anunc. Div.')));
+    const monthCounts = DIVIDEND_MONTHS.map((_, monthIndex) =>
+        monthsByStock.filter((months) => months.includes(monthIndex)).length);
+    const maxCount = Math.max(1, ...monthCounts);
 
     return (
         <div className="panel">
@@ -25,10 +29,26 @@ export function DividendCalendar({ rows = [] }) {
                             </tr>
                         </thead>
                         <tbody>
+                            <tr className="dividend-calendar-summary">
+                                <th scope="row">Carteira</th>
+                                <td />
+                                {DIVIDEND_MONTHS.map((month, monthIndex) => {
+                                    const count = monthCounts[monthIndex];
+                                    const intensity = count === 0 ? 0 : 0.12 + 0.68 * count / maxCount;
+                                    return (
+                                        <td key={month}
+                                            style={{ backgroundColor: `rgba(34, 197, 94, ${intensity})` }}
+                                            aria-label={`${month}: ${count} ações com anúncio previsto`}
+                                            title={`${count} ações com anúncio previsto`}>
+                                            {count}
+                                        </td>
+                                    );
+                                })}
+                            </tr>
                             {stocks.map((row, index) => {
                                 const ticker = getStockField(row, 'Ticker');
                                 const announcement = getStockField(row, 'Anunc. Div.');
-                                const months = parseDividendMonths(announcement);
+                                const months = monthsByStock[index];
                                 return (
                                     <tr key={`${ticker}-${index}`}>
                                         <th scope="row">{ticker}</th>
